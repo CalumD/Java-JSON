@@ -2,7 +2,6 @@ package Json;
 
 import Core.IJsonObject;
 import Core.JSONParser;
-import Exceptions.JSON.BuildException;
 import Exceptions.JSON.KeyDifferentTypeException;
 import Exceptions.JSON.KeyNotFoundException;
 import Exceptions.JSON.ParseException;

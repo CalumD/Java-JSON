@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://cjd24.host.cs.st-andrews.ac.uk/CS4099/SystemSpecification.schema.json",
+  "$id": "",
   "title": "CS4099 System Config Schema",
   "description": "This schema should be used to lay out the structure of a single 'system' of the SH framework for lightweight component and channel abstractions for uni-kernel based distributed systems.",
   "type": "object",

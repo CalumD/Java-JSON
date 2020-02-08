@@ -1,7 +1,9 @@
 package Core;
 
-import java.io.*;
-import java.nio.file.Files;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 /**
@@ -89,54 +91,5 @@ public class FileManager {
 
         //return complete result.
         return ret;
-    }
-
-    /**
-     * This is used to return the raw bytes of a given file.
-     *
-     * @param path The full path to the file to get the bytes from.
-     * @return The byte[] of the entire file contents.
-     * @throws IOException Thrown if there was a problem accessing the requested file.
-     */
-    static byte[] getComponentAsBytes(File path) throws IOException {
-        if (path == null) {
-            return new byte[]{};
-        }
-        return Files.readAllBytes(path.toPath());
-    }
-
-    /**
-     * This is used to validate the existence (as a directory) and permission to read from the given
-     * path.
-     *
-     * @param path The path to validate.
-     * @return The String of the resolved path to that directory (removal of . and .. if necessary)
-     * @throws IOException Thrown if there was a problem accessing that path as a directory.
-     */
-    public static String validateDirectory(String path) throws IOException {
-        File activeDir;
-
-        //resolve canonical
-        try {
-            activeDir = new File(path).getCanonicalFile();
-        } catch (IOException e) {
-            throw new IOException(
-                "The path provided could not be resolved to a file system location.");
-        }
-
-        //check attributes
-        if (!activeDir.exists()) {
-            throw new IOException("The path provided for active components does not exist.");
-        }
-        if (!activeDir.isDirectory()) {
-            throw new IOException("The path provided for active components is not a directory.");
-        }
-        if (!activeDir.canRead()) {
-            throw new IOException(
-                "The directory provided for active components cannot be read from.");
-        }
-
-        //return valid path
-        return activeDir.getPath();
     }
 }
