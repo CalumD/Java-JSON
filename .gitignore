@@ -3,3 +3,5 @@ bin
 *.iml
 *.class
 *.jar
+target
+*.DS_Store
