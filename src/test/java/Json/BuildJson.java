@@ -3,9 +3,9 @@ package Json;
 import Core.IJsonBuilder;
 import Core.IJsonObject;
 import Core.JSONBuilder;
-import Exceptions.JSON.BuildException;
-import Exceptions.JSON.KeyDifferentTypeException;
-import Exceptions.JSON.KeyNotFoundException;
+import Exceptions.BuildException;
+import Exceptions.KeyDifferentTypeException;
+import Exceptions.KeyNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,6 @@
 package Values;
 
-import Exceptions.JSON.ParseException;
+import Exceptions.JSONParseException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,11 +9,11 @@ public class JSString extends JSON {
 
     private String myValue;
 
-    public JSString(String jsonFragment) throws ParseException {
+    public JSString(String jsonFragment) throws JSONParseException {
         super("", jsonFragment, true);
     }
 
-    JSString(String keyAtElement, String jsonFragment, boolean willSanitise) throws ParseException {
+    JSString(String keyAtElement, String jsonFragment, boolean willSanitise) throws JSONParseException {
         super(keyAtElement, jsonFragment, willSanitise);
     }
 
@@ -23,7 +23,7 @@ public class JSString extends JSON {
     }
 
     @Override
-    void parse(String jsonFragment, boolean sanitize) throws ParseException {
+    void parse(String jsonFragment, boolean sanitize) throws JSONParseException {
         if (sanitize) {
             jsonFragment = sanitiseFragment(jsonFragment);
         }
@@ -44,7 +44,7 @@ public class JSString extends JSON {
 
         //if we didn't find the end char, there was a problem
         if (!endFound) {
-            throw new ParseException("Failed to parse JSON internal string.");
+            throw new JSONParseException("Failed to parse JSON internal string.");
         }
 
         if (endOfString == 1) {

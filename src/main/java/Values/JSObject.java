@@ -1,8 +1,8 @@
 package Values;
 
 import Core.IJsonObject;
-import Exceptions.JSON.KeyNotFoundException;
-import Exceptions.JSON.ParseException;
+import Exceptions.KeyNotFoundException;
+import Exceptions.JSONParseException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,11 +15,11 @@ public class JSObject extends JSON {
     private String keyAtElement;
 
 
-    public JSObject(String jsonFragment) throws ParseException {
+    public JSObject(String jsonFragment) throws JSONParseException {
         super(JSON_ROOT, jsonFragment, true);
     }
 
-    JSObject(String keyFragment, String jsonFragment, boolean willSanitise) throws ParseException {
+    JSObject(String keyFragment, String jsonFragment, boolean willSanitise) throws JSONParseException {
         super(keyFragment == null ? JSON_ROOT : keyFragment, jsonFragment, willSanitise);
     }
 
@@ -32,7 +32,7 @@ public class JSObject extends JSON {
 
 
     @Override
-    void parse(String jsonFragment, boolean sanitize) throws ParseException {
+    void parse(String jsonFragment, boolean sanitize) throws JSONParseException {
 
         //check if we need to sanitize input
         if (sanitize) {
@@ -41,16 +41,16 @@ public class JSObject extends JSON {
 
         //check BASIC things about new object being valid
         if (jsonFragment.length() < 2) {
-            throw new ParseException("A JSON JSObject is malformed (too short?) to be parsed.");
+            throw new JSONParseException("A JSON JSObject is malformed (too short?) to be parsed.");
         }
         if (jsonFragment.charAt(0) != '{') {
-            throw new ParseException("A JSON JSObject is missing the opening <{>");
+            throw new JSONParseException("A JSON JSObject is missing the opening <{>");
         }
         if (jsonFragment.charAt(jsonFragment.length() - 1) != '}') {
-            throw new ParseException("A JSON JSObject is missing the closing <}>");
+            throw new JSONParseException("A JSON JSObject is missing the closing <}>");
         }
         if (jsonFragment.charAt(1) != '"' && jsonFragment.charAt(1) != '}') {
-            throw new ParseException("A Key in the JSON is missing an enclosing quote");
+            throw new JSONParseException("A Key in the JSON is missing an enclosing quote");
         }
 
         //init parse variables
@@ -66,12 +66,12 @@ public class JSObject extends JSON {
 
             //if we have pre-empt reached the end of the string, fail
             if (nextKey.equals("")) {
-                throw new ParseException("An empty key is not a valid key.");
+                throw new JSONParseException("An empty key is not a valid key.");
             }
 
             //ensure that there is a ':' to separate key and value
             if (jsonFragment.charAt(currentFragmentIndex) != ':') {
-                throw new ParseException(
+                throw new JSONParseException(
                     "A JSON Element is missing the <:> to separate key and value");
             }
 
@@ -88,7 +88,7 @@ public class JSObject extends JSON {
             //check we haven't reached an invalid state between elements in the object.
             if (jsonFragment.charAt(currentFragmentIndex) != ','
                 && jsonFragment.charAt(currentFragmentIndex) != '}') {
-                throw new ParseException("Invalid element separator. (Are you missing a <,> ?)");
+                throw new JSONParseException("Invalid element separator. (Are you missing a <,> ?)");
             }
             //check if we have a new element by a comma
             if (jsonFragment.charAt(currentFragmentIndex) == ',') {
@@ -98,33 +98,33 @@ public class JSObject extends JSON {
 
         //ensure we see the end of the object.
         if (jsonFragment.charAt(currentFragmentIndex) != '}') {
-            throw new ParseException("A JSON JSObject is missing the closing <}>");
+            throw new JSONParseException("A JSON JSObject is missing the closing <}>");
         }
     }
 
-    private String parseNextKey(String remainingValue) throws ParseException {
+    private String parseNextKey(String remainingValue) throws JSONParseException {
         JSString key;
 
         //validate the key into the object doesnt contain bad chars
         try {
             key = new JSString(null, remainingValue, false);
-        } catch (ParseException e) {
-            throw new ParseException("A Key in the JSON is missing an enclosing quote");
+        } catch (JSONParseException e) {
+            throw new JSONParseException("A Key in the JSON is missing an enclosing quote");
         }
         if (key.getValue().contains(".")) {
-            throw new ParseException("You have used a reserved character in a JSON key: .");
+            throw new JSONParseException("You have used a reserved character in a JSON key: .");
         }
         if (key.getValue().contains("[")) {
-            throw new ParseException("You have used a reserved character in a JSON key: [");
+            throw new JSONParseException("You have used a reserved character in a JSON key: [");
         }
         if (key.getValue().contains("]")) {
-            throw new ParseException("You have used a reserved character in a JSON key: ]");
+            throw new JSONParseException("You have used a reserved character in a JSON key: ]");
         }
         if (key.getValue().contains("{")) {
-            throw new ParseException("You have used a reserved character in a JSON key: {");
+            throw new JSONParseException("You have used a reserved character in a JSON key: {");
         }
         if (key.getValue().contains("}")) {
-            throw new ParseException("You have used a reserved character in a JSON key: }");
+            throw new JSONParseException("You have used a reserved character in a JSON key: }");
         }
 
         currentFragmentIndex += key.fragmentSize;

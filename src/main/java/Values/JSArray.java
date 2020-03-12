@@ -1,8 +1,8 @@
 package Values;
 
 import Core.IJsonObject;
-import Exceptions.JSON.KeyNotFoundException;
-import Exceptions.JSON.ParseException;
+import Exceptions.KeyNotFoundException;
+import Exceptions.JSONParseException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,11 +12,11 @@ public class JSArray extends JSON {
     private List<IJsonObject> myValue;
     private String keyAtElement;
 
-    public JSArray(String jsonFragment) throws ParseException {
+    public JSArray(String jsonFragment) throws JSONParseException {
         super("", jsonFragment, true);
     }
 
-    JSArray(String keyAtElement, String jsonFragment, boolean willSanitise) throws ParseException {
+    JSArray(String keyAtElement, String jsonFragment, boolean willSanitise) throws JSONParseException {
         super(keyAtElement, jsonFragment, willSanitise);
     }
 
@@ -29,7 +29,7 @@ public class JSArray extends JSON {
     }
 
     @Override
-    void parse(String jsonFragment, boolean sanitize) throws ParseException {
+    void parse(String jsonFragment, boolean sanitize) throws JSONParseException {
 
         //check if we need to sanitise the contents of the fragment
         if (sanitize) {
@@ -58,7 +58,7 @@ public class JSArray extends JSON {
             //check that there is a separating comma between array elements.
             if (jsonFragment.charAt(currentFragmentIndex) != ','
                 && jsonFragment.charAt(currentFragmentIndex) != ']') {
-                throw new ParseException("Invalid element separator. (Are you missing a <,> ?)");
+                throw new JSONParseException("Invalid element separator. (Are you missing a <,> ?)");
             }
             //skip the comma
             if (jsonFragment.charAt(currentFragmentIndex) == ',') {
@@ -67,7 +67,7 @@ public class JSArray extends JSON {
         }
         //check for a missing closing array bracket
         if (jsonFragment.charAt(currentFragmentIndex) != ']') {
-            throw new ParseException("A JSArray is missing the closing <]>");
+            throw new JSONParseException("A JSArray is missing the closing <]>");
         }
     }
 

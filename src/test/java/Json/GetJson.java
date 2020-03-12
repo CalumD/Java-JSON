@@ -2,9 +2,9 @@ package Json;
 
 import Core.IJsonObject;
 import Core.JSONParser;
-import Exceptions.JSON.KeyDifferentTypeException;
-import Exceptions.JSON.KeyNotFoundException;
-import Exceptions.JSON.ParseException;
+import Exceptions.KeyDifferentTypeException;
+import Exceptions.KeyNotFoundException;
+import Exceptions.JSONParseException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +16,7 @@ public class GetJson {
 
 
     @BeforeAll
-    public static void setupQueryObject() throws ParseException {
+    public static void setupQueryObject() throws JSONParseException {
         obj = JSONParser.parse(
                 "{\"variables\":[10, true, -3.14],\"item\":[{\"item\":[{\"request\":{\"method\":" +
                         "\"POST\",\"isValid\":true,\"header\":[false, {\"description\":\"\",\"value\":\"application/json\",\"key\":"
@@ -857,7 +857,7 @@ public class GetJson {
 
     @Test
     public void getAllFromArray()
-            throws KeyDifferentTypeException, KeyNotFoundException, ParseException {
+            throws KeyDifferentTypeException, KeyNotFoundException, JSONParseException {
         IJsonObject obj = JSONParser
                 .parse("{\"friends\":[{\"name\":\"Shanna Garrett\",\"id\":0},{\"name\":\"" +
                         "Peggy Brown\",\"id\":1},{\"name\":\"Roach Mcguire\",\"id\":2}]}");
@@ -873,7 +873,7 @@ public class GetJson {
 
     @Test
     public void getAllFromObject()
-            throws KeyDifferentTypeException, KeyNotFoundException, ParseException {
+            throws KeyDifferentTypeException, KeyNotFoundException, JSONParseException {
         IJsonObject obj = JSONParser
                 .parse("{\"friends\":{\"friend1\":{\"name\":\"Shanna Garrett\",\"id\":0}," +
                         "\"friend2\":{\"name\":\"Peggy Brown\",\"id\":1},\"friend3\":{\"name\":\"Roach Mcguire\",\"id\":2}}}");

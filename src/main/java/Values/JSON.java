@@ -1,9 +1,10 @@
 package Values;
 
 import Core.IJsonObject;
-import Exceptions.JSON.KeyDifferentTypeException;
-import Exceptions.JSON.KeyNotFoundException;
-import Exceptions.JSON.ParseException;
+import Exceptions.JSONException;
+import Exceptions.KeyDifferentTypeException;
+import Exceptions.KeyNotFoundException;
+import Exceptions.JSONParseException;
 
 import java.util.List;
 
@@ -14,25 +15,25 @@ public abstract class JSON implements IJsonObject {
     int currentFragmentIndex = 0;
     JSType myType = JSType.UNDEFINED;
 
-    JSON(String keyAtElement, String jsonFragment, boolean willSanitise) throws ParseException {
+    JSON(String keyAtElement, String jsonFragment, boolean willSanitise) throws JSONParseException {
         init(keyAtElement);
         parse(jsonFragment, willSanitise);
     }
 
     //CREATION/////////////////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
-    public JSON createFromString(String jsonFragment) throws ParseException {
+    public JSON createFromString(String jsonFragment) throws JSONParseException {
         return new JSObject("", jsonFragment, true);
     }
 
     abstract void init(String keyAtElement);
 
-    abstract void parse(String jsonFragment, boolean withSanitisation) throws ParseException;
+    abstract void parse(String jsonFragment, boolean withSanitisation) throws JSONParseException;
 
 
     //PARSING NEW//////////////////////////////////////////////////////////////////////////////////////////////////////////
     JSON parseNextElement(char idChar, String keyAtElement, String nextKey,
-        int currentFragmentIndex, String jsonFragment) throws ParseException {
+        int currentFragmentIndex, String jsonFragment) throws JSONParseException {
         JSON nextElement;
 
         //find out the next element based on the json fragment
@@ -78,7 +79,7 @@ public abstract class JSON implements IJsonObject {
         return nextElement;
     }
 
-    String sanitiseFragment(String jsonFragment) throws ParseException {
+    String sanitiseFragment(String jsonFragment) throws JSONParseException {
 
         StringBuilder strippedJSON = new StringBuilder();
 
@@ -154,17 +155,17 @@ public abstract class JSON implements IJsonObject {
             }
         }
         if (inDoubleQuote) {
-            throw new ParseException("JSON Has mismatched <\"> opening quote");
+            throw new JSONParseException("JSON Has mismatched <\"> opening quote");
         }
         if (inSingleQuote) {
-            throw new ParseException("JSON Has mismatched <'> opening quote");
+            throw new JSONParseException("JSON Has mismatched <'> opening quote");
         }
         if (curlyCount != 0) {
-            throw new ParseException(
+            throw new JSONParseException(
                 "The input has mismatched curly brackets, wont attempt to parse.");
         }
         if (squareCount != 0) {
-            throw new ParseException(
+            throw new JSONParseException(
                 "The input has mismatched square brackets, wont attempt to parse.");
         }
 
@@ -177,6 +178,16 @@ public abstract class JSON implements IJsonObject {
 
     @Override
     public abstract boolean contains(String keys);
+
+    @Override
+    public boolean contains(List<String> keys) {
+        for(String key : keys) {
+            if (!contains(key)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     @Override
     public abstract boolean equals(Object other);
@@ -192,6 +203,11 @@ public abstract class JSON implements IJsonObject {
     @Override
     public JSType getDataType() {
         return myType;
+    }
+
+    @Override
+    public JSType getDataTypeAtKey(String key) throws JSONException {
+        return getByKey(key).getDataType();
     }
 
 

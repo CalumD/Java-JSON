@@ -1,6 +1,6 @@
 package Values;
 
-import Exceptions.JSON.ParseException;
+import Exceptions.JSONParseException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,11 +10,11 @@ public class JSNumber extends JSON {
     private Long myLongValue;
     private Double myDoubleValue;
 
-    public JSNumber(String jsonFragment) throws ParseException {
+    public JSNumber(String jsonFragment) throws JSONParseException {
         super("", jsonFragment, true);
     }
 
-    JSNumber(String keyAtElement, String jsonFragment, boolean willSanitise) throws ParseException {
+    JSNumber(String keyAtElement, String jsonFragment, boolean willSanitise) throws JSONParseException {
         super(keyAtElement, jsonFragment, willSanitise);
     }
 
@@ -24,7 +24,7 @@ public class JSNumber extends JSON {
     }
 
     @Override
-    void parse(String jsonFragment, boolean sanitize) throws ParseException {
+    void parse(String jsonFragment, boolean sanitize) throws JSONParseException {
         int endOfNumber = 0;
         //check if we need to sanitize the fragment
         if (sanitize) {
@@ -40,7 +40,7 @@ public class JSNumber extends JSON {
         }
         //ensure that there is at least a single character
         if (endOfNumber == 0) {
-            throw new ParseException("There is a value missing in the JSON string.");
+            throw new JSONParseException("There is a value missing in the JSON string.");
         }
 
         try {
@@ -55,7 +55,7 @@ public class JSNumber extends JSON {
             //get the size of the number to add to fragment
             fragmentSize = endOfNumber;
         } catch (NumberFormatException e) {
-            throw new ParseException(e.getMessage());
+            throw new JSONParseException(e.getMessage());
         }
     }
 

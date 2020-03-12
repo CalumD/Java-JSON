@@ -1,6 +1,6 @@
 package Values;
 
-import Exceptions.JSON.ParseException;
+import Exceptions.JSONParseException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,12 +9,12 @@ public class JSBoolean extends JSON {
 
     private boolean myValue;
 
-    public JSBoolean(String jsonFragment) throws ParseException {
+    public JSBoolean(String jsonFragment) throws JSONParseException {
         super("", jsonFragment, true);
     }
 
     JSBoolean(String keyAtElement, String jsonFragment, boolean willSanitise)
-        throws ParseException {
+        throws JSONParseException {
         super(keyAtElement, jsonFragment, willSanitise);
     }
 
@@ -25,7 +25,7 @@ public class JSBoolean extends JSON {
 
 
     @Override
-    void parse(String jsonFragment, boolean sanitize) throws ParseException {
+    void parse(String jsonFragment, boolean sanitize) throws JSONParseException {
 
         if (sanitize) {
             jsonFragment = sanitiseFragment(jsonFragment);
@@ -40,7 +40,7 @@ public class JSBoolean extends JSON {
             myValue = false;
             fragmentSize = 5;
         } else {
-            throw new ParseException("The type of a JSON element in the input was unknown");
+            throw new JSONParseException("The type of a JSON element in the input was unknown");
         }
     }
 

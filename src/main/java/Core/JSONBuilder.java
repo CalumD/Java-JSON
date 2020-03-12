@@ -1,7 +1,7 @@
 package Core;
 
-import Exceptions.JSON.BuildException;
-import Exceptions.JSON.ParseException;
+import Exceptions.BuildException;
+import Exceptions.JSONParseException;
 import Values.JSType;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class JSONBuilder implements IJsonBuilder {
             //call our json parser, if there was any problem with that - assume it
             // was our fault and fail with a build exception.
             return JSONParser.parse(this.toString());
-        } catch (ParseException e) {
+        } catch (JSONParseException e) {
             throw new BuildException(
                 "An unexpected error occurred when building a JSON object: " + e.getMessage());
         }

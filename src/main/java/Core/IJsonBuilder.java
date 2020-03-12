@@ -1,6 +1,6 @@
 package Core;
 
-import Exceptions.JSON.BuildException;
+import Exceptions.BuildException;
 
 /**
  * This interface defines the methods for dynamically creating a JSON object from contents of a

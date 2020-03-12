@@ -1,9 +1,9 @@
 package Core;
 
-import Exceptions.JSON.KeyDifferentTypeException;
-import Exceptions.JSON.KeyNotFoundException;
-import Exceptions.JSON.ParseException;
-import Exceptions.JSON.SchemaException;
+import Exceptions.KeyDifferentTypeException;
+import Exceptions.KeyNotFoundException;
+import Exceptions.JSONParseException;
+import Exceptions.SchemaException;
 import Values.*;
 
 import java.io.IOException;
@@ -23,10 +23,10 @@ public class JSONSchemaEnforcer {
      * @param pathToSchema The entire path to the schema file to check the object against.
      * @return True if the object adheres to the schema, false if not.
      * @throws IOException    Thrown if there was a problem accessing the schema.
-     * @throws ParseException Thrown if there was an issue parsing the schema.
+     * @throws JSONParseException Thrown if there was an issue parsing the schema.
      */
     public static boolean validateGlobal(IJsonObject objectToValidate, String pathToSchema)
-        throws IOException, ParseException {
+        throws IOException, JSONParseException {
 
         String fileAsString = FileManager.getFileAsString(pathToSchema);
         IJsonObject schema = JSONParser.parse(fileAsString);
@@ -42,10 +42,10 @@ public class JSONSchemaEnforcer {
      * @param resourceName The path of the internal schema to validate against.
      * @return True if the object adheres to the schema, false if not.
      * @throws IOException    Thrown if there was a problem accessing the schema.
-     * @throws ParseException Thrown if there was an issue parsing the schema.
+     * @throws JSONParseException Thrown if there was an issue parsing the schema.
      */
     public static boolean validateInternal(IJsonObject objectToValidate, String resourceName)
-        throws IOException, ParseException {
+        throws IOException, JSONParseException {
 
         String fileAsString = FileManager.getLocalResourceAsString(resourceName);
         IJsonObject schema = JSONParser.parse(fileAsString);
@@ -74,10 +74,10 @@ public class JSONSchemaEnforcer {
      * @param config The JSON object to check is a valid system specification.
      * @throws IOException    Thrown if there was some error accessing the Schema (Should never be
      *                        thrown for this method)
-     * @throws ParseException Thrown if there was some error parsing the Schema (Should never be
+     * @throws JSONParseException Thrown if there was some error parsing the Schema (Should never be
      *                        thrown for this method)
      */
-    public static void validateSystem(IJsonObject config) throws IOException, ParseException {
+    public static void validateSystem(IJsonObject config) throws IOException, JSONParseException {
         validateInternal(config, "/SystemSpecification.schema.json");
     }
 

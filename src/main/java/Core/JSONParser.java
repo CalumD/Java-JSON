@@ -1,8 +1,8 @@
 package Core;
 
-import Exceptions.JSON.KeyDifferentTypeException;
-import Exceptions.JSON.KeyNotFoundException;
-import Exceptions.JSON.ParseException;
+import Exceptions.KeyDifferentTypeException;
+import Exceptions.KeyNotFoundException;
+import Exceptions.JSONParseException;
 import Values.JSObject;
 
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * This class provides a wrapper access to the JSON class, and handles passing strings into the
- * parser for an Core.IJsonObject.
+ * parser for an IJsonObject.
  */
 public final class JSONParser {
 
@@ -20,12 +20,12 @@ public final class JSONParser {
      *
      * @param jsonAsString The JSON string.
      * @return A JSON object representation.
-     * @throws ParseException Thrown if there was an error while parsing the given string.
+     * @throws JSONParseException Thrown if there was an error while parsing the given string.
      */
-    public static IJsonObject parse(String jsonAsString) throws ParseException {
+    public static IJsonObject parse(String jsonAsString) throws JSONParseException {
 
         if (jsonAsString.length() == 0) {
-            throw new ParseException("Empty JSON String, cannot parse");
+            throw new JSONParseException("Empty JSON String, cannot parse");
         }
 
         return new JSObject(jsonAsString);
@@ -36,15 +36,15 @@ public final class JSONParser {
      *
      * @param filePath The path of the file to try and parse as JSON.
      * @return The object representing the file contents.
-     * @throws ParseException Thrown if there was an error while parsing the contents of the file.
+     * @throws JSONParseException Thrown if there was an error while parsing the contents of the file.
      * @throws IOException    Thrown if there was an error loading the file from disk
      */
-    public static IJsonObject parseFromFile(String filePath) throws ParseException, IOException {
+    public static IJsonObject parseFromFile(String filePath) throws JSONParseException, IOException {
 
         String fileContents = FileManager.getFileAsString(filePath);
 
         if (fileContents.length() == 0) {
-            throw new ParseException("Empty JSON String, cannot parse");
+            throw new JSONParseException("Empty JSON String, cannot parse");
         }
 
         return new JSObject(fileContents);
@@ -55,9 +55,9 @@ public final class JSONParser {
      *
      * @param jsonAsStringList The list of strings representing JSON.
      * @return A JSON object representation.
-     * @throws ParseException Thrown if there was an error while parsing the given strings.
+     * @throws JSONParseException Thrown if there was an error while parsing the given strings.
      */
-    public static IJsonObject parse(List<String> jsonAsStringList) throws ParseException {
+    public static IJsonObject parse(List<String> jsonAsStringList) throws JSONParseException {
 
         StringBuilder whole = new StringBuilder();
 
@@ -73,9 +73,9 @@ public final class JSONParser {
      *
      * @param jsonAsStringArray The array of strings representing JSON.
      * @return A JSON object representation.
-     * @throws ParseException Thrown if there was an error while parsing the given strings.
+     * @throws JSONParseException Thrown if there was an error while parsing the given strings.
      */
-    public static IJsonObject parse(String[] jsonAsStringArray) throws ParseException {
+    public static IJsonObject parse(String[] jsonAsStringArray) throws JSONParseException {
 
         StringBuilder whole = new StringBuilder();
 
