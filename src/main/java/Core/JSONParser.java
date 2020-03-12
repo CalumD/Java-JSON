@@ -1,8 +1,8 @@
 package Core;
 
+import Exceptions.JSONParseException;
 import Exceptions.KeyDifferentTypeException;
 import Exceptions.KeyNotFoundException;
-import Exceptions.JSONParseException;
 import Values.JSObject;
 
 import java.io.IOException;
@@ -99,7 +99,7 @@ public final class JSONParser {
      */
     public static Object getObject(IJsonObject fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
-        return fromObject.getObject(key);
+        return fromObject.getValue(key);
     }
 
     /**

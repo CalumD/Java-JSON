@@ -2,9 +2,9 @@ package Json;
 
 import Core.IJsonObject;
 import Core.JSONParser;
+import Exceptions.JSONParseException;
 import Exceptions.KeyDifferentTypeException;
 import Exceptions.KeyNotFoundException;
-import Exceptions.JSONParseException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -864,7 +864,7 @@ public class GetJson {
 
         int count = 3;
         for (String key : obj.getKeys("friends")) {
-            obj.getObject("friends[" + key + "]");
+            obj.getValue("friends[" + key + "]");
             count--;
         }
 
@@ -880,7 +880,7 @@ public class GetJson {
 
         int count = 3;
         for (String key : obj.getKeys("friends")) {
-            obj.getObject("friends." + key);
+            obj.getValue("friends." + key);
             count--;
         }
 

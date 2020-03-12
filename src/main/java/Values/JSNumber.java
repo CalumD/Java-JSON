@@ -105,7 +105,7 @@ public class JSNumber extends JSON {
     }
 
     @Override
-    public JSON getByKey(String keys) {
+    public JSON getJSONByKey(String keys) {
         if (contains(keys)) {
             return this;
         }

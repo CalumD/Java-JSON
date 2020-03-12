@@ -1,9 +1,9 @@
 package Core;
 
+import Exceptions.JSONException;
+import Exceptions.JSONParseException;
 import Exceptions.KeyDifferentTypeException;
 import Exceptions.KeyNotFoundException;
-import Exceptions.JSONParseException;
-import Exceptions.JSONException;
 import Values.JSType;
 
 import java.io.Serializable;
@@ -24,22 +24,16 @@ public interface IJsonObject extends Serializable {
      */
     IJsonObject createFromString(String jsonFragment) throws JSONParseException;
 
-
-
     /**
-     * Used to get the value of the IJsonObject
+     * Used to turn a json fragment from a list of strings into a code JSON object
      *
-     * @return This has to be a generic object since it can subcontain a number of types, but typing
-     * can be cleared up by calling the @getDataType() method.
+     * @param jsonFragment The list of strings representing the JSON object to use in code
+     * @return The parsed version of the JSON object in code.
+     * @throws JSONParseException Thrown if there is a problem with the input list.
      */
-    Object getValue();
+    IJsonObject createFromStringList(List<String> jsonFragment) throws JSONParseException;
 
-    /**
-     * Used to get the current IJsonObject.
-     *
-     * @return The IJsonObject.
-     */
-    IJsonObject get();
+
 
 
 
@@ -60,17 +54,16 @@ public interface IJsonObject extends Serializable {
     boolean contains(List<String> keys);
 
 
-
     /**
-     * This is used to get the object at the given key.
+     * Used to get the value of the IJsonObject
      *
-     * @param keys The key to retrieve the object from
-     * @return The object at the given key
-     * @throws KeyNotFoundException Thrown if there was no object found at that key.
+     * @return This has to be a generic object since it can subcontain a number of types, but typing
+     * can be cleared up by calling the @getDataType() method.
      */
-    IJsonObject getByKey(String keys) throws JSONException;
+    Object getValue();
 
     /**
+     * Calls getDataType(key) with an empty key. E.g. Refers to the current object.
      * Used to find out the type of the current object.
      *
      * @return The type of the current object.
@@ -78,21 +71,83 @@ public interface IJsonObject extends Serializable {
     JSType getDataType();
 
     /**
-     * Used to find out the type of the object at the given key.
+     * Calls getKeys(key) with an empty key. E.g. Refers to the current object.
      *
-     * @return The type of the current object.
+     * @return The keys of the current object.
+     * @throws KeyNotFoundException      Shouldn't really be thrown by this method since it exists
+     *                                   itself.
+     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
+     *                                   expected.
      */
-    JSType getDataTypeAtKey(String key) throws JSONException;
+    List<String> getKeys();
 
+    /**
+     * Calls getValues(key) with an empty key. E.g. Refers to the current object.
+     *
+     * @return The keys of the current object.
+     * @throws KeyNotFoundException      Shouldn't really be thrown by this method since it exists
+     *                                   itself.
+     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
+     *                                   expected.
+     */
+    List<IJsonObject> getValues();
 
+    /**
+     * Calls getList(key) with an empty key. E.g. Refers to the current object.
+     *
+     * @return The list value of the current object.
+     * @throws KeyNotFoundException      Shouldn't really be thrown by this method since it exists
+     *                                   itself.
+     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
+     *                                   expected.
+     */
+    List<IJsonObject> getList() throws KeyDifferentTypeException;
 
+    /**
+     * Calls getBoolean(key) with an empty key. E.g. Refers to the current object.
+     *
+     * @return The boolean value of the current object.
+     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
+     *                                   expected.
+     */
+    boolean getBoolean() throws KeyDifferentTypeException;
+
+    /**
+     * Calls getDouble(key) with an empty key. E.g. Refers to the current object.
+     *
+     * @return The double value of the current object.
+     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
+     *                                   expected.
+     */
+    double getDouble() throws KeyDifferentTypeException;
+
+    /**
+     * Calls getLong(key) with an empty key. E.g. Refers to the current object.
+     *
+     * @return The long value of the current object.
+     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
+     *                                   expected.
+     */
+    long getLong() throws KeyDifferentTypeException;
+
+    /**
+     * Calls getString(key) with an empty key. E.g. Refers to the current object.
+     *
+     * @return The string value of the current object.
+     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
+     *                                   expected.
+     */
+    String getString() throws KeyDifferentTypeException;
 
     /**
      * Calls getObject(key) with an empty key. E.g. Refers to the current object.
      *
-     * @return The value of the current object.
+     * @return The 'anything' value of the current object.
+     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
+     *                                   expected.
      */
-    Object getObject();
+    IJsonObject getAny();
+
 
     /**
      * Gets the object at the given key.
@@ -104,19 +159,25 @@ public interface IJsonObject extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    Object getObject(String key) throws JSONException;
-
+    Object getValue(String key) throws JSONException;
 
     /**
-     * Calls getKeys(key) with an empty key. E.g. Refers to the current object.
+     * This is used to get the object at the given key.
      *
-     * @return The keys of the current object.
-     * @throws KeyNotFoundException      Shouldn't really be thrown by this method since it exists
-     *                                   itself.
-     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
-     *                                   expected.
+     * @param keys The key to retrieve the object from
+     * @return The object at the given key
+     * @throws KeyNotFoundException Thrown if there was no object found at that key.
      */
-    List<String> getKeys() throws JSONException;
+    IJsonObject getJSONByKey(String keys) throws JSONException;
+
+    /**
+     * Used to find out the type of the current object.
+     *
+     * @param key the key to look for the type of the object at
+     * @return The Type of the object at the given key.
+     * @throws JSONException Thrown if the Key was not found in the object.
+     */
+    JSType getDataType(String key) throws JSONException;
 
     /**
      * Gets the keys from the object at the given key.
@@ -130,17 +191,17 @@ public interface IJsonObject extends Serializable {
      */
     List<String> getKeys(String key) throws JSONException;
 
-
     /**
-     * Calls getList(key) with an empty key. E.g. Refers to the current object.
+     * Gets the values from the object at the given key.
      *
-     * @return The list value of the current object.
-     * @throws KeyNotFoundException      Shouldn't really be thrown by this method since it exists
-     *                                   itself.
-     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
-     *                                   expected.
+     * @param key This is the key to search for within the current object.
+     * @return The 'values' of the object at the given key.
+     * @throws KeyNotFoundException      Thrown if there was not an object at the path (or if the
+     *                                   path syntax is bad).
+     * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
+     *                                   match the return type of this method.
      */
-    List<IJsonObject> getList() throws JSONException;
+    List<IJsonObject> getValues(String key) throws JSONException;
 
     /**
      * Gets the values of the array at the given key.
@@ -154,16 +215,6 @@ public interface IJsonObject extends Serializable {
      */
     List<IJsonObject> getList(String key) throws JSONException;
 
-
-    /**
-     * Calls getBoolean(key) with an empty key. E.g. Refers to the current object.
-     *
-     * @return The boolean value of the current object.
-     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
-     *                                   expected.
-     */
-    boolean getBoolean() throws JSONException;
-
     /**
      * Gets the boolean at the given key.
      *
@@ -175,16 +226,6 @@ public interface IJsonObject extends Serializable {
      *                                   match the return type of this method.
      */
     boolean getBoolean(String key) throws JSONException;
-
-
-    /**
-     * Calls getDouble(key) with an empty key. E.g. Refers to the current object.
-     *
-     * @return The double value of the current object.
-     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
-     *                                   expected.
-     */
-    double getDouble() throws JSONException;
 
     /**
      * Gets the double at the given key.
@@ -198,16 +239,6 @@ public interface IJsonObject extends Serializable {
      */
     double getDouble(String key) throws JSONException;
 
-
-    /**
-     * Calls getLong(key) with an empty key. E.g. Refers to the current object.
-     *
-     * @return The long value of the current object.
-     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
-     *                                   expected.
-     */
-    long getLong() throws KeyDifferentTypeException;
-
     /**
      * Gets the long at the given key.
      *
@@ -219,16 +250,6 @@ public interface IJsonObject extends Serializable {
      *                                   match the return type of this method.
      */
     long getLong(String key) throws JSONException;
-
-
-    /**
-     * Calls getString(key) with an empty key. E.g. Refers to the current object.
-     *
-     * @return The string value of the current object.
-     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
-     *                                   expected.
-     */
-    String getString() throws JSONException;
 
     /**
      * Gets the string at the given key.
@@ -243,16 +264,6 @@ public interface IJsonObject extends Serializable {
      */
     String getString(String key) throws JSONException;
 
-
-    /**
-     * Calls getObject(key) with an empty key. E.g. Refers to the current object.
-     *
-     * @return The 'anything' value of the current object.
-     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
-     *                                   expected.
-     */
-    IJsonObject getAny() throws JSONException;
-
     /**
      * Gets whatever the object is at the given key.
      *
@@ -266,24 +277,6 @@ public interface IJsonObject extends Serializable {
 
 
 
-    /**
-     * Replica of the .equals on a class, but used to enforce implementors override.
-     *
-     * @param other Another instance of an IJsonObject.
-     * @return The equality state of the two objects in question.
-     */
-    @Override
-    boolean equals(Object other);
-
-    /**
-     * Used to enforce the implementation of a Hashcode on Implementers
-     * @return The Hashcode of this IJsonObject
-     */
-    @Override
-    int hashCode();
-
-
-
 
     /**
      * Calls as string with the shallowest depth
@@ -292,7 +285,6 @@ public interface IJsonObject extends Serializable {
      */
     @Override
     String toString();
-
     /**
      * Calls asPrettyString with the shallowest depth
      *
@@ -301,14 +293,12 @@ public interface IJsonObject extends Serializable {
     String toPrettyString();
 
 
-
     /**
      * Calls as string with the deepest depth
      *
      * @return The most detailed view of the current object
      */
     String asString();
-
     /**
      * Creates a string representation of the current object with a given depth of object expansion
      *
@@ -316,7 +306,6 @@ public interface IJsonObject extends Serializable {
      * @return The string representation of this object
      */
     String asString(int depth);
-
 
 
     /**
@@ -333,4 +322,31 @@ public interface IJsonObject extends Serializable {
      * @return The string representation of this object, with new lines and object indentation
      */
     String asPrettyString(int depth);
+
+    /**
+     * Creates a string representation of the current object with a given depth of object expansion
+     * And a set level of indentation
+     *
+     * @param depth The depth of objects to show in the output
+     * @return The string representation of this object, with new lines and object indentation
+     */
+    String asPrettyString(int depth, int indentWidth);
+
+
+    /**
+     * Replica of the .equals on a class, but used to enforce implementors override.
+     *
+     * @param other Another instance of an IJsonObject.
+     * @return The equality state of the two objects in question.
+     */
+    @Override
+    boolean equals(Object other);
+
+    /**
+     * Used to enforce the implementation of a Hashcode on Implementers
+     *
+     * @return The Hashcode of this IJsonObject
+     */
+    @Override
+    int hashCode();
 }

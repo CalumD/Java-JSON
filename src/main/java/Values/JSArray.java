@@ -1,8 +1,8 @@
 package Values;
 
 import Core.IJsonObject;
-import Exceptions.KeyNotFoundException;
 import Exceptions.JSONParseException;
+import Exceptions.KeyNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,7 +112,7 @@ public class JSArray extends JSON {
 
         try {
             //else get from children
-            getByKey(keys);
+            getJSONByKey(keys);
             return true;
         } catch (KeyNotFoundException e) {
             return false;
@@ -143,7 +143,7 @@ public class JSArray extends JSON {
     }
 
     @Override
-    public IJsonObject getByKey(String key) throws KeyNotFoundException {
+    public IJsonObject getJSONByKey(String key) throws KeyNotFoundException {
         //if the key is simply to show that this index exists then show it exists
         if (key.equals("")) {
             return this;
@@ -162,7 +162,7 @@ public class JSArray extends JSON {
             //find the object at that array index
             IJsonObject ret = this;
             for (String i : nestedIndexString) {
-                ret = ret.getByKey(i);
+                ret = ret.getJSONByKey(i);
             }
             return ret;
         }

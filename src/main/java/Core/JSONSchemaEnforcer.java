@@ -1,8 +1,8 @@
 package Core;
 
+import Exceptions.JSONParseException;
 import Exceptions.KeyDifferentTypeException;
 import Exceptions.KeyNotFoundException;
-import Exceptions.JSONParseException;
 import Exceptions.SchemaException;
 import Values.*;
 
@@ -258,11 +258,11 @@ public class JSONSchemaEnforcer {
                 }
                 if (schema.contains("enum")) {
                     HashSet<String> allowed = new HashSet<>();
-                    for (IJsonObject elem : ((JSArray) schema.getByKey("enum")).getValue()) {
+                    for (IJsonObject elem : ((JSArray) schema.getJSONByKey("enum")).getValue()) {
                         allowed.add((String) elem.getValue());
                     }
                     if (!allowed.contains(value)) {
-                        valueUnexpected("enum: " + schema.getByKey("enum"), limiter);
+                        valueUnexpected("enum: " + schema.getJSONByKey("enum"), limiter);
                     }
                 }
             } catch (ClassCastException | KeyNotFoundException | KeyDifferentTypeException e) {
@@ -297,8 +297,8 @@ public class JSONSchemaEnforcer {
                             "Required attribute declared but no properties attribute found.");
                     }
                     HashSet<String> requiredKeys = new HashSet<>();
-                    for (IJsonObject key : ((JSArray) localSchema.getByKey("required"))
-                        .getValue()) {
+                    for (IJsonObject key : ((JSArray) localSchema.getJSONByKey("required"))
+                            .getValue()) {
                         requiredKeys.add(((JSString) key).getValue());
                     }
                     if (requiredKeys.size() == 0) {
@@ -314,16 +314,16 @@ public class JSONSchemaEnforcer {
                     }
                 }
                 if (localSchema.contains("additionalProperties")) {
-                    if (localSchema.getByKey("additionalProperties") instanceof JSBoolean) {
+                    if (localSchema.getJSONByKey("additionalProperties") instanceof JSBoolean) {
                         if (!localSchema.getBoolean("additionalProperties")) {
                             HashSet<String> allowedKeys = new HashSet<>(
-                                localSchema.getByKey("properties").getKeys());
+                                    localSchema.getJSONByKey("properties").getKeys());
 
                             for (String key : value.getKeys()) {
                                 if (!allowedKeys.contains(key)) {
                                     throw new SchemaException("Additional property '" + key
-                                        + "' not defined in schema found, " +
-                                        "when additionalProperties was set to false.");
+                                            + "' not defined in schema found, " +
+                                            "when additionalProperties was set to false.");
                                 }
                             }
                             if (value.getKeys().size() > allowedKeys.size()) {
@@ -334,35 +334,35 @@ public class JSONSchemaEnforcer {
                         }
                     } else {
                         HashSet<String> allowedKeys = new HashSet<>(
-                            localSchema.getByKey("properties").getKeys());
+                                localSchema.getJSONByKey("properties").getKeys());
 
                         if (localSchema.contains("additionalProperties.$ref")) {
                             for (String key : value.getKeys()) {
                                 if (!allowedKeys.contains(key)) {
-                                    validateByType(value.getByKey(key), schema,
-                                        localSchema.getString("additionalProperties.$ref")
-                                            .substring(2));
+                                    validateByType(value.getJSONByKey(key), schema,
+                                            localSchema.getString("additionalProperties.$ref")
+                                                    .substring(2));
                                 }
                             }
                         } else {
                             for (String key : value.getKeys()) {
                                 if (!allowedKeys.contains(key)) {
-                                    validateByType(value.getByKey(key), schema,
-                                        resolvePath(pathSoFar, "additionalProperties"));
+                                    validateByType(value.getJSONByKey(key), schema,
+                                            resolvePath(pathSoFar, "additionalProperties"));
                                 }
                             }
                         }
                     }
                 }
                 if (localSchema.contains("properties")) {
-                    if (!(localSchema.getByKey("properties") instanceof JSObject)) {
+                    if (!(localSchema.getJSONByKey("properties") instanceof JSObject)) {
                         throw new KeyDifferentTypeException(
-                            "Properties declaration in object must be an object.");
+                                "Properties declaration in object must be an object.");
                     }
-                    for (String key : localSchema.getByKey("properties").getKeys()) {
+                    for (String key : localSchema.getJSONByKey("properties").getKeys()) {
                         if (obj.contains(key)) {
-                            validateByType(obj.getByKey(key), schema,
-                                resolvePath(pathSoFar, "properties." + key));
+                            validateByType(obj.getJSONByKey(key), schema,
+                                    resolvePath(pathSoFar, "properties." + key));
                         }
                     }
                 }
@@ -375,17 +375,17 @@ public class JSONSchemaEnforcer {
                     }
                 }
                 if (localSchema.contains("minProperties")) {
-                    if (value.getKeys().size() < (Long) localSchema.getByKey("minProperties")
-                        .getValue()) {
+                    if (value.getKeys().size() < (Long) localSchema.getJSONByKey("minProperties")
+                            .getValue()) {
                         valueUnexpected("minProperties: " + localSchema.getLong("minProperties"),
-                            String.valueOf(value.getKeys().size()));
+                                String.valueOf(value.getKeys().size()));
                     }
                 }
                 if (localSchema.contains("maxProperties")) {
-                    if (value.getKeys().size() > (Long) localSchema.getByKey("maxProperties")
-                        .getValue()) {
+                    if (value.getKeys().size() > (Long) localSchema.getJSONByKey("maxProperties")
+                            .getValue()) {
                         valueUnexpected("maxProperties: " + localSchema.getLong("maxProperties"),
-                            String.valueOf(value.getKeys().size()));
+                                String.valueOf(value.getKeys().size()));
                     }
                 }
                 if (localSchema.contains("dependencies")) {
@@ -446,46 +446,46 @@ public class JSONSchemaEnforcer {
                     }
                 }
                 if (localSchema.contains("items")) {
-                    if (localSchema.getByKey("items") instanceof JSArray) {
+                    if (localSchema.getJSONByKey("items") instanceof JSArray) {
                         for (int i = 0; i < value.getValue().size(); i++) {
                             validateByType(value.getValue().get(i), schema,
-                                resolvePath(pathSoFar, "items[" + i + "]"));
+                                    resolvePath(pathSoFar, "items[" + i + "]"));
                         }
                         if (localSchema.contains("additionalItems")) {
-                            if (localSchema.getByKey("additionalItems") instanceof JSBoolean) {
+                            if (localSchema.getJSONByKey("additionalItems") instanceof JSBoolean) {
                                 if (!(localSchema.getBoolean("additionalItems"))) {
                                     if (value.getValue().size() > ((JSArray) localSchema
-                                        .getByKey("items")).getValue().size()) {
+                                            .getJSONByKey("items")).getValue().size()) {
                                         throw new SchemaException(
-                                            "Found additional attribute in {" + arr
-                                                + "}, schema enforced no additional items in that array.");
+                                                "Found additional attribute in {" + arr
+                                                        + "}, schema enforced no additional items in that array.");
                                     }
                                 }
                             } else {
                                 if (localSchema.contains("additionalItems.$ref")) {
                                     for (
-                                        int i = ((JSArray) localSchema.getByKey("items")).getValue()
-                                            .size(); i < value.getValue().size(); i++) {
+                                            int i = ((JSArray) localSchema.getJSONByKey("items")).getValue()
+                                                    .size(); i < value.getValue().size(); i++) {
                                         validateByType(value.getValue().get(i), schema,
                                             localSchema.getString("additionalItems.$ref")
                                                 .substring(2));
                                     }
                                 } else {
                                     for (
-                                        int i = ((JSArray) localSchema.getByKey("items")).getValue()
-                                            .size(); i < value.getValue().size(); i++) {
+                                            int i = ((JSArray) localSchema.getJSONByKey("items")).getValue()
+                                                    .size(); i < value.getValue().size(); i++) {
                                         validateByType(value.getValue().get(i), schema,
-                                            resolvePath(pathSoFar, "items"));
+                                                resolvePath(pathSoFar, "items"));
                                     }
                                 }
                             }
                         }
                     }
-                    if (localSchema.getByKey("items") instanceof JSObject) {
+                    if (localSchema.getJSONByKey("items") instanceof JSObject) {
                         if (localSchema.contains("items.$ref")) {
                             for (IJsonObject elem : value.getValue()) {
                                 validateByType(elem, schema,
-                                    localSchema.getString("items.$ref").substring(2));
+                                        localSchema.getString("items.$ref").substring(2));
                             }
                         } else {
                             for (IJsonObject elem : value.getValue()) {
@@ -558,7 +558,7 @@ public class JSONSchemaEnforcer {
     private static IJsonObject getSchema(IJsonObject schema, String path) throws SchemaException {
         path = path.replaceAll("/", ".");
         try {
-            return schema.getByKey(path);
+            return schema.getJSONByKey(path);
         } catch (KeyNotFoundException e) {
             throw new SchemaException("Path not found in schema. " + e.getMessage());
         }

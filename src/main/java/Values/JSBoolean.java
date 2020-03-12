@@ -80,7 +80,7 @@ public class JSBoolean extends JSON {
     }
 
     @Override
-    public JSON getByKey(String keys) {
+    public JSON getJSONByKey(String keys) {
         if (keys.equals("")) {
             return this;
         }

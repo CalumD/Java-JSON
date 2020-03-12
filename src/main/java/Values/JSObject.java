@@ -1,8 +1,8 @@
 package Values;
 
 import Core.IJsonObject;
-import Exceptions.KeyNotFoundException;
 import Exceptions.JSONParseException;
+import Exceptions.KeyNotFoundException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -177,7 +177,7 @@ public class JSObject extends JSON {
         }
 
         try {
-            getByKey(keys);
+            getJSONByKey(keys);
             return true;
         } catch (KeyNotFoundException e) {
             return false;
@@ -211,14 +211,14 @@ public class JSObject extends JSON {
     }
 
     @Override
-    public IJsonObject getByKey(String keys) throws KeyNotFoundException {
+    public IJsonObject getJSONByKey(String keys) throws KeyNotFoundException {
         if (keys.equals("")) {
             return this;
         }
         //invalid key checks
         if (keys.endsWith(".")) {
             throw new KeyNotFoundException(
-                "The Key provided could not be found in the JSON.  The Key ends with an additional <.>");
+                    "The Key provided could not be found in the JSON.  The Key ends with an additional <.>");
         }
 
         //generate basic stuff
@@ -312,7 +312,7 @@ public class JSObject extends JSON {
         if (arrayAccess != null) {
             //if the stuff after the next dot reference matches our substrings, then get the current key and passdown on the array access
             if (keys.substring(keys.indexOf(".") + 1).equals(keys)) {
-                ret = json.get(key).getByKey(arrayAccess);
+                ret = json.get(key).getJSONByKey(arrayAccess);
                 //if nothing was found, then throw
                 if (ret == null) {
                     throw new KeyNotFoundException(
@@ -326,7 +326,7 @@ public class JSObject extends JSON {
                 }
                 //continue down the nested key path
                 if (nestedArrays) {
-                    return ret.getByKey(nestedKey);
+                    return ret.getJSONByKey(nestedKey);
                 }
                 //return this found object
                 else {
@@ -337,9 +337,9 @@ public class JSObject extends JSON {
             else {
                 //straight pass through the nested keys, based on current key and array access
                 if (nestedArrays) {
-                    ret = json.get(key).getByKey(arrayAccess).getByKey(nestedKey);
+                    ret = json.get(key).getJSONByKey(arrayAccess).getJSONByKey(nestedKey);
                 } else {
-                    ret = json.get(key).getByKey(arrayAccess);
+                    ret = json.get(key).getJSONByKey(arrayAccess);
                 }
                 //if no object was found then throw
                 if (ret == null) {
@@ -354,7 +354,7 @@ public class JSObject extends JSON {
                 }
                 //else return the contents from the remainder of the key not yet decoded.
                 else {
-                    return ret.getByKey(keys.substring(keys.indexOf(".") + 1));
+                    return ret.getJSONByKey(keys.substring(keys.indexOf(".") + 1));
                 }
             }
         }
@@ -363,18 +363,18 @@ public class JSObject extends JSON {
             try {
                 //if the next thing is an array, check it has content based on remaining un-decoded key subs
                 if (ret.getDataType() == JSType.ARRAY
-                    && (ret = ret.getByKey(keys.substring(key.length() + 1))) == null) {
+                        && (ret = ret.getJSONByKey(keys.substring(key.length() + 1))) == null) {
                     throw new KeyNotFoundException(
-                        "The Key provided could not be found in the JSON. Reached: " +
-                            (keyAtElement.equals(JSON_ROOT) ? "" :
-                                (keyAtElement.substring(JSON_ROOT.length() + 1) +
-                                    ".")) +
-                            keys.split("\\.")[1] +
-                            "_     ::" +
-                            "It looks like you are trying to access an array with invalid id"
+                            "The Key provided could not be found in the JSON. Reached: " +
+                                    (keyAtElement.equals(JSON_ROOT) ? "" :
+                                            (keyAtElement.substring(JSON_ROOT.length() + 1) +
+                                                    ".")) +
+                                    keys.split("\\.")[1] +
+                                    "_     ::" +
+                                    "It looks like you are trying to access an array with invalid id"
                     );
                 }
-                return ret.getByKey(keys.substring(key.length() + 1));
+                return ret.getJSONByKey(keys.substring(key.length() + 1));
             } catch (StringIndexOutOfBoundsException e) {
                 return ret;
             }
