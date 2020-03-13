@@ -31,7 +31,7 @@ public interface IJsonObject extends Serializable {
      * @return The parsed version of the JSON object in code.
      * @throws JSONParseException Thrown if there is a problem with the input list.
      */
-    IJsonObject createFromStringList(List<String> jsonFragment) throws JSONParseException;
+    IJsonObject createFromMultilineString(List<String> jsonFragment) throws JSONParseException;
 
 
 

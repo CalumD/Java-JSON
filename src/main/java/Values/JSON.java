@@ -18,11 +18,46 @@ public abstract class JSON implements IJsonObject {
     //////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
     public IJsonObject createFromString(String jsonFragment) throws JSONParseException {
-        // TODO this method
+        if (jsonFragment == null || jsonFragment.length() == 0) {
+            throw new JSONParseException("You cannot create json from null.");
+        }
+        if (jsonFragment.equals("true") || jsonFragment.equals("True")
+                || jsonFragment.equals("false") || jsonFragment.equals("False")) {
+            return new JSBoolean(jsonFragment);
+        }
+        switch (jsonFragment.charAt(0)) {
+            case '{':
+                return new JSObject(jsonFragment);
+            case '[':
+                return new JSArray(jsonFragment);
+            case '"':
+            case '\'':
+                return new JSString(jsonFragment);
+            case '-':
+            case '+':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                return new JSNumber(jsonFragment);
+            default:
+                throw new JSONParseException("You cannot start json with a {"
+                        + jsonFragment.charAt(0)
+                        + "}. Expected ''', '\"', '{', '[', <number>, <boolean>");
+        }
     }
 
     @Override
-    public IJsonObject createFromStringList(List<String> jsonFragment) throws JSONParseException {
+    public IJsonObject createFromMultilineString(List<String> jsonFragment) throws JSONParseException {
+        if (jsonFragment == null || jsonFragment.size() == 0) {
+            throw new JSONParseException("You cannot create json from null.");
+        }
         // TODO this method
     }
 
