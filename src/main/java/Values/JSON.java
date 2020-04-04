@@ -20,6 +20,7 @@ public abstract class JSON implements IJson {
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
     JSON(JSONParsingTape parsingTape) throws JSONParseException {
+        // This is only used to enforce each extending class has this matching constructor to execute the parse.
     }
 
     @Override
@@ -34,7 +35,7 @@ public abstract class JSON implements IJson {
 
     private JSON parseSelf(String jsonFragment) {
         JSONParsingTape parsingTape = new JSONParsingTape(jsonFragment);
-        parsingTape.parse();
+        parsingTape.parseFragment();
         return parsingTape.getJson();
     }
 

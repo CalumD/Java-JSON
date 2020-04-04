@@ -9,63 +9,52 @@ class JSONParsingTape {
 
     private String fullString;
     private int currentIndex;
-
+    private JSON topLevelJSON;
 
     JSONParsingTape(String fullJSONString) {
         this.fullString = fullJSONString;
     }
 
-    char charAt(int index) {
-        return fullString.charAt(index);
+    char currentChar() {
+        return charAt(0);
+    }
+    char nextChar() {
+        return charAt(1);
+    }
+    char previousChar() {
+        return charAt(-1);
+    }
+    char charAt(int offsetToCurrent) {
+        return fullString.charAt(currentIndex + offsetToCurrent);
     }
 
-    char previousChar(int currentIndex) {
-        return fullString.charAt(currentIndex-1);
+    void moveTapeHead(int byOffset) {
+        currentIndex += byOffset;
     }
-
-    void parse() {
-//        if (jsonFragment == null || jsonFragment.length() == 0) {
-//            throw new JSONParseException("You cannot create json from null.");
-//        }
-//        if (jsonFragment.equals("true") || jsonFragment.equals("True")
-//                || jsonFragment.equals("false") || jsonFragment.equals("False")) {
-//            return new JSBoolean(jsonFragment);
-//        }
-//        switch (jsonFragment.charAt(0)) {
-//            case '{':
-//                return new JSObject(jsonFragment);
-//            case '[':
-//                return new JSArray(jsonFragment);
-//            case '"':
-//            case '\'':
-//                return new JSString(jsonFragment);
-//            case '-':
-//            case '+':
-//            case '0':
-//            case '1':
-//            case '2':
-//            case '3':
-//            case '4':
-//            case '5':
-//            case '6':
-//            case '7':
-//            case '8':
-//            case '9':
-//                return new JSNumber(jsonFragment);
-//            default:
-//                throw new JSONParseException("You cannot start json with a {"
-//                        + jsonFragment.charAt(0)
-//                        + "}. Expected ''', '\"', '{', '[', <number>, <boolean>");
-//        }
+    char consume() {
+        return charAt(currentIndex++);
     }
-
-    JSON getJson() {
-        return new JSBoolean();
+    String consume(int fragmentSize) {
+        String fragment = fullString.substring(currentIndex, currentIndex + fragmentSize);
+        moveTapeHead(fragmentSize);
+        return fragment;
     }
 
 
-
-
+    private void consumeWhiteSpace() {
+        boolean foundNext = false;
+        while (!foundNext) {
+            switch (currentChar()) {
+                case ' ':
+                case '\n':
+                case '\r':
+                case '\t':
+                    currentIndex++;
+                default:
+                    foundNext = true;
+            }
+        }
+    }
     void createParseError(String expectedFragment, String customErrorMessage) {
         String gotFragment = "...";
 
@@ -80,11 +69,61 @@ class JSONParsingTape {
                 + "\nGot: " + gotFragment + ",  Expected: " + expectedFragment
         );
     }
-
     void createParseError(String expectedFragment) {
         createParseError(
                 expectedFragment,
                 "Unexpected symbol found in JSON while parsing."
         );
+    }
+
+    void parseFragment() {
+        // Reach the first legitimate character.
+        consumeWhiteSpace();
+        if (fullString == null || fullString.length() == 0) {
+            throw new JSONParseException("You cannot create json from null.");
+        }
+        JSON resultTopLevelJSON = null;
+        switch (fullString.charAt(0)) {
+            case 't':
+            case 'T':
+            case 'f':
+            case 'F':
+                resultTopLevelJSON = new JSBoolean(this);
+                break;
+            case '{':
+                resultTopLevelJSON = new JSObject(this);
+                break;
+            case '[':
+                resultTopLevelJSON = new JSArray(this);
+                break;
+            case '"':
+            case '\'':
+                resultTopLevelJSON = new JSString(this);
+                break;
+            case '-':
+            case '+':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                resultTopLevelJSON = new JSNumber(this);
+                break;
+            default:
+                createParseError("'/\"/{/[/<number>/<boolean>",
+                        "You cannot start json with a {" + currentChar() + "}.");
+        }
+        topLevelJSON = resultTopLevelJSON;
+    }
+    JSON getJson() {
+        if (topLevelJSON == null) {
+            throw new JSONParseException("Failed to find a parsable fragment.");
+        }
+        return topLevelJSON;
     }
 }
