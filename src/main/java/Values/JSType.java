@@ -2,6 +2,6 @@ package Values;
 
 public enum JSType {
 
-    ARRAY, BOOLEAN, DOUBLE, LONG, OBJECT, STRING, UNDEFINED
+    ARRAY, BOOLEAN, DOUBLE, LONG, OBJECT, STRING
 
 }

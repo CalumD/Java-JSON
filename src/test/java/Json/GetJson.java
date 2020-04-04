@@ -1,6 +1,6 @@
 package Json;
 
-import Core.IJsonObject;
+import Core.IJson;
 import Core.JSONParser;
 import Exceptions.JSONParseException;
 import Exceptions.KeyDifferentTypeException;
@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class GetJson {
 
-    private static IJsonObject obj, deepNesting;
+    private static IJson obj, deepNesting;
 
 
     @BeforeAll
@@ -858,7 +858,7 @@ public class GetJson {
     @Test
     public void getAllFromArray()
             throws KeyDifferentTypeException, KeyNotFoundException, JSONParseException {
-        IJsonObject obj = JSONParser
+        IJson obj = JSONParser
                 .parse("{\"friends\":[{\"name\":\"Shanna Garrett\",\"id\":0},{\"name\":\"" +
                         "Peggy Brown\",\"id\":1},{\"name\":\"Roach Mcguire\",\"id\":2}]}");
 
@@ -874,7 +874,7 @@ public class GetJson {
     @Test
     public void getAllFromObject()
             throws KeyDifferentTypeException, KeyNotFoundException, JSONParseException {
-        IJsonObject obj = JSONParser
+        IJson obj = JSONParser
                 .parse("{\"friends\":{\"friend1\":{\"name\":\"Shanna Garrett\",\"id\":0}," +
                         "\"friend2\":{\"name\":\"Peggy Brown\",\"id\":1},\"friend3\":{\"name\":\"Roach Mcguire\",\"id\":2}}}");
 

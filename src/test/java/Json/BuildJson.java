@@ -1,7 +1,7 @@
 package Json;
 
+import Core.IJson;
 import Core.IJsonBuilder;
-import Core.IJsonObject;
 import Core.JSONBuilder;
 import Exceptions.BuildException;
 import Exceptions.KeyDifferentTypeException;
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class BuildJson {
 
     private static IJsonBuilder builder;
-    private static IJsonObject getter;
+    private static IJson getter;
 
     private static void resetGets() {
         IJsonBuilder pre = new JSONBuilder(), last = new JSONBuilder();

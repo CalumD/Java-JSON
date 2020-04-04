@@ -25,11 +25,11 @@ public class JSONSchemaEnforcer {
      * @throws IOException    Thrown if there was a problem accessing the schema.
      * @throws JSONParseException Thrown if there was an issue parsing the schema.
      */
-    public static boolean validateGlobal(IJsonObject objectToValidate, String pathToSchema)
+    public static boolean validateGlobal(IJson objectToValidate, String pathToSchema)
         throws IOException, JSONParseException {
 
         String fileAsString = FileManager.getFileAsString(pathToSchema);
-        IJsonObject schema = JSONParser.parse(fileAsString);
+        IJson schema = JSONParser.parse(fileAsString);
 
         return validate(objectToValidate, schema);
     }
@@ -44,11 +44,11 @@ public class JSONSchemaEnforcer {
      * @throws IOException    Thrown if there was a problem accessing the schema.
      * @throws JSONParseException Thrown if there was an issue parsing the schema.
      */
-    public static boolean validateInternal(IJsonObject objectToValidate, String resourceName)
+    public static boolean validateInternal(IJson objectToValidate, String resourceName)
         throws IOException, JSONParseException {
 
         String fileAsString = FileManager.getLocalResourceAsString(resourceName);
-        IJsonObject schema = JSONParser.parse(fileAsString);
+        IJson schema = JSONParser.parse(fileAsString);
 
         return validate(objectToValidate, schema);
     }
@@ -61,7 +61,7 @@ public class JSONSchemaEnforcer {
      * @return True if the object satisfies the schema
      * @throws SchemaException Thrown if the object does not conform to the schema.
      */
-    private static boolean validate(IJsonObject objectToValidate, IJsonObject schema)
+    private static boolean validate(IJson objectToValidate, IJson schema)
         throws SchemaException {
         validateByType(objectToValidate, schema, "");
         return true;
@@ -77,7 +77,7 @@ public class JSONSchemaEnforcer {
      * @throws JSONParseException Thrown if there was some error parsing the Schema (Should never be
      *                        thrown for this method)
      */
-    public static void validateSystem(IJsonObject config) throws IOException, JSONParseException {
+    public static void validateSystem(IJson config) throws IOException, JSONParseException {
         validateInternal(config, "/SystemSpecification.schema.json");
     }
 
@@ -90,10 +90,10 @@ public class JSONSchemaEnforcer {
      * @param pathSoFar The path inside the schema we have reached so far.
      * @throws SchemaException Thrown if the object does not satisfy the schema.
      */
-    private static void validateByType(IJsonObject toValidate, IJsonObject schema, String pathSoFar)
+    private static void validateByType(IJson toValidate, IJson schema, String pathSoFar)
         throws SchemaException {
 
-        IJsonObject localSchema = getSchema(schema, pathSoFar);
+        IJson localSchema = getSchema(schema, pathSoFar);
 
         if (schema.contains(resolvePath(pathSoFar, "type"))) {
             try {
@@ -141,7 +141,7 @@ public class JSONSchemaEnforcer {
      * @param schema The schema for this number instance.
      * @throws SchemaException Thrown if the object does not satisfy the schema.
      */
-    private static void validateNumber(IJsonObject number, IJsonObject schema)
+    private static void validateNumber(IJson number, IJson schema)
         throws SchemaException {
 
         if (number instanceof JSNumber) {
@@ -234,7 +234,7 @@ public class JSONSchemaEnforcer {
      * @param schema The schema for this String instance.
      * @throws SchemaException Thrown if the object does not satisfy the schema.
      */
-    private static void validateString(IJsonObject string, IJsonObject schema)
+    private static void validateString(IJson string, IJson schema)
         throws SchemaException {
         if (string instanceof JSString) {
             String value = ((JSString) string).getValue();
@@ -258,7 +258,7 @@ public class JSONSchemaEnforcer {
                 }
                 if (schema.contains("enum")) {
                     HashSet<String> allowed = new HashSet<>();
-                    for (IJsonObject elem : ((JSArray) schema.getJSONByKey("enum")).getValue()) {
+                    for (IJson elem : ((JSArray) schema.getJSONByKey("enum")).getValue()) {
                         allowed.add((String) elem.getValue());
                     }
                     if (!allowed.contains(value)) {
@@ -284,8 +284,8 @@ public class JSONSchemaEnforcer {
      * object.
      * @throws SchemaException Thrown if the object does not satisfy the schema.
      */
-    private static void validateObject(IJsonObject obj, IJsonObject schema, String pathSoFar,
-        IJsonObject localSchema) throws SchemaException {
+    private static void validateObject(IJson obj, IJson schema, String pathSoFar,
+                                       IJson localSchema) throws SchemaException {
 
         if (obj instanceof JSObject) {
             JSObject value = (JSObject) obj;
@@ -297,7 +297,7 @@ public class JSONSchemaEnforcer {
                             "Required attribute declared but no properties attribute found.");
                     }
                     HashSet<String> requiredKeys = new HashSet<>();
-                    for (IJsonObject key : ((JSArray) localSchema.getJSONByKey("required"))
+                    for (IJson key : ((JSArray) localSchema.getJSONByKey("required"))
                             .getValue()) {
                         requiredKeys.add(((JSString) key).getValue());
                     }
@@ -411,8 +411,8 @@ public class JSONSchemaEnforcer {
      * array.
      * @throws SchemaException Thrown if the object does not satisfy the schema.
      */
-    private static void validateArray(IJsonObject arr, IJsonObject schema, String pathSoFar,
-        IJsonObject localSchema) throws SchemaException {
+    private static void validateArray(IJson arr, IJson schema, String pathSoFar,
+                                      IJson localSchema) throws SchemaException {
 
         if (arr instanceof JSArray) {
             JSArray value = ((JSArray) arr);
@@ -483,12 +483,12 @@ public class JSONSchemaEnforcer {
                     }
                     if (localSchema.getJSONByKey("items") instanceof JSObject) {
                         if (localSchema.contains("items.$ref")) {
-                            for (IJsonObject elem : value.getValue()) {
+                            for (IJson elem : value.getValue()) {
                                 validateByType(elem, schema,
                                         localSchema.getString("items.$ref").substring(2));
                             }
                         } else {
-                            for (IJsonObject elem : value.getValue()) {
+                            for (IJson elem : value.getValue()) {
                                 validateByType(elem, localSchema, resolvePath(pathSoFar, "items"));
                             }
                         }
@@ -509,7 +509,7 @@ public class JSONSchemaEnforcer {
      * @param bool The Boolean to validate.
      * @throws SchemaException Thrown if the object does not satisfy the schema.
      */
-    private static void validateBoolean(IJsonObject bool) throws SchemaException {
+    private static void validateBoolean(IJson bool) throws SchemaException {
         if (!(bool instanceof JSBoolean)) {
             throw new SchemaException("Value found in " + bool + " is not the declared type.");
         }
@@ -555,7 +555,7 @@ public class JSONSchemaEnforcer {
      * @return The Schema object at the given path from the given whole schema
      * @throws SchemaException Thrown if that path is not found in the given schema.
      */
-    private static IJsonObject getSchema(IJsonObject schema, String path) throws SchemaException {
+    private static IJson getSchema(IJson schema, String path) throws SchemaException {
         path = path.replaceAll("/", ".");
         try {
             return schema.getJSONByKey(path);

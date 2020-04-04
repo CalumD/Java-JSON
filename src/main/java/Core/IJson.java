@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * This interface defines the methods for accessing the elements of a JSON object
  */
-public interface IJsonObject extends Serializable {
+public interface IJson extends Serializable {
 
 
     /**
@@ -22,7 +22,7 @@ public interface IJsonObject extends Serializable {
      * @return The parsed version of the JSON object in code.
      * @throws JSONParseException Thrown if there is a problem with the input string.
      */
-    IJsonObject createFromString(String jsonFragment) throws JSONParseException;
+    IJson createFromString(String jsonFragment) throws JSONParseException;
 
     /**
      * Used to turn a json fragment from a list of strings into a code JSON object
@@ -31,7 +31,7 @@ public interface IJsonObject extends Serializable {
      * @return The parsed version of the JSON object in code.
      * @throws JSONParseException Thrown if there is a problem with the input list.
      */
-    IJsonObject createFromMultilineString(List<String> jsonFragment) throws JSONParseException;
+    IJson createFromMultilineString(List<String> jsonFragment) throws JSONParseException;
 
 
 
@@ -90,7 +90,7 @@ public interface IJsonObject extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
      *                                   expected.
      */
-    List<IJsonObject> getValues();
+    List<IJson> getValues();
 
     /**
      * Calls getList(key) with an empty key. E.g. Refers to the current object.
@@ -101,7 +101,7 @@ public interface IJsonObject extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
      *                                   expected.
      */
-    List<IJsonObject> getList() throws KeyDifferentTypeException;
+    List<IJson> getList() throws KeyDifferentTypeException;
 
     /**
      * Calls getBoolean(key) with an empty key. E.g. Refers to the current object.
@@ -146,7 +146,7 @@ public interface IJsonObject extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
      *                                   expected.
      */
-    IJsonObject getAny();
+    IJson getAny();
 
 
     /**
@@ -168,7 +168,7 @@ public interface IJsonObject extends Serializable {
      * @return The object at the given key
      * @throws KeyNotFoundException Thrown if there was no object found at that key.
      */
-    IJsonObject getJSONByKey(String keys) throws JSONException;
+    IJson getJSONByKey(String keys) throws JSONException;
 
     /**
      * Used to find out the type of the current object.
@@ -201,7 +201,7 @@ public interface IJsonObject extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    List<IJsonObject> getValues(String key) throws JSONException;
+    List<IJson> getValues(String key) throws JSONException;
 
     /**
      * Gets the values of the array at the given key.
@@ -213,7 +213,7 @@ public interface IJsonObject extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    List<IJsonObject> getList(String key) throws JSONException;
+    List<IJson> getList(String key) throws JSONException;
 
     /**
      * Gets the boolean at the given key.
@@ -272,7 +272,7 @@ public interface IJsonObject extends Serializable {
      * @throws KeyNotFoundException      Thrown if there was not an object at the path (or if the
      *                                   path syntax is bad).
      */
-    IJsonObject getAny(String key) throws JSONException;
+    IJson getAny(String key) throws JSONException;
 
 
 

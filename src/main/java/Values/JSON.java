@@ -1,64 +1,47 @@
 package Values;
 
-import Core.IJsonObject;
+import Core.IJson;
 import Exceptions.JSONException;
 import Exceptions.JSONParseException;
 import Exceptions.KeyDifferentTypeException;
 
 import java.util.List;
 
-public abstract class JSON implements IJsonObject {
+public abstract class JSON implements IJson {
 
     public static final int DEFAULT_PRETTY_JSON_INDENT_WIDTH = 2;
-    JSType myType = JSType.UNDEFINED;
 
-    private JSON() {
-    }
+    protected static final long serialVersionUID = 100L;
+
+    protected JSType jsType = null;
+    protected long lengthInOriginalString = -1;
+
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public IJsonObject createFromString(String jsonFragment) throws JSONParseException {
-        if (jsonFragment == null || jsonFragment.length() == 0) {
-            throw new JSONParseException("You cannot create json from null.");
-        }
-        if (jsonFragment.equals("true") || jsonFragment.equals("True")
-                || jsonFragment.equals("false") || jsonFragment.equals("False")) {
-            return new JSBoolean(jsonFragment);
-        }
-        switch (jsonFragment.charAt(0)) {
-            case '{':
-                return new JSObject(jsonFragment);
-            case '[':
-                return new JSArray(jsonFragment);
-            case '"':
-            case '\'':
-                return new JSString(jsonFragment);
-            case '-':
-            case '+':
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                return new JSNumber(jsonFragment);
-            default:
-                throw new JSONParseException("You cannot start json with a {"
-                        + jsonFragment.charAt(0)
-                        + "}. Expected ''', '\"', '{', '[', <number>, <boolean>");
-        }
+
+    JSON(JSONParsingTape parsingTape) throws JSONParseException {
     }
 
     @Override
-    public IJsonObject createFromMultilineString(List<String> jsonFragment) throws JSONParseException {
-        if (jsonFragment == null || jsonFragment.size() == 0) {
-            throw new JSONParseException("You cannot create json from null.");
-        }
-        // TODO this method
+    public JSON createFromString(String jsonFragment) throws JSONParseException {
+        return parseSelf(jsonFragment);
+    }
+
+    @Override
+    public JSON createFromMultilineString(List<String> jsonFragment) throws JSONParseException {
+        return parseSelf(jsonFragment);
+    }
+
+    private JSON parseSelf(String jsonFragment) {
+        JSONParsingTape parsingTape = new JSONParsingTape(jsonFragment);
+        parsingTape.parse();
+        return parsingTape.getJson();
+    }
+
+    private JSON parseSelf(List<String> jsonFragment) {
+        StringBuilder concater = new StringBuilder();
+        jsonFragment.forEach(concater::append);
+        return parseSelf(concater.toString());
     }
 
 
@@ -81,7 +64,7 @@ public abstract class JSON implements IJsonObject {
 
     @Override
     public JSType getDataType() {
-        return myType;
+        return jsType;
     }
 
     @Override
@@ -90,12 +73,12 @@ public abstract class JSON implements IJsonObject {
     }
 
     @Override
-    public List<IJsonObject> getValues() {
+    public List<IJson> getValues() {
         return getValues("");
     }
 
     @Override
-    public List<IJsonObject> getList() throws KeyDifferentTypeException {
+    public List<IJson> getList() throws KeyDifferentTypeException {
         return getList("");
     }
 
@@ -120,7 +103,7 @@ public abstract class JSON implements IJsonObject {
     }
 
     @Override
-    public IJsonObject getAny() {
+    public IJson getAny() {
         return getAny("");
     }
 
@@ -132,7 +115,7 @@ public abstract class JSON implements IJsonObject {
     }
 
     @Override
-    public IJsonObject getJSONByKey(String key) throws JSONException {
+    public IJson getJSONByKey(String key) throws JSONException {
         return ((JSObject) getInternal(key, JSType.OBJECT)).getValue();
     }
 
@@ -147,12 +130,12 @@ public abstract class JSON implements IJsonObject {
     }
 
     @Override
-    public List<IJsonObject> getValues(String key) throws JSONException {
+    public List<IJson> getValues(String key) throws JSONException {
         return getInternal(key).getValues();
     }
 
     @Override
-    public List<IJsonObject> getList(String key) throws JSONException {
+    public List<IJson> getList(String key) throws JSONException {
         return ((JSArray) getInternal(key, JSType.ARRAY)).getValue();
     }
 
@@ -177,15 +160,16 @@ public abstract class JSON implements IJsonObject {
     }
 
     @Override
-    public IJsonObject getAny(String key) throws JSONException {
+    public IJson getAny(String key) throws JSONException {
         return getInternal(key);
     }
 
 
-    private IJsonObject getInternal(String key, JSType requiredType) {
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+    private IJson getInternal(String key, JSType requiredType) {
 
         // Acquire accurate typing
-        IJsonObject ret = getInternal(key);
+        IJson ret = getInternal(key);
         JSType actualTyping = ret.getDataType();
 
         // check cast to asked typing
@@ -196,7 +180,7 @@ public abstract class JSON implements IJsonObject {
         return ret;
     }
 
-    private IJsonObject getInternal(String key) {
+    private IJson getInternal(String key) {
         // Attempt retrieval of object from structure.
         return getJSONByKey(key); // Throws KeyNotFoundException
     }
@@ -240,80 +224,14 @@ public abstract class JSON implements IJsonObject {
         do {
             prettyTabSizeBuilder.append(' ');
         } while (indentWidth-- > 0);
-        String prettyTabSize = prettyTabSizeBuilder.toString();
-        StringBuilder spacing = new StringBuilder();
-        StringBuilder ret = new StringBuilder();
 
-        char[] self = asString(depth).toCharArray();
-        char prev = self[0];
-        boolean inString = false;
-        boolean inAngle = false;
+        StringBuilder result = new StringBuilder();
+        asPrettyString(new StringBuilder(), prettyTabSizeBuilder.toString(), result, depth);
 
-        //depending on the string we need to do things differently to make it nice
-        for (char c : self) {
-
-            switch (c) {
-                //see the start of an object or array, add a newline unless in string
-                case '{':
-                case '[':
-                    if (inString) {
-                        ret.append(c);
-                    } else {
-                        spacing.append(prettyTabSize);
-                        ret.append(c).append("\n").append(spacing);
-                    }
-                    break;
-                //When we see the end of the array or object, reduce the tab size again
-                case '}':
-                case ']':
-                    if (inString) {
-                        ret.append(c);
-                    } else {
-                        if (prev == '{' || prev == '[') {
-                            ret.delete(ret.length() - 1 - spacing.length(), ret.length()).append(c);
-                        } else {
-                            spacing.delete(0, prettyTabSize.length());
-                            ret.append("\n").append(spacing).append(c);
-                            continue;
-                        }
-                        spacing.delete(0, prettyTabSize.length());
-                    }
-                    break;
-                //replace for a space unless in a string
-                case ':':
-                    if (inString) {
-                        ret.append(c);
-                    } else {
-                        ret.append(c).append(" ");
-                    }
-                    break;
-                //check for space breaking in strings
-                case ',':
-                    if (!inString && !inAngle) {
-                        ret.append(c).append("\n").append(spacing);
-                        break;
-                    }
-                    if (inAngle) {
-                        ret.append(c).append(' ');
-                    }
-                    break;
-                //toggle in angle brackets too
-                case '<':
-                case '>':
-                    inAngle = !inAngle;
-                    ret.append(c);
-                    break;
-                //toggle in string
-                case '"':
-                    inString = !inString;
-                default:
-                    ret.append(c);
-            }
-            prev = c;
-        }
-
-        return ret.toString();
+        return result.toString();
     }
+
+    abstract void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////

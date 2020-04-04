@@ -61,5 +61,5 @@ public interface IJsonBuilder {
      * @throws BuildException If there was some error converting this scaffold to a real json
      *                        object.
      */
-    IJsonObject convertToJSON() throws BuildException;
+    IJson convertToJSON() throws BuildException;
 }

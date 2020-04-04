@@ -22,7 +22,7 @@ public final class JSONParser {
      * @return A JSON object representation.
      * @throws JSONParseException Thrown if there was an error while parsing the given string.
      */
-    public static IJsonObject parse(String jsonAsString) throws JSONParseException {
+    public static IJson parse(String jsonAsString) throws JSONParseException {
 
         if (jsonAsString.length() == 0) {
             throw new JSONParseException("Empty JSON String, cannot parse");
@@ -39,7 +39,7 @@ public final class JSONParser {
      * @throws JSONParseException Thrown if there was an error while parsing the contents of the file.
      * @throws IOException    Thrown if there was an error loading the file from disk
      */
-    public static IJsonObject parseFromFile(String filePath) throws JSONParseException, IOException {
+    public static IJson parseFromFile(String filePath) throws JSONParseException, IOException {
 
         String fileContents = FileManager.getFileAsString(filePath);
 
@@ -57,7 +57,7 @@ public final class JSONParser {
      * @return A JSON object representation.
      * @throws JSONParseException Thrown if there was an error while parsing the given strings.
      */
-    public static IJsonObject parse(List<String> jsonAsStringList) throws JSONParseException {
+    public static IJson parse(List<String> jsonAsStringList) throws JSONParseException {
 
         StringBuilder whole = new StringBuilder();
 
@@ -75,7 +75,7 @@ public final class JSONParser {
      * @return A JSON object representation.
      * @throws JSONParseException Thrown if there was an error while parsing the given strings.
      */
-    public static IJsonObject parse(String[] jsonAsStringArray) throws JSONParseException {
+    public static IJson parse(String[] jsonAsStringArray) throws JSONParseException {
 
         StringBuilder whole = new StringBuilder();
 
@@ -97,7 +97,7 @@ public final class JSONParser {
      * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
      *                                   expected.
      */
-    public static Object getObject(IJsonObject fromObject, String key)
+    public static Object getObject(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
         return fromObject.getValue(key);
     }
@@ -112,7 +112,7 @@ public final class JSONParser {
      * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
      *                                   expected.
      */
-    public static List<String> getKeys(IJsonObject fromObject)
+    public static List<String> getKeys(IJson fromObject)
         throws KeyNotFoundException, KeyDifferentTypeException {
         return fromObject.getKeys();
     }
@@ -128,7 +128,7 @@ public final class JSONParser {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    public static List<String> getKeys(IJsonObject fromObject, String key)
+    public static List<String> getKeys(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
         return fromObject.getKeys(key);
     }
@@ -144,7 +144,7 @@ public final class JSONParser {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    public static List<IJsonObject> getList(IJsonObject fromObject, String key)
+    public static List<IJson> getList(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
         return fromObject.getList(key);
     }
@@ -160,7 +160,7 @@ public final class JSONParser {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    public static boolean getBoolean(IJsonObject fromObject, String key)
+    public static boolean getBoolean(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
         return fromObject.getBoolean(key);
     }
@@ -176,7 +176,7 @@ public final class JSONParser {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    public static double getDouble(IJsonObject fromObject, String key)
+    public static double getDouble(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
         return fromObject.getDouble(key);
     }
@@ -192,7 +192,7 @@ public final class JSONParser {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    public static long getLong(IJsonObject fromObject, String key)
+    public static long getLong(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
         return fromObject.getLong(key);
     }
@@ -209,7 +209,7 @@ public final class JSONParser {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    public static String getString(IJsonObject fromObject, String key)
+    public static String getString(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
         return fromObject.getString(key);
     }
@@ -225,7 +225,7 @@ public final class JSONParser {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    public static IJsonObject getAny(IJsonObject fromObject, String key)
+    public static IJson getAny(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
         return fromObject.getAny(key);
     }
@@ -237,7 +237,7 @@ public final class JSONParser {
      * @param object2 The second JSON object to compare with.
      * @return The equality of the two objects.
      */
-    public static boolean equals(IJsonObject object1, IJsonObject object2) {
+    public static boolean equals(IJson object1, IJson object2) {
         return object1.equals(object2);
     }
 }

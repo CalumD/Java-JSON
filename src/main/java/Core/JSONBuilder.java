@@ -51,7 +51,7 @@ public class JSONBuilder implements IJsonBuilder {
      *                        object.
      */
     @Override
-    public IJsonObject convertToJSON() throws BuildException {
+    public IJson convertToJSON() throws BuildException {
         try {
             //call our json parser, if there was any problem with that - assume it
             // was our fault and fail with a build exception.
