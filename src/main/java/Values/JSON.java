@@ -39,7 +39,7 @@ public abstract class JSON implements IJson {
 
     private JSON parseSelf(List<String> jsonFragment) {
         StringBuilder concater = new StringBuilder();
-        jsonFragment.forEach(concater::append);
+        jsonFragment.forEach(line -> concater.append(line).append('\n'));
         return parseSelf(concater.toString());
     }
 
