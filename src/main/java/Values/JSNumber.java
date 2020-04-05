@@ -2,75 +2,71 @@ package Values;
 
 import Exceptions.JSONParseException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class JSNumber extends JSON {
 
     private Long myLongValue;
     private Double myDoubleValue;
 
-    public JSNumber(String jsonFragment) throws JSONParseException {
-        super("", jsonFragment, true);
-    }
-
-    JSNumber(String keyAtElement, String jsonFragment, boolean willSanitise) throws JSONParseException {
-        super(keyAtElement, jsonFragment, willSanitise);
-    }
-
-    @Override
-    void init(String keyAtElement) {
-
-    }
-
-    @Override
-    void parse(String jsonFragment, boolean sanitize) throws JSONParseException {
-        int endOfNumber = 0;
-        //check if we need to sanitize the fragment
-        if (sanitize) {
-            jsonFragment = sanitiseFragment(jsonFragment);
-        }
-
-        //for all characters in the remaining fragment, find out how long a number is
-        for (char c : jsonFragment.toCharArray()) {
-            if (c == ',' || c == '}' || c == ']' || c == '"' || c == '\'') {
-                break;
+    JSNumber(JSONParsingTape parsingTape) throws JSONParseException {
+        super(parsingTape);
+        int lengthOfNumber = 0;
+        boolean foundEnd = false;
+        while (!foundEnd) {
+            switch(parsingTape.consume()) {
+                case '-':
+                case '+':
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                case '.':
+                case 'e':
+                case '^':
+                    lengthOfNumber++;
+                default:
+                    foundEnd = true;
             }
-            endOfNumber++;
         }
-        //ensure that there is at least a single character
-        if (endOfNumber == 0) {
-            throw new JSONParseException("There is a value missing in the JSON string.");
-        }
+        parsingTape.moveTapeHead(lengthOfNumber * -1);
+        String numberString = parsingTape.consume(lengthOfNumber);
 
         try {
-            //check to see if that number was a decimal
-            if (jsonFragment.substring(0, endOfNumber).contains(".")) {
-                this.myDoubleValue = Double.parseDouble(jsonFragment.substring(0, endOfNumber));
-                myType = JSType.DOUBLE;
+            if (numberString.contains(".")) {
+                this.myDoubleValue = Double.parseDouble(numberString);
+                jsType = JSType.DOUBLE;
             } else {
-                this.myLongValue = Long.parseLong(jsonFragment.substring(0, endOfNumber));
-                myType = JSType.LONG;
+                this.myLongValue = Long.parseLong(numberString);
+                jsType = JSType.LONG;
             }
-            //get the size of the number to add to fragment
-            fragmentSize = endOfNumber;
         } catch (NumberFormatException e) {
-            throw new JSONParseException(e.getMessage());
+            parsingTape.moveTapeHead(lengthOfNumber * -1);
+            parsingTape.createParseError("<number>", e.getMessage());
         }
     }
 
     @Override
     public Object getValue() {
-        if (myLongValue == null) {
-            return myDoubleValue;
-        }
-
-        return myLongValue;
+        return myLongValue == null
+                ? myDoubleValue
+                : myLongValue;
     }
 
     @Override
     public String asString(int depth) {
-        return myLongValue == null ? String.valueOf(myDoubleValue) : String.valueOf(myLongValue);
+        return myLongValue == null
+                ? String.valueOf(myDoubleValue)
+                : String.valueOf(myLongValue);
+    }
+
+    @Override
+    protected void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
+        result.append(asString(1));
     }
 
     @Override
@@ -88,16 +84,16 @@ public class JSNumber extends JSON {
         }
 
         if (myLongValue != null) {
-            if (other instanceof Long) {
-                return myLongValue.equals(other);
-            } else if (other instanceof JSNumber) {
+            if (other instanceof JSNumber) {
+                return myLongValue.equals(((JSNumber) other).myLongValue);
+            } else if (other instanceof Long) {
                 return myLongValue.equals(other);
             }
         }
         if (myDoubleValue != null) {
-            if (other instanceof Double) {
-                return myDoubleValue.equals(other);
-            } else if (other instanceof JSNumber) {
+            if (other instanceof JSNumber) {
+                return myDoubleValue.equals(((JSNumber) other).myDoubleValue);
+            } else if (other instanceof Double) {
                 return myDoubleValue.equals(other);
             }
         }
@@ -105,15 +101,22 @@ public class JSNumber extends JSON {
     }
 
     @Override
-    public JSON getJSONByKey(String keys) {
-        if (contains(keys)) {
-            return this;
-        }
-
-        return null;
+    public int hashCode() {
+        return myLongValue == null
+                ? Double.hashCode(myDoubleValue)
+                : Long.hashCode(myLongValue);
     }
 
-    public List<String> getKeys() {
-        return new ArrayList<>();
-    }
+//    @Override
+//    public JSON getJSONByKey(String key) {
+//        if (contains(key)) {
+//            return this;
+//        }
+//        throw new KeyNotFoundException("Key: " + key + ", not found in JSON.");
+//    }
+//
+//    @Override
+//    public List<String> getKeys() {
+//        return new ArrayList<>();
+//    }
 }
