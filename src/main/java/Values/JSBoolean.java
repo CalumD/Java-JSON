@@ -2,45 +2,21 @@ package Values;
 
 import Exceptions.JSONParseException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class JSBoolean extends JSON {
 
     private boolean myValue;
 
-    public JSBoolean(String jsonFragment) throws JSONParseException {
-        super("", jsonFragment, true);
-    }
-
-    JSBoolean(String keyAtElement, String jsonFragment, boolean willSanitise)
-        throws JSONParseException {
-        super(keyAtElement, jsonFragment, willSanitise);
-    }
-
-    @Override
-    void init(String keyAtElement) {
-        myType = JSType.BOOLEAN;
-    }
-
-
-    @Override
-    void parse(String jsonFragment, boolean sanitize) throws JSONParseException {
-
-        if (sanitize) {
-            jsonFragment = sanitiseFragment(jsonFragment);
-        }
-
-        if (jsonFragment.startsWith("true") || jsonFragment.startsWith("True") || jsonFragment
-            .startsWith("TRUE")) {
+    JSBoolean(JSONParsingTape parsingTape) throws JSONParseException {
+        super(parsingTape);
+        if (parsingTape.checkNext("true") || parsingTape.checkNext("True") || parsingTape.checkNext("TRUE")) {
             myValue = true;
-            fragmentSize = 4;
-        } else if (jsonFragment.startsWith("false") || jsonFragment.startsWith("False")
-            || jsonFragment.startsWith("FALSE")) {
+            parsingTape.moveTapeHead(4);
+        } else if (parsingTape.checkNext("false") || parsingTape.checkNext("False") || parsingTape.checkNext("FALSE")) {
             myValue = false;
-            fragmentSize = 5;
+            parsingTape.moveTapeHead(5);
         } else {
-            throw new JSONParseException("The type of a JSON element in the input was unknown");
+            parsingTape.moveTapeHead(1);
+            parsingTape.createParseError("true/false");
         }
     }
 
@@ -50,13 +26,18 @@ public class JSBoolean extends JSON {
     }
 
     @Override
+    public boolean contains(String keys) {
+        return keys.equals("");
+    }
+
+    @Override
     public String asString(int depth) {
         return String.valueOf(myValue);
     }
 
     @Override
-    public boolean contains(String keys) {
-        return keys.equals("");
+    protected void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
+        result.append(asString(1));
     }
 
     @Override
@@ -80,14 +61,20 @@ public class JSBoolean extends JSON {
     }
 
     @Override
-    public JSON getJSONByKey(String keys) {
-        if (keys.equals("")) {
-            return this;
-        }
-        return null;
+    public int hashCode() {
+        return Boolean.hashCode(myValue);
     }
 
-    public List<String> getKeys() {
-        return new ArrayList<>();
-    }
+//    @Override
+//    public JSON getJSONByKey(String key) {
+//        if (contains(key)) {
+//            return this;
+//        }
+//        throw new KeyNotFoundException("Key: " + key + ", not found in JSON.");
+//    }
+//
+//    @Override
+//    public List<String> getKeys() {
+//        return new ArrayList<>();
+//    }
 }

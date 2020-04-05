@@ -39,6 +39,9 @@ class JSONParsingTape {
         moveTapeHead(fragmentSize);
         return fragment;
     }
+    boolean checkNext(String fragment) {
+        return fragment.equals(fullString.substring(currentIndex, fragment.length()));
+    }
 
 
     private void consumeWhiteSpace() {

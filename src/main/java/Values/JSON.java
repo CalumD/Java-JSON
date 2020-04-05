@@ -12,9 +12,7 @@ public abstract class JSON implements IJson {
     public static final int DEFAULT_PRETTY_JSON_INDENT_WIDTH = 2;
 
     protected static final long serialVersionUID = 100L;
-
     protected JSType jsType = null;
-    protected long lengthInOriginalString = -1;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
