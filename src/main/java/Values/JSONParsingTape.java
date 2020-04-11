@@ -60,6 +60,8 @@ class JSONParsingTape {
         // Reach the first legitimate character.
         consumeWhiteSpace();
         if (fullString == null || fullString.length() == 0) {
+            // TODO remove the sout.
+            System.out.println(new JSONParseException("You cannot create json from nothing.").getMessage());
             throw new JSONParseException("You cannot create json from nothing.");
         }
         JSON nextElement = null;
@@ -121,8 +123,10 @@ class JSONParsingTape {
                 }
             }
         } catch (IndexOutOfBoundsException e) {
+            // TODO remove the sout.
+            System.out.println(new JSONParseException("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?").getMessage());
             throw new JSONParseException(
-                    "Reached the end of the JSON input before parsing was complete. Are you missing a delimiter?"
+                    "Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?"
             );
         }
     }
