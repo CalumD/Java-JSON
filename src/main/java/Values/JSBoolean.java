@@ -8,14 +8,22 @@ public class JSBoolean extends JSON {
 
     JSBoolean(JSONParsingTape parsingTape) throws JSONParseException {
         super(parsingTape);
-        if (parsingTape.checkNext("true") || parsingTape.checkNext("True") || parsingTape.checkNext("TRUE")) {
+
+        if (parsingTape.checkNextFragment("true", true)
+                || parsingTape.checkNextFragment("True", true)
+                || parsingTape.checkNextFragment("TRUE", true)
+        ) {
             myValue = true;
-            parsingTape.moveTapeHead(4);
-        } else if (parsingTape.checkNext("false") || parsingTape.checkNext("False") || parsingTape.checkNext("FALSE")) {
+        }
+
+        else if (parsingTape.checkNextFragment("false", true)
+                || parsingTape.checkNextFragment("False", true)
+                || parsingTape.checkNextFragment("FALSE", true)
+        ) {
             myValue = false;
-            parsingTape.moveTapeHead(5);
-        } else {
-            parsingTape.moveTapeHead(1);
+        }
+
+        else {
             parsingTape.createParseError("true/false");
         }
     }
