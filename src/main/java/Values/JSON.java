@@ -32,9 +32,7 @@ public abstract class JSON implements IJson {
     }
 
     private JSON parseSelf(String jsonFragment) {
-        JSONParsingTape parsingTape = new JSONParsingTape(jsonFragment);
-        parsingTape.parseFragment();
-        return parsingTape.getJson();
+        return new JSONParsingTape(jsonFragment).parseNextElement();
     }
 
     private JSON parseSelf(List<String> jsonFragment) {
