@@ -98,7 +98,7 @@ class JSONParsingTape {
         return nextElement;
     }
 
-    private void consumeWhiteSpace() {
+    void consumeWhiteSpace() {
         while (true) {
             switch (checkCurrentChar()) {
                 case ' ':
@@ -107,6 +107,9 @@ class JSONParsingTape {
                 case '\t':
                     currentIndex++;
                     break;
+                case '/':
+                case '#':
+                    consumeComment();
                 default:
                     return;
             }
