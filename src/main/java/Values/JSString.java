@@ -2,57 +2,56 @@ package Values;
 
 import Exceptions.JSONParseException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class JSString extends JSON {
 
-    private String myValue;
+    private final String myValue;
 
-    public JSString(String jsonFragment) throws JSONParseException {
-        super("", jsonFragment, true);
-    }
+    JSString(JSONParsingTape parsingTape) throws JSONParseException {
+        super(parsingTape);
 
-    JSString(String keyAtElement, String jsonFragment, boolean willSanitise) throws JSONParseException {
-        super(keyAtElement, jsonFragment, willSanitise);
-    }
-
-    @Override
-    void init(String keyAtElement) {
-        myType = JSType.STRING;
-    }
-
-    @Override
-    void parse(String jsonFragment, boolean sanitize) throws JSONParseException {
-        if (sanitize) {
-            jsonFragment = sanitiseFragment(jsonFragment);
-        }
-
+        // Setup tracking variables;
+        final char stringDelimiter = parsingTape.checkCurrentChar();
+        final StringBuilder string = new StringBuilder();
+        boolean currentlyEscaped = false;
         boolean endFound = false;
-        int endOfString = 1;
-        char endChar = jsonFragment.charAt(0);
-        char[] remainingFragment = jsonFragment.toCharArray();
+        char currentChar = '.';
 
-        //assume the initial char is the end char, but start at 1
-        for (; endOfString < jsonFragment.length(); endOfString++) {
-            if (remainingFragment[endOfString] == endChar
-                && remainingFragment[endOfString - 1] != '\\') {
+        // Consume the initial delimiter;
+        parsingTape.consumeOne();
+
+        // Parse the rest of the string;
+        while (!endFound) {
+            try {
+                currentChar = parsingTape.consumeOne();
+            } catch (IndexOutOfBoundsException e) {
+                parsingTape.createParseError(
+                        "Didn't find matching " + stringDelimiter + ", before end of string."
+                );
+            }
+
+            // Skip over the current character if it was escaped
+            if (currentlyEscaped) {
+                currentlyEscaped = false;
+                string.append(currentChar);
+                continue;
+            }
+
+            // If char is backslash, then indicate we are escaped.
+            if (currentChar == '\\') {
+                currentlyEscaped = true;
+                continue;
+            }
+
+            // If reached end of string, stop, else add to string.
+            if (currentChar == stringDelimiter) {
                 endFound = true;
-                break;
+            } else {
+                string.append(currentChar);
             }
         }
 
-        //if we didn't find the end char, there was a problem
-        if (!endFound) {
-            throw new JSONParseException("Failed to parse JSON internal string.");
-        }
-
-        if (endOfString == 1) {
-            myValue = "";
-        } else {
-            this.myValue = jsonFragment.substring(1, endOfString);
-        }
-        fragmentSize = endOfString + 1;
+        // finalise result.
+        myValue = string.toString();
     }
 
     @Override
@@ -61,13 +60,19 @@ public class JSString extends JSON {
     }
 
     @Override
-    public String asString(int depth) {
-        return "\"" + myValue + "\"";
+    public boolean contains(String keys) {
+        return keys.equals("");
     }
 
     @Override
-    public boolean contains(String keys) {
-        return keys.equals("");
+    protected void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
+        result.append(asString(depth));
+    }
+
+    @Override
+    public String asString(int depth) {
+        // TODO: Check if I need to re-introduce backslash escapes here.
+        return "\"" + myValue + "\"";
     }
 
     @Override
@@ -90,14 +95,20 @@ public class JSString extends JSON {
     }
 
     @Override
-    public JSON getJSONByKey(String keys) {
-        if (contains(keys)) {
-            return this;
-        }
-        return null;
+    public int hashCode() {
+        return myValue.hashCode();
     }
 
-    public List<String> getKeys() {
-        return new ArrayList<>();
-    }
+//    @Override
+//    public JSON getJSONByKey(String key) {
+//        if (contains(key)) {
+//            return this;
+//        }
+//        throw new KeyNotFoundException("Key: " + key + ", not found in JSON.");
+//    }
+//
+//    @Override
+//    public List<String> getKeys() {
+//        return new ArrayList<>();
+//    }
 }
