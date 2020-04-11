@@ -9,7 +9,7 @@ import java.util.List;
 
 public class JSArray extends JSON {
 
-    private List<IJson> myValue;
+    private final List<IJson> myValue;
 
     JSArray(JSONParsingTape parsingTape) throws JSONParseException {
         super(parsingTape);
@@ -28,8 +28,8 @@ public class JSArray extends JSON {
                     "Missing Valid JSON at start of array."
             );
         }
+        myValue = new ArrayList<>();
         if (checkingChar == ']') {
-            myValue = new ArrayList<>(0);
             return;
         }
 

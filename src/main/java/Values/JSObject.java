@@ -1,6 +1,6 @@
 package Values;
 
-import Core.IJsonObject;
+import Core.IJson;
 import Exceptions.JSONParseException;
 import Exceptions.KeyNotFoundException;
 
@@ -10,129 +10,95 @@ import java.util.List;
 
 public class JSObject extends JSON {
 
-    private static final String JSON_ROOT = "JSON_ROOT";
-    private HashMap<String, JSON> json;
-    private String keyAtElement;
+    private final HashMap<String, IJson> json;
 
+    JSObject(JSONParsingTape parsingTape) throws JSONParseException {
+        super(parsingTape);
+        jsType = JSType.OBJECT;
+        char checkingChar;
 
-    public JSObject(String jsonFragment) throws JSONParseException {
-        super(JSON_ROOT, jsonFragment, true);
-    }
+        // Skip over the object opener
+        parsingTape.consumeOne();
+        parsingTape.consumeWhiteSpace();
+        checkingChar = parsingTape.checkCurrentChar();
 
-    JSObject(String keyFragment, String jsonFragment, boolean willSanitise) throws JSONParseException {
-        super(keyFragment == null ? JSON_ROOT : keyFragment, jsonFragment, willSanitise);
-    }
-
-    @Override
-    void init(String keyAtElement) {
-        this.keyAtElement = keyAtElement;
-        myType = JSType.OBJECT;
+        // Initial Object parsing Checks
         json = new HashMap<>();
-    }
-
-
-    @Override
-    void parse(String jsonFragment, boolean sanitize) throws JSONParseException {
-
-        //check if we need to sanitize input
-        if (sanitize) {
-            jsonFragment = sanitiseFragment(jsonFragment);
+        if (checkingChar == '}') {
+            return;
+        }
+        if (checkingChar != '"') {
+            parsingTape.createParseError("\"", "Missing Key at start of Object.");
         }
 
-        //check BASIC things about new object being valid
-        if (jsonFragment.length() < 2) {
-            throw new JSONParseException("A JSON JSObject is malformed (too short?) to be parsed.");
-        }
-        if (jsonFragment.charAt(0) != '{') {
-            throw new JSONParseException("A JSON JSObject is missing the opening <{>");
-        }
-        if (jsonFragment.charAt(jsonFragment.length() - 1) != '}') {
-            throw new JSONParseException("A JSON JSObject is missing the closing <}>");
-        }
-        if (jsonFragment.charAt(1) != '"' && jsonFragment.charAt(1) != '}') {
-            throw new JSONParseException("A Key in the JSON is missing an enclosing quote");
-        }
 
-        //init parse variables
-        currentFragmentIndex = 1;
-        fragmentSize = 2;
-        String nextKey;
-        JSON nextElement;
+        // Parse object
+        boolean moreChildren = true;
+        while (moreChildren) {
+            // Get the Key
+            String key = ((JSString)parsingTape.parseNextElement()).getValue();
+            validateObjectKey(key, parsingTape);
 
-        //parse the json
-        while (jsonFragment.charAt(currentFragmentIndex) != '}') {
-            //figure out the next KEY for object entry.;
-            nextKey = parseNextKey(jsonFragment.substring(currentFragmentIndex));
-
-            //if we have pre-empt reached the end of the string, fail
-            if (nextKey.equals("")) {
-                throw new JSONParseException("An empty key is not a valid key.");
+            // Validate Colon
+            parsingTape.consumeWhiteSpace();
+            if (parsingTape.consumeOne() != ':') {
+                parsingTape.createParseError(":", "Invalid Key:Value separator. Must use a colon(:).");
             }
 
-            //ensure that there is a ':' to separate key and value
-            if (jsonFragment.charAt(currentFragmentIndex) != ':') {
-                throw new JSONParseException(
-                    "A JSON Element is missing the <:> to separate key and value");
+            // Parse value
+            JSON nextChild = parsingTape.parseNextElement();
+            json.put(key, nextChild);
+
+            // Check delimiters.
+            parsingTape.consumeWhiteSpace();
+            checkingChar = parsingTape.checkCurrentChar();
+            switch (checkingChar) {
+                case '}':
+                    moreChildren = false;
+                case ',':
+                    parsingTape.consumeOne();
+                    // Validate if we see a comma, there are more children to come
+                    parsingTape.consumeWhiteSpace();
+                    if (parsingTape.checkCurrentChar() == '}') {
+                        parsingTape.createParseError(JSONParsingTape.VALID_JSON,
+                                "Comma suggests more object elements, but object terminates.");
+                    }
+                    break;
+                default:
+                    parsingTape.createParseError(", / }",
+                            "Invalid array child delimiter.");
             }
-
-            //Figure out and parse the type of value
-            currentFragmentIndex++;
-            nextElement = parseNextElement(jsonFragment.charAt(currentFragmentIndex), keyAtElement,
-                nextKey, currentFragmentIndex, jsonFragment);
-
-            //add this object to our local object references
-            json.put(nextKey, nextElement);
-            currentFragmentIndex += nextElement.fragmentSize;
-            fragmentSize = currentFragmentIndex + 1;
-
-            //check we haven't reached an invalid state between elements in the object.
-            if (jsonFragment.charAt(currentFragmentIndex) != ','
-                && jsonFragment.charAt(currentFragmentIndex) != '}') {
-                throw new JSONParseException("Invalid element separator. (Are you missing a <,> ?)");
-            }
-            //check if we have a new element by a comma
-            if (jsonFragment.charAt(currentFragmentIndex) == ',') {
-                currentFragmentIndex++;
-            }
-        }
-
-        //ensure we see the end of the object.
-        if (jsonFragment.charAt(currentFragmentIndex) != '}') {
-            throw new JSONParseException("A JSON JSObject is missing the closing <}>");
         }
     }
 
-    private String parseNextKey(String remainingValue) throws JSONParseException {
-        JSString key;
-
-        //validate the key into the object doesnt contain bad chars
-        try {
-            key = new JSString(null, remainingValue, false);
-        } catch (JSONParseException e) {
-            throw new JSONParseException("A Key in the JSON is missing an enclosing quote");
+    private void validateObjectKey(String key, JSONParsingTape parsingTape) {
+        if (key.equals("")) {
+            parsingTape.createParseError("<Valid Key>", "Illegal Object Key (Empty).");
         }
-        if (key.getValue().contains(".")) {
-            throw new JSONParseException("You have used a reserved character in a JSON key: .");
-        }
-        if (key.getValue().contains("[")) {
-            throw new JSONParseException("You have used a reserved character in a JSON key: [");
-        }
-        if (key.getValue().contains("]")) {
-            throw new JSONParseException("You have used a reserved character in a JSON key: ]");
-        }
-        if (key.getValue().contains("{")) {
-            throw new JSONParseException("You have used a reserved character in a JSON key: {");
-        }
-        if (key.getValue().contains("}")) {
-            throw new JSONParseException("You have used a reserved character in a JSON key: }");
+        if (json.containsKey(key)) {
+            parsingTape.createParseError("<Unique Key>", "Illegal Object key (Duplicate): " + key);
         }
 
-        currentFragmentIndex += key.fragmentSize;
-        return key.getValue();
+        Character reservedCharacter = null;
+        if (key.contains(".")) {
+            reservedCharacter = '.';
+        }
+        if (key.contains("[")) {
+            reservedCharacter = '[';
+        }
+        if (key.contains("]")) {
+            reservedCharacter = ']';
+        }
+        if (key.contains("\\")) {
+            reservedCharacter = '\\';
+        }
+        if (reservedCharacter != null) {
+            parsingTape.createParseError("<Valid Key>", "Illegal Object Key (Reserved/Illegal character found): " + reservedCharacter);
+        }
     }
 
     @Override
-    public IJsonObject getValue() {
+    public IJson getValue() {
         return this;
     }
 
@@ -199,7 +165,7 @@ public class JSObject extends JSON {
             return false;
         }
         for (String key : this.getKeys()) {
-            if (!o.contains(key)) {
+            if (!o.json.containsKey(key)) {
                 return false;
             }
             if (!(json.get(key).equals(o.json.get(key)))) {
@@ -211,7 +177,13 @@ public class JSObject extends JSON {
     }
 
     @Override
-    public IJsonObject getJSONByKey(String keys) throws KeyNotFoundException {
+    public int hashCode() {
+        return json.hashCode();
+    }
+
+    @Override
+    public IJson getJSONByKey(String keys) throws KeyNotFoundException {
+        String temporaryErrorText = "SOMETHING";
         if (keys.equals("")) {
             return this;
         }
@@ -223,9 +195,7 @@ public class JSObject extends JSON {
 
         //generate basic stuff
         String arrayAccess = null;
-        String genericError = "The Key provided could not be found in the JSON. Reached: " + (
-            keyAtElement.length() >= JSON_ROOT.length() + 1 ?
-                keyAtElement.substring(JSON_ROOT.length() + 1) + "_" : "_");
+        String genericError = "The Key provided could not be found in the JSON. Reached: " + temporaryErrorText;
 
         String key = keys.split("\\.")[0];
         boolean nestedArrays = false;
@@ -302,7 +272,7 @@ public class JSObject extends JSON {
         }
 
         //get the base object at that key
-        IJsonObject ret = json.get(key);
+        IJson ret = json.get(key);
         //if nothing was found, throw
         if (ret == null) {
             throw new KeyNotFoundException(genericError);
@@ -316,10 +286,7 @@ public class JSObject extends JSON {
                 //if nothing was found, then throw
                 if (ret == null) {
                     throw new KeyNotFoundException(
-                        "The Key provided could not be found in the JSON. Reached: " +
-                            (keyAtElement.equals(JSON_ROOT) ? "" :
-                                (keyAtElement.substring(JSON_ROOT.length() + 1) +
-                                    ".")) +
+                        "The Key provided could not be found in the JSON. Reached: " +temporaryErrorText +
                             keys +
                             "    ::Array Index is out of bounds."
                     );
@@ -344,10 +311,8 @@ public class JSObject extends JSON {
                 //if no object was found then throw
                 if (ret == null) {
                     throw new KeyNotFoundException(
-                        "The Key provided could not be found in the JSON. Reached: " +
-                            (keyAtElement.equals(JSON_ROOT) ? "" :
-                                (keyAtElement.substring(JSON_ROOT.length() + 1) +
-                                    ".")) +
+                        "The Key provided could not be found in the JSON. Reached: " +temporaryErrorText +
+                                    "." +
                             keys +
                             "    ::Array Index is out of bounds."
                     );
@@ -365,10 +330,7 @@ public class JSObject extends JSON {
                 if (ret.getDataType() == JSType.ARRAY
                         && (ret = ret.getJSONByKey(keys.substring(key.length() + 1))) == null) {
                     throw new KeyNotFoundException(
-                            "The Key provided could not be found in the JSON. Reached: " +
-                                    (keyAtElement.equals(JSON_ROOT) ? "" :
-                                            (keyAtElement.substring(JSON_ROOT.length() + 1) +
-                                                    ".")) +
+                            "The Key provided could not be found in the JSON. Reached: " +temporaryErrorText +
                                     keys.split("\\.")[1] +
                                     "_     ::" +
                                     "It looks like you are trying to access an array with invalid id"
@@ -379,6 +341,30 @@ public class JSObject extends JSON {
                 return ret;
             }
         }
+    }
+
+    @Override
+    void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
+        if (json.isEmpty()) {
+            result.append("{}");
+            return;
+        }
+
+        indent.append(tabSize);
+        result.append('{').append('\n').append(indent);
+        if (depth == 0) {
+            result.append("<").append(json.size()).append(">");
+        } else {
+            json.forEach((key, value) -> {
+                result.append('"').append(key).append("\": ");
+                ((JSON)value).asPrettyString(indent, tabSize, result, depth - 1);
+                result.append(",\n");
+            });
+            result.delete(result.length() - 3, result.length() -1);
+        }
+
+        indent.delete(0, tabSize.length());
+        result.append("\n").append(indent).append('}');
     }
 
     public List<String> getKeys() {
