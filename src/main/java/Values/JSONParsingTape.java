@@ -7,101 +7,73 @@ class JSONParsingTape {
     public static final int DEFAULT_PARSE_ERROR_CONTEXT_SIZE = 10;
     public static final String DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL = "_";
 
-    private String fullString;
-    private int currentIndex;
-    private JSON topLevelJSON;
+    private final String fullString;
+    private int currentIndex = 0;
 
     JSONParsingTape(String fullJSONString) {
         this.fullString = fullJSONString;
     }
 
-    char currentChar() {
-        return charAt(0);
+
+    char checkCurrentChar() {
+        return checkCharAt(0);
     }
-    char nextChar() {
-        return charAt(1);
+
+    char checkNextChar() {
+        return checkCharAt(1);
     }
-    char previousChar() {
-        return charAt(-1);
+
+    char checkPreviousChar() {
+        return checkCharAt(-1);
     }
-    char charAt(int offsetToCurrent) {
+
+    private char checkCharAt(int offsetToCurrent) {
         return fullString.charAt(currentIndex + offsetToCurrent);
     }
 
-    void moveTapeHead(int byOffset) {
-        currentIndex += byOffset;
-    }
-    char consume() {
-        return charAt(currentIndex++);
-    }
-    String consume(int fragmentSize) {
-        String fragment = fullString.substring(currentIndex, currentIndex + fragmentSize);
-        moveTapeHead(fragmentSize);
-        return fragment;
-    }
-    boolean checkNext(String fragment) {
-        return fragment.equals(fullString.substring(currentIndex, fragment.length()));
-    }
-
-
-    private void consumeWhiteSpace() {
-        boolean foundNext = false;
-        while (!foundNext) {
-            switch (currentChar()) {
-                case ' ':
-                case '\n':
-                case '\r':
-                case '\t':
-                    currentIndex++;
-                default:
-                    foundNext = true;
-            }
+    boolean checkNextFragment(String fragment, boolean consumeIfMatches) {
+        boolean matches = fragment.equals(fullString.substring(currentIndex, fragment.length()));
+        if (matches && consumeIfMatches) {
+            currentIndex += fragment.length();
         }
-    }
-    void createParseError(String expectedFragment, String customErrorMessage) {
-        String gotFragment = "...";
-
-        if (currentIndex > DEFAULT_PARSE_ERROR_CONTEXT_SIZE) {
-            gotFragment += fullString.substring(currentIndex - DEFAULT_PARSE_ERROR_CONTEXT_SIZE, currentIndex);
-        } else {
-            gotFragment = fullString.substring(0, currentIndex);
-        }
-        gotFragment += DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL;
-
-        throw new JSONParseException(customErrorMessage
-                + "\nGot: " + gotFragment + ",  Expected: " + expectedFragment
-        );
-    }
-    void createParseError(String expectedFragment) {
-        createParseError(
-                expectedFragment,
-                "Unexpected symbol found in JSON while parsing."
-        );
+        return matches;
     }
 
-    void parseFragment() {
+    char consumeOne() {
+        return checkCharAt(currentIndex++);
+    }
+
+    String requestRegion(int fromHere, int toHere) {
+        return fullString.substring(fromHere, toHere);
+    }
+
+    int getCurrentIndex() {
+        return currentIndex;
+    }
+
+    JSON parseNextElement() {
         // Reach the first legitimate character.
         consumeWhiteSpace();
         if (fullString == null || fullString.length() == 0) {
-            throw new JSONParseException("You cannot create json from null.");
+            throw new JSONParseException("You cannot create json from nothing.");
         }
-        JSON resultTopLevelJSON = null;
-        switch (fullString.charAt(0)) {
+        JSON nextElement = null;
+        switch (checkCurrentChar()) {
             case 't':
             case 'T':
             case 'f':
             case 'F':
-                resultTopLevelJSON = new JSBoolean(this);
+                nextElement = new JSBoolean(this);
                 break;
             case '{':
-                resultTopLevelJSON = new JSObject(this);
+                nextElement = new JSObject(this);
                 break;
             case '[':
-                resultTopLevelJSON = new JSArray(this);
+                nextElement = new JSArray(this);
                 break;
             case '"':
             case '\'':
-                resultTopLevelJSON = new JSString(this);
+                nextElement = new JSString(this);
                 break;
             case '-':
             case '+':
@@ -115,18 +87,89 @@ class JSONParsingTape {
             case '7':
             case '8':
             case '9':
-                resultTopLevelJSON = new JSNumber(this);
+                nextElement = new JSNumber(this);
                 break;
+            case '/':
+            case '#':
+                consumeComment();
             default:
-                createParseError("'/\"/{/[/<number>/<boolean>",
-                        "You cannot start json with a {" + currentChar() + "}.");
+                createParseError("{/[/<number>/<boolean>/\"");
         }
-        topLevelJSON = resultTopLevelJSON;
+        return nextElement;
     }
-    JSON getJson() {
-        if (topLevelJSON == null) {
-            throw new JSONParseException("Failed to find a parsable fragment.");
+
+    private void consumeWhiteSpace() {
+        while (true) {
+            switch (checkCurrentChar()) {
+                case ' ':
+                case '\n':
+                case '\r':
+                case '\t':
+                    currentIndex++;
+                    break;
+                default:
+                    return;
+            }
         }
-        return topLevelJSON;
+    }
+
+    private void consumeComment() {
+        switch (checkNextChar()) {
+
+            //   <-- this Comment
+            // # <-- or this comment
+            case '/':
+            case '#':
+                while (true) {
+                    if (consumeOne() == '\n') {
+                        return;
+                    }
+                }
+
+                /* <-- This comment --> */
+            case '*':
+                while (true) {
+                    if (consumeOne() == '*' && consumeOne() == '/') {
+                        return;
+                    }
+                }
+
+                // Invalid Comment Type
+            default:
+                createParseError("/ or *");
+        }
+    }
+
+    void createParseError(String expectedFragment, String customErrorMessage) {
+        String gotFragment = "...";
+
+        // Check if we are far enough into the string to just show a snippet of "up-to here" code.
+        if (currentIndex > DEFAULT_PARSE_ERROR_CONTEXT_SIZE) {
+            gotFragment += fullString.substring(currentIndex - DEFAULT_PARSE_ERROR_CONTEXT_SIZE, currentIndex);
+        } else {
+            gotFragment = fullString.substring(0, currentIndex);
+        }
+        gotFragment += DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL;
+
+        // Count lines til here:
+        int lineCount = 0;
+        for (int charIndex = 0; charIndex <= currentIndex; charIndex++) {
+            if (fullString.charAt(charIndex) == '\n') {
+                lineCount++;
+            }
+        }
+
+        // Throw the exception
+        throw new JSONParseException(customErrorMessage
+                + "\nLine: " + lineCount
+                + "\nGot: " + gotFragment + ",  Expected: " + expectedFragment
+        );
+    }
+
+    void createParseError(String expectedFragment) {
+        createParseError(
+                expectedFragment,
+                "Unexpected symbol found in JSON while parsing."
+        );
     }
 }
