@@ -6,6 +6,7 @@ class JSONParsingTape {
 
     public static final int DEFAULT_PARSE_ERROR_CONTEXT_SIZE = 10;
     public static final String DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL = "_";
+    static final String VALID_JSON = "{ / [ / \" / <number> / <boolean> ";
 
     private final String fullString;
     private int currentIndex = 0;
@@ -93,26 +94,32 @@ class JSONParsingTape {
             case '#':
                 consumeComment();
             default:
-                createParseError("{/[/<number>/<boolean>/\"");
+                createParseError(VALID_JSON);
         }
         return nextElement;
     }
 
     void consumeWhiteSpace() {
-        while (true) {
-            switch (checkCurrentChar()) {
-                case ' ':
-                case '\n':
-                case '\r':
-                case '\t':
-                    currentIndex++;
-                    break;
-                case '/':
-                case '#':
-                    consumeComment();
-                default:
-                    return;
+        try {
+            while (true) {
+                switch (checkCurrentChar()) {
+                    case ' ':
+                    case '\n':
+                    case '\r':
+                    case '\t':
+                        currentIndex++;
+                        break;
+                    case '/':
+                    case '#':
+                        consumeComment();
+                    default:
+                        return;
+                }
             }
+        } catch (IndexOutOfBoundsException e) {
+            throw new JSONParseException(
+                    "Reached the end of the JSON input before parsing was complete. Are you missing a delimiter?"
+            );
         }
     }
 

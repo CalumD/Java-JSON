@@ -1,6 +1,6 @@
 package Values;
 
-import Core.IJsonObject;
+import Core.IJson;
 import Exceptions.JSONParseException;
 import Exceptions.KeyNotFoundException;
 
@@ -9,82 +9,69 @@ import java.util.List;
 
 public class JSArray extends JSON {
 
-    private List<IJsonObject> myValue;
-    private String keyAtElement;
+    private List<IJson> myValue;
 
-    public JSArray(String jsonFragment) throws JSONParseException {
-        super("", jsonFragment, true);
-    }
+    JSArray(JSONParsingTape parsingTape) throws JSONParseException {
+        super(parsingTape);
+        jsType = JSType.ARRAY;
+        char checkingChar;
 
-    JSArray(String keyAtElement, String jsonFragment, boolean willSanitise) throws JSONParseException {
-        super(keyAtElement, jsonFragment, willSanitise);
-    }
+        // Skip over the array opener
+        parsingTape.consumeOne();
+        parsingTape.consumeWhiteSpace();
+        checkingChar = parsingTape.checkCurrentChar();
 
-
-    @Override
-    void init(String keyAtElement) {
-        this.keyAtElement = keyAtElement;
-        myType = JSType.ARRAY;
-        myValue = new ArrayList<>();
-    }
-
-    @Override
-    void parse(String jsonFragment, boolean sanitize) throws JSONParseException {
-
-        //check if we need to sanitise the contents of the fragment
-        if (sanitize) {
-            jsonFragment = sanitiseFragment(jsonFragment);
+        // Initial Array parsing Checks
+        if (checkingChar == ',') {
+            parsingTape.createParseError(
+                    JSONParsingTape.VALID_JSON,
+                    "Missing Valid JSON at start of array."
+            );
+        }
+        if (checkingChar == ']') {
+            myValue = new ArrayList<>(0);
+            return;
         }
 
-        //mark which index in the fragment we are at
-        int currentFragmentIndex = 1, arrayElems = 0;
-        JSON nextElement;
-        fragmentSize = 2;
 
-        //while there are more elements in the current level array
-        while (jsonFragment.charAt(currentFragmentIndex) != ']') {
-
-            //Figure out and parse the type of value
-            nextElement = parseNextElement(jsonFragment.charAt(currentFragmentIndex), keyAtElement,
-                "[" + arrayElems++ + "]", currentFragmentIndex, jsonFragment);
-
-            //add the next element to the array
-            myValue.add(nextElement);
-            //increment the fragment pointer by the previous elements size in the fragment
-            currentFragmentIndex += nextElement.fragmentSize;
-            //add one to the fragment size
-            fragmentSize = currentFragmentIndex + 1;
-
-            //check that there is a separating comma between array elements.
-            if (jsonFragment.charAt(currentFragmentIndex) != ','
-                && jsonFragment.charAt(currentFragmentIndex) != ']') {
-                throw new JSONParseException("Invalid element separator. (Are you missing a <,> ?)");
-            }
-            //skip the comma
-            if (jsonFragment.charAt(currentFragmentIndex) == ',') {
-                currentFragmentIndex++;
+        // Parse array
+        boolean moreChildren = true;
+        while (moreChildren) {
+            myValue.add(parsingTape.parseNextElement());
+            parsingTape.consumeWhiteSpace();
+            checkingChar = parsingTape.checkCurrentChar();
+            switch (checkingChar) {
+                case ']':
+                    moreChildren = false;
+                case ',':
+                    parsingTape.consumeOne();
+                    // Validate if we see a comma, there are more children to come
+                    parsingTape.consumeWhiteSpace();
+                    if (parsingTape.checkCurrentChar() == ']') {
+                        parsingTape.createParseError(JSONParsingTape.VALID_JSON,
+                                "Comma suggests more array elements, but array terminates.");
+                    }
+                    break;
+                default:
+                    parsingTape.createParseError(", / ]",
+                            "Invalid array child delimiter.");
             }
         }
-        //check for a missing closing array bracket
-        if (jsonFragment.charAt(currentFragmentIndex) != ']') {
-            throw new JSONParseException("A JSArray is missing the closing <]>");
-        }
     }
 
     @Override
-    public List<IJsonObject> getValue() {
+    public List<IJson> getValue() {
         return myValue;
     }
 
-
     @Override
     public String asString(int depth) {
-        StringBuilder ret = new StringBuilder("[");
-
         //if this is an empty array, then be sensible
         if (myValue.size() == 0) {
             return "[]";
         }
+
+        StringBuilder ret = new StringBuilder("[");
 
         //if the depth is already too low, display the number of elements we contain
         if (depth == 0) {
@@ -92,7 +79,7 @@ public class JSArray extends JSON {
         }
         //pass down the next value of depth to all children and get their strings
         else {
-            for (IJsonObject value : myValue) {
+            for (IJson value : myValue) {
                 ret.append(value.asString(depth - 1)).append(",");
             }
             if (ret.charAt(ret.length() - 1) == ',') {
@@ -143,7 +130,12 @@ public class JSArray extends JSON {
     }
 
     @Override
-    public IJsonObject getJSONByKey(String key) throws KeyNotFoundException {
+    public int hashCode() {
+        return myValue.hashCode();
+    }
+
+    @Override
+    public IJson getJSONByKey(String key) throws KeyNotFoundException {
         //if the key is simply to show that this index exists then show it exists
         if (key.equals("")) {
             return this;
@@ -160,7 +152,7 @@ public class JSArray extends JSON {
             }
 
             //find the object at that array index
-            IJsonObject ret = this;
+            IJson ret = this;
             for (String i : nestedIndexString) {
                 ret = ret.getJSONByKey(i);
             }
@@ -176,6 +168,28 @@ public class JSArray extends JSON {
         }
     }
 
+    @Override
+    void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
+        if (myValue.isEmpty()) {
+            result.append("[]");
+            return;
+        }
+
+        indent.append(tabSize);
+        result.append('[').append('\n').append(indent);
+        if (depth == 0) {
+            result.append("<").append(myValue.size()).append(">");
+        } else {
+            myValue.forEach(value -> {
+                ((JSON)value).asPrettyString(indent, tabSize, result, depth - 1);
+                result.append(",\n");
+            });
+            result.delete(result.length() - 3, result.length() -1);
+        }
+
+        indent.delete(0, tabSize.length());
+        result.append("\n").append(indent).append(']');
+    }
 
     public List<String> getKeys() {
         ArrayList<String> ret = new ArrayList<>();

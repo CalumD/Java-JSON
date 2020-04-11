@@ -25,7 +25,7 @@ public class JSBoolean extends JSON {
         }
 
         else {
-            parsingTape.createParseError("true/false");
+            parsingTape.createParseError("true / false");
         }
     }
 
@@ -46,7 +46,7 @@ public class JSBoolean extends JSON {
 
     @Override
     protected void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
-        result.append(asString(1));
+        result.append(asString(depth));
     }
 
     @Override
