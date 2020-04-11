@@ -1,6 +1,10 @@
 package Values;
 
 import Exceptions.JSONParseException;
+import Exceptions.KeyNotFoundException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class JSNumber extends JSON {
 
@@ -15,7 +19,7 @@ public class JSNumber extends JSON {
         boolean isFloating = false;
 
         while (!foundEnd) {
-            switch(parsingTape.consumeOne()) {
+            switch(parsingTape.checkCurrentChar()) {
                 case '.':
                     isFloating = true;
                 case '-':
@@ -31,8 +35,10 @@ public class JSNumber extends JSON {
                 case '8':
                 case '9':
                 case 'e':
+                case 'E':
                 case '^':
-                    continue;
+                    parsingTape.consumeOne();
+                    break;
                 default:
                     foundEnd = true;
             }
@@ -56,8 +62,20 @@ public class JSNumber extends JSON {
     public Object getValue() {
         return myLongValue == null
                 ? myDoubleValue
-                : myLongValue;
+                : Long.valueOf(myLongValue);
     }
+
+    @Override
+    public double getDouble() {
+        return myDoubleValue;
+    }
+
+    @Override
+    public long getLong() {
+        return myLongValue;
+    }
+
+
 
     @Override
     public String asString(int depth) {
@@ -109,16 +127,16 @@ public class JSNumber extends JSON {
                 : Long.hashCode(myLongValue);
     }
 
-//    @Override
-//    public JSON getJSONByKey(String key) {
-//        if (contains(key)) {
-//            return this;
-//        }
-//        throw new KeyNotFoundException("Key: " + key + ", not found in JSON.");
-//    }
-//
-//    @Override
-//    public List<String> getKeys() {
-//        return new ArrayList<>();
-//    }
+    @Override
+    public JSON getJSONByKey(String key) {
+        if (contains(key)) {
+            return this;
+        }
+        throw new KeyNotFoundException("Key: " + key + ", not found in JSON.");
+    }
+
+    @Override
+    public List<String> getKeys() {
+        return new ArrayList<>();
+    }
 }

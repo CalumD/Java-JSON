@@ -119,7 +119,7 @@ public abstract class JSON implements IJson {
     //////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
     public Object getValue(String key) throws JSONException {
-        return getInternal(key).getValue();
+        return getInternal(key, JSType.OBJECT).getValue();
     }
 
     @Override

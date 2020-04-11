@@ -1,6 +1,10 @@
 package Values;
 
 import Exceptions.JSONParseException;
+import Exceptions.KeyNotFoundException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class JSBoolean extends JSON {
 
@@ -77,16 +81,16 @@ public class JSBoolean extends JSON {
         return Boolean.hashCode(myValue);
     }
 
-//    @Override
-//    public JSON getJSONByKey(String key) {
-//        if (contains(key)) {
-//            return this;
-//        }
-//        throw new KeyNotFoundException("Key: " + key + ", not found in JSON.");
-//    }
-//
-//    @Override
-//    public List<String> getKeys() {
-//        return new ArrayList<>();
-//    }
+    @Override
+    public JSON getJSONByKey(String key) {
+        if (contains(key)) {
+            return this;
+        }
+        throw new KeyNotFoundException("Key: " + key + ", not found in JSON.");
+    }
+
+    @Override
+    public List<String> getKeys() {
+        return new ArrayList<>();
+    }
 }

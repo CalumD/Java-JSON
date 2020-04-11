@@ -30,6 +30,7 @@ public class JSArray extends JSON {
         }
         myValue = new ArrayList<>();
         if (checkingChar == ']') {
+            parsingTape.consumeOne();
             return;
         }
 
@@ -39,12 +40,12 @@ public class JSArray extends JSON {
         while (moreChildren) {
             myValue.add(parsingTape.parseNextElement());
             parsingTape.consumeWhiteSpace();
-            checkingChar = parsingTape.checkCurrentChar();
+            checkingChar = parsingTape.consumeOne();
             switch (checkingChar) {
                 case ']':
                     moreChildren = false;
+                    break;
                 case ',':
-                    parsingTape.consumeOne();
                     // Validate if we see a comma, there are more children to come
                     parsingTape.consumeWhiteSpace();
                     if (parsingTape.checkCurrentChar() == ']') {
@@ -182,9 +183,9 @@ public class JSArray extends JSON {
         } else {
             myValue.forEach(value -> {
                 ((JSON)value).asPrettyString(indent, tabSize, result, depth - 1);
-                result.append(",\n");
+                result.append(",\n").append(indent);
             });
-            result.delete(result.length() - 3, result.length() -1);
+            result.delete(result.length() - 2 - indent.length(), result.length() -1);
         }
 
         indent.delete(0, tabSize.length());

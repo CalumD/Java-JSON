@@ -4,7 +4,7 @@ import Exceptions.JSONParseException;
 
 class JSONParsingTape {
 
-    public static final int DEFAULT_PARSE_ERROR_CONTEXT_SIZE = 10;
+    public static final int DEFAULT_PARSE_ERROR_CONTEXT_SIZE = 20;
     public static final String DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL = "_";
     static final String VALID_JSON = "{ / [ / \" / <number> / <boolean> ";
 
@@ -156,18 +156,19 @@ class JSONParsingTape {
 
     void createParseError(String expectedFragment, String customErrorMessage) {
         String gotFragment = "...";
+        int reached = currentIndex == 0 ? 0 : currentIndex - 1;
 
         // Check if we are far enough into the string to just show a snippet of "up-to here" code.
         if (currentIndex > DEFAULT_PARSE_ERROR_CONTEXT_SIZE) {
-            gotFragment += fullString.substring(currentIndex - DEFAULT_PARSE_ERROR_CONTEXT_SIZE, currentIndex);
+            gotFragment += fullString.substring(currentIndex - DEFAULT_PARSE_ERROR_CONTEXT_SIZE, reached);
         } else {
-            gotFragment = fullString.substring(0, currentIndex);
+            gotFragment = fullString.substring(0, reached);
         }
         gotFragment += DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL;
 
         // Count lines til here:
         int lineCount = 0;
-        for (int charIndex = 0; charIndex < currentIndex; charIndex++) {
+        for (int charIndex = 0; charIndex < reached; charIndex++) {
             if (fullString.charAt(charIndex) == '\n') {
                 lineCount++;
             }
@@ -177,11 +178,11 @@ class JSONParsingTape {
         // TODO remove the sout.
         System.out.println(new JSONParseException(customErrorMessage
                 + "\nLine: " + lineCount
-                + "\nGot: " + gotFragment + ",  Expected: " + expectedFragment
+                + "\nGot: " + gotFragment + "  Expected: " + expectedFragment
         ).getMessage());
         throw new JSONParseException(customErrorMessage
                 + "\nLine: " + lineCount
-                + "\nGot: " + gotFragment + ",  Expected: " + expectedFragment
+                + "\nGot: " + gotFragment + "  Expected: " + expectedFragment
         );
     }
 

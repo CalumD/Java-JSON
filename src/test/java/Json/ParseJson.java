@@ -315,21 +315,6 @@ public class ParseJson {
         );
     }
 
-    @Test
-    public void basic_parse_1_33() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a{b\":0}")
-        );
-    }
-
-    @Test
-    public void basic_parse_1_34() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a}b\":0}")
-        );
-    }
-
-
     /////////////////////////////BASIC PARSE PASS  ------- PASSES ---------////////////////////////////////////////////
     @Test
     public void basic_parse_2_1() throws JSONParseException {
@@ -444,6 +429,16 @@ public class ParseJson {
     @Test
     public void basic_parse_2_23() throws JSONParseException {
         JSONParser.parse("{\"a\":{\"b\":1}}");
+    }
+
+    @Test
+    public void basic_parse_2_24() throws JSONParseException {
+        JSONParser.parse("{\"a{b\":0}");
+    }
+
+    @Test
+    public void basic_parse_2_25() throws JSONParseException {
+        JSONParser.parse("{\"a}b\":0}");
     }
 
 
