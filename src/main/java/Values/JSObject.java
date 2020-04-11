@@ -66,7 +66,7 @@ public class JSObject extends JSON {
                     break;
                 default:
                     parsingTape.createParseError(", / }",
-                            "Invalid array child delimiter.");
+                            "Invalid object child delimiter.");
             }
         }
     }

@@ -17,23 +17,27 @@ class JSONParsingTape {
 
 
     char checkCurrentChar() {
-        return checkCharAt(0);
+        return checkCharAtOffsetFromCurrent(0);
     }
 
     char checkNextChar() {
-        return checkCharAt(1);
+        return checkCharAtOffsetFromCurrent(1);
     }
 
     char checkPreviousChar() {
-        return checkCharAt(-1);
+        return checkCharAtOffsetFromCurrent(-1);
     }
 
-    private char checkCharAt(int offsetToCurrent) {
-        return fullString.charAt(currentIndex + offsetToCurrent);
+    private char checkCharAtOffsetFromCurrent(int offsetToCurrent) {
+        return checkCharAt(currentIndex + offsetToCurrent);
+    }
+
+    private char checkCharAt(int absoluteOffset) {
+        return fullString.charAt(absoluteOffset);
     }
 
     boolean checkNextFragment(String fragment, boolean consumeIfMatches) {
-        boolean matches = fragment.equals(fullString.substring(currentIndex, fragment.length()));
+        boolean matches = fragment.equals(fullString.substring(currentIndex, currentIndex + fragment.length()));
         if (matches && consumeIfMatches) {
             currentIndex += fragment.length();
         }
@@ -163,13 +167,18 @@ class JSONParsingTape {
 
         // Count lines til here:
         int lineCount = 0;
-        for (int charIndex = 0; charIndex <= currentIndex; charIndex++) {
+        for (int charIndex = 0; charIndex < currentIndex; charIndex++) {
             if (fullString.charAt(charIndex) == '\n') {
                 lineCount++;
             }
         }
 
         // Throw the exception
+        // TODO remove the sout.
+        System.out.println(new JSONParseException(customErrorMessage
+                + "\nLine: " + lineCount
+                + "\nGot: " + gotFragment + ",  Expected: " + expectedFragment
+        ).getMessage());
         throw new JSONParseException(customErrorMessage
                 + "\nLine: " + lineCount
                 + "\nGot: " + gotFragment + ",  Expected: " + expectedFragment
