@@ -9,10 +9,15 @@ public class JSNumber extends JSON {
 
     JSNumber(JSONParsingTape parsingTape) throws JSONParseException {
         super(parsingTape);
-        int lengthOfNumber = 0;
+        int numberStartIndex = parsingTape.getCurrentIndex();
+
         boolean foundEnd = false;
+        boolean isFloating = false;
+
         while (!foundEnd) {
-            switch(parsingTape.consume()) {
+            switch(parsingTape.consumeOne()) {
+                case '.':
+                    isFloating = true;
                 case '-':
                 case '+':
                 case '0':
@@ -25,19 +30,17 @@ public class JSNumber extends JSON {
                 case '7':
                 case '8':
                 case '9':
-                case '.':
                 case 'e':
                 case '^':
-                    lengthOfNumber++;
+                    continue;
                 default:
                     foundEnd = true;
             }
         }
-        parsingTape.moveTapeHead(lengthOfNumber * -1);
-        String numberString = parsingTape.consume(lengthOfNumber);
+        String numberString = parsingTape.requestRegion(numberStartIndex, parsingTape.getCurrentIndex());
 
         try {
-            if (numberString.contains(".")) {
+            if (isFloating) {
                 this.myDoubleValue = Double.parseDouble(numberString);
                 jsType = JSType.DOUBLE;
             } else {
@@ -45,7 +48,6 @@ public class JSNumber extends JSON {
                 jsType = JSType.LONG;
             }
         } catch (NumberFormatException e) {
-            parsingTape.moveTapeHead(lengthOfNumber * -1);
             parsingTape.createParseError("<number>", e.getMessage());
         }
     }
