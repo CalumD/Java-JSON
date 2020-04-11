@@ -52,6 +52,7 @@ public class JSString extends JSON {
 
         // finalise result.
         myValue = string.toString();
+        jsType = JSType.STRING;
     }
 
     @Override

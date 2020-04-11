@@ -8,6 +8,7 @@ public class JSBoolean extends JSON {
 
     JSBoolean(JSONParsingTape parsingTape) throws JSONParseException {
         super(parsingTape);
+        jsType = JSType.BOOLEAN;
 
         if (parsingTape.checkNextFragment("true", true)
                 || parsingTape.checkNextFragment("True", true)
