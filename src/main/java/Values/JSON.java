@@ -16,6 +16,17 @@ public abstract class JSON implements IJson {
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
+    JSON() {
+    }
+
+    public static JSON createJSON(String jsonFragment) throws JSONParseException {
+        return new JSBoolean().createFromString(jsonFragment);
+    }
+
+    public static JSON createMultilineJSON(List<String> jsonFragment) throws JSONParseException {
+        return new JSBoolean().createFromMultilineString(jsonFragment);
+    }
+
 
     JSON(JSONParsingTape parsingTape) throws JSONParseException {
         // This is only used to enforce each extending class has this matching constructor to execute the parse.

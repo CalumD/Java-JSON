@@ -6,6 +6,9 @@ public class JSBoolean extends JSON {
 
     private boolean myValue;
 
+    JSBoolean() {
+    }
+
     JSBoolean(JSONParsingTape parsingTape) throws JSONParseException {
         super(parsingTape);
         jsType = JSType.BOOLEAN;
