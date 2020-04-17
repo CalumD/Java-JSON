@@ -45,7 +45,9 @@ public abstract class JSON implements IJson {
 
     @Override
     public boolean contains(List<String> keys) {
+        if (keys == null) return false;
         for (String key : keys) {
+            if (key == null) return false;
             if (!contains(key)) {
                 return false;
             }

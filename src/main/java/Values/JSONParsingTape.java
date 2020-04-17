@@ -23,10 +23,6 @@ public class JSONParsingTape {
         return checkCharAtOffsetFromCurrent(1);
     }
 
-    char checkPreviousChar() {
-        return checkCharAtOffsetFromCurrent(-1);
-    }
-
     private char checkCharAtOffsetFromCurrent(int offsetToCurrent) {
         return checkCharAt(currentIndex + offsetToCurrent);
     }
