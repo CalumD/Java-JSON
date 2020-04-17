@@ -1,4 +1,4 @@
-package Json;
+package oldTests.Json;
 
 import Core.JSONParser;
 import Exceptions.JSONParseException;

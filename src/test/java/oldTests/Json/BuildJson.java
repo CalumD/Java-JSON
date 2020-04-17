@@ -1,4 +1,4 @@
-package Json;
+package oldTests.Json;
 
 import Core.IJson;
 import Core.IJsonBuilder;

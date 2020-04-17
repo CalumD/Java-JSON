@@ -2,19 +2,18 @@ package Values;
 
 import Exceptions.JSONParseException;
 
-class JSONParsingTape {
+public class JSONParsingTape {
 
-    public static final int DEFAULT_PARSE_ERROR_CONTEXT_SIZE = 20;
-    public static final String DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL = "_";
+    static final int DEFAULT_PARSE_ERROR_CONTEXT_SIZE = 20;
+    static final String DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL = "_";
     static final String VALID_JSON = "{ / [ / \" / <number> / <boolean> ";
 
     private final String fullString;
     private int currentIndex = 0;
 
-    JSONParsingTape(String fullJSONString) {
-        this.fullString = fullJSONString;
+    public JSONParsingTape(String fullJSONAsString) {
+        this.fullString = fullJSONAsString;
     }
-
 
     char checkCurrentChar() {
         return checkCharAtOffsetFromCurrent(0);
@@ -56,12 +55,10 @@ class JSONParsingTape {
         return currentIndex;
     }
 
-    JSON parseNextElement() {
+    public JSON parseNextElement() {
         // Reach the first legitimate character.
         consumeWhiteSpace();
         if (fullString == null || fullString.length() == 0) {
-            // TODO remove the sout.
-            System.out.println(new JSONParseException("You cannot create json from nothing.").getMessage());
             throw new JSONParseException("You cannot create json from nothing.");
         }
         JSON nextElement = null;
@@ -123,8 +120,6 @@ class JSONParsingTape {
                 }
             }
         } catch (IndexOutOfBoundsException e) {
-            // TODO remove the sout.
-            System.out.println(new JSONParseException("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?").getMessage());
             throw new JSONParseException(
                     "Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?"
             );
