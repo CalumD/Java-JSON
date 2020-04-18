@@ -4,8 +4,8 @@ import Exceptions.JSONParseException;
 
 public class JSONParsingTape {
 
-    static final int DEFAULT_PARSE_ERROR_CONTEXT_SIZE = 20;
-    static final String DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL = "_";
+    private static final int DEFAULT_PARSE_ERROR_CONTEXT_SIZE = 30;
+    private static final String DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL = "_";
     static final String VALID_JSON = "{ / [ / \" / <number> / <boolean> ";
 
     private final String fullString;
@@ -15,48 +15,17 @@ public class JSONParsingTape {
         this.fullString = fullJSONAsString;
     }
 
-    char checkCurrentChar() {
-        return checkCharAtOffsetFromCurrent(0);
-    }
-
-    char checkNextChar() {
-        return checkCharAtOffsetFromCurrent(1);
-    }
-
-    private char checkCharAtOffsetFromCurrent(int offsetToCurrent) {
-        return checkCharAt(currentIndex + offsetToCurrent);
-    }
-
-    private char checkCharAt(int absoluteOffset) {
-        return fullString.charAt(absoluteOffset);
-    }
-
-    boolean checkNextFragment(String fragment, boolean consumeIfMatches) {
-        boolean matches = fragment.equals(fullString.substring(currentIndex, currentIndex + fragment.length()));
-        if (matches && consumeIfMatches) {
-            currentIndex += fragment.length();
-        }
-        return matches;
-    }
-
-    char consumeOne() {
-        return checkCharAt(currentIndex++);
-    }
-
-    String requestRegion(int fromHere, int toHere) {
-        return fullString.substring(fromHere, toHere);
-    }
-
-    int getCurrentIndex() {
-        return currentIndex;
-    }
-
     public JSON parseNextElement() {
+        //Sanity Check
+        if (fullString == null || fullString.length() == 0) {
+            throw new JSONParseException("You cannot create json from nothing. Input was "
+                    + (fullString == null ? "null." : "empty."));
+        }
+
         // Reach the first legitimate character.
         consumeWhiteSpace();
-        if (fullString == null || fullString.length() == 0) {
-            throw new JSONParseException("You cannot create json from nothing.");
-        }
+
+        // Figure out the next JSON type
         JSON nextElement = null;
         switch (checkCurrentChar()) {
             case 't':
@@ -98,6 +67,38 @@ public class JSONParsingTape {
         return nextElement;
     }
 
+    char checkCurrentChar() {
+        return checkCharAtOffsetFromCurrent(0);
+    }
+
+    char checkNextChar() {
+        return checkCharAtOffsetFromCurrent(1);
+    }
+
+    char consumeOne() {
+        return checkCharAt(currentIndex++);
+    }
+
+    boolean checkNextFragment(String fragment) {
+        return checkNextFragment(fragment, true);
+    }
+
+    boolean checkNextFragment(String fragment, boolean consumeIfMatches) {
+        boolean matches = fragment.equals(fullString.substring(currentIndex, currentIndex + fragment.length()));
+        if (matches && consumeIfMatches) {
+            currentIndex += fragment.length();
+        }
+        return matches;
+    }
+
+    String requestRegion(int fromHere, int toHere) {
+        return fullString.substring(fromHere, toHere);
+    }
+
+    int getCurrentIndex() {
+        return currentIndex;
+    }
+
     void consumeWhiteSpace() {
         try {
             while (true) {
@@ -111,6 +112,7 @@ public class JSONParsingTape {
                     case '/':
                     case '#':
                         consumeComment();
+                        break;
                     default:
                         return;
                 }
@@ -122,62 +124,35 @@ public class JSONParsingTape {
         }
     }
 
-    private void consumeComment() {
-        switch (checkNextChar()) {
-
-            //   <-- this Comment
-            // # <-- or this comment
-            case '/':
-            case '#':
-                while (true) {
-                    if (consumeOne() == '\n') {
-                        return;
-                    }
-                }
-
-                /* <-- This comment --> */
-            case '*':
-                while (true) {
-                    if (consumeOne() == '*' && consumeOne() == '/') {
-                        return;
-                    }
-                }
-
-                // Invalid Comment Type
-            default:
-                createParseError("/ or *");
-        }
+    void createParseErrorFromOffset(int relativeOffset, String expectedFragment, String customErrorMessage) {
+        currentIndex += relativeOffset;
+        createParseError(expectedFragment, customErrorMessage);
     }
 
     void createParseError(String expectedFragment, String customErrorMessage) {
         String gotFragment = "...";
-        int reached = currentIndex == 0 ? 0 : currentIndex - 1;
 
-        // Check if we are far enough into the string to just show a snippet of "up-to here" code.
+        // Check if we are far enough into the string to just
         if (currentIndex > DEFAULT_PARSE_ERROR_CONTEXT_SIZE) {
-            gotFragment += fullString.substring(currentIndex - DEFAULT_PARSE_ERROR_CONTEXT_SIZE, reached);
+            gotFragment += getNonSpaceSnippet();
         } else {
-            gotFragment = fullString.substring(0, reached);
+            gotFragment = fullString.substring(0, currentIndex);
         }
         gotFragment += DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL;
 
         // Count lines til here:
-        int lineCount = 0;
-        for (int charIndex = 0; charIndex < reached; charIndex++) {
+        int lineCount = 1;
+        for (int charIndex = 0; charIndex < currentIndex; charIndex++) {
             if (fullString.charAt(charIndex) == '\n') {
                 lineCount++;
             }
         }
 
         // Throw the exception
-        // TODO remove the sout.
-        System.out.println(new JSONParseException(customErrorMessage
-                + "\nLine: " + lineCount
-                + "\nGot: " + gotFragment + "  Expected: " + expectedFragment
-        ).getMessage());
         throw new JSONParseException(customErrorMessage
                 + "\nLine: " + lineCount
-                + "\nGot: " + gotFragment + "  Expected: " + expectedFragment
+                + "\nGot: " + gotFragment
+                + "\nExpected: " + expectedFragment
         );
     }
 
@@ -186,5 +161,74 @@ public class JSONParsingTape {
                 expectedFragment,
                 "Unexpected symbol found in JSON while parsing."
         );
+    }
+
+    private void consumeComment() {
+        switch (checkCurrentChar()) {
+            case '#':
+                consumeUntilNewLine();
+                break;
+            case '/':
+                switch (checkNextChar()) {
+                    //   <-- this Comment
+                    case '/':
+                        consumeUntilNewLine();
+                        break;
+
+                    /*    This comment    */
+                    case '*':
+                        consumeUntilEndOfMultilineString();
+                        break;
+
+                    // Invalid Comment Type
+                    default:
+                        createParseError("/ or *");
+                }
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported comment sequence.");
+        }
+    }
+
+    private void consumeUntilNewLine() {
+        while (checkCurrentChar() != '\n') {
+            currentIndex++;
+        }
+        currentIndex++;
+    }
+
+    private void consumeUntilEndOfMultilineString() {
+        while (!checkNextFragment("*/")) {
+            currentIndex++;
+        }
+    }
+
+    private char checkCharAtOffsetFromCurrent(int relativeOffset) {
+        return checkCharAt(currentIndex + relativeOffset);
+    }
+
+    private char checkCharAt(int absoluteOffset) {
+        return fullString.charAt(absoluteOffset);
+    }
+
+    private String getNonSpaceSnippet() {
+        // Count back 20 'real' (non-space) characters to show a snippet of "up-to here" code.
+        char currentChar;
+        int snippetIndex, snippetLength;
+        for (snippetIndex = currentIndex - 1, snippetLength = 0;
+             ((snippetIndex > 0) && (snippetLength < DEFAULT_PARSE_ERROR_CONTEXT_SIZE));
+             snippetIndex--, snippetLength++
+        ) {
+            currentChar = checkCharAt(snippetIndex);
+            switch (currentChar) {
+                case ' ':
+                case '\n':
+                case '\r':
+                case '\t':
+                    snippetLength--;
+                    break;
+            }
+        }
+        return fullString.substring(snippetIndex, currentIndex);
     }
 }

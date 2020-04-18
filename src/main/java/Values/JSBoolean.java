@@ -14,21 +14,17 @@ public class JSBoolean extends JSON {
         super(parsingTape);
         jsType = JSType.BOOLEAN;
 
-        if (parsingTape.checkNextFragment("true", true)
-                || parsingTape.checkNextFragment("True", true)
-                || parsingTape.checkNextFragment("TRUE", true)
+        if (parsingTape.checkNextFragment("true")
+                || parsingTape.checkNextFragment("True")
+                || parsingTape.checkNextFragment("TRUE")
         ) {
             myValue = true;
-        }
-
-        else if (parsingTape.checkNextFragment("false", true)
-                || parsingTape.checkNextFragment("False", true)
-                || parsingTape.checkNextFragment("FALSE", true)
+        } else if (parsingTape.checkNextFragment("false")
+                || parsingTape.checkNextFragment("False")
+                || parsingTape.checkNextFragment("FALSE")
         ) {
             myValue = false;
-        }
-
-        else {
+        } else {
             parsingTape.createParseError("true / false");
         }
     }

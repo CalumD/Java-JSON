@@ -28,7 +28,9 @@ public class JSString extends JSON {
             try {
                 currentChar = parsingTape.consumeOne();
             } catch (IndexOutOfBoundsException e) {
-                parsingTape.createParseError(
+                parsingTape.createParseErrorFromOffset(
+                        -1,
+                        "\"",
                         "Didn't find matching " + stringDelimiter + ", before end of string."
                 );
             }
