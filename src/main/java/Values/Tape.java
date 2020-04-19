@@ -13,6 +13,11 @@ public abstract class Tape<T> {
 
     public Tape(String fullInput) {
         this.fullInput = fullInput;
+        //Sanity Check
+        if (fullInput == null || fullInput.length() == 0) {
+            throw new JSONParseException("You cannot create something from nothing. Input was "
+                    + (fullInput == null ? "null." : "empty."));
+        }
     }
 
     public abstract T parseNextElement();

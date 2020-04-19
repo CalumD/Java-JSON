@@ -354,8 +354,20 @@ public class JSObject extends JSON {
     }
 
     @Override
-    protected IJson getInternal(JSONKey keyChain) throws KeyNotFoundException {
-        throw new UnsupportedOperationException("Still need to implement this");
+    protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
+        String nextKey = keySequence.getNextKey();
+        if (nextKey.equals("")) {
+            return this;
+        }
+        if (!nextKey.startsWith("{")) {
+            keySequence.createKeyDifferentTypeException();
+        }
+        JSON childElement = (JSON) json.get(nextKey.substring(1));
+        if (childElement == null) {
+            keySequence.createKeyNotFoundException();
+        }
+        assert childElement != null;
+        return childElement.getInternal(keySequence);
     }
 
     @Override

@@ -170,8 +170,22 @@ public class JSArray extends JSON {
     }
 
     @Override
-    protected IJson getInternal(JSONKey keyChain) throws KeyNotFoundException {
-        throw new UnsupportedOperationException("Still need to implement this");
+    protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
+        String nextKey = keySequence.getNextKey();
+        if (nextKey.equals("")) {
+            return this;
+        }
+        if (!nextKey.startsWith("[")) {
+            keySequence.createKeyDifferentTypeException();
+        }
+        JSON childElement = null;
+        try {
+            childElement = (JSON) myValue.get(Integer.parseInt(nextKey.substring(1)));
+        } catch (IndexOutOfBoundsException e) {
+            keySequence.createKeyNotFoundException();
+        }
+        assert childElement != null;
+        return childElement.getInternal(keySequence);
     }
 
     @Override

@@ -81,8 +81,11 @@ public class JSString extends JSON {
     }
 
     @Override
-    protected IJson getInternal(JSONKey keyChain) throws KeyNotFoundException {
-        throw new UnsupportedOperationException("Still need to implement this");
+    protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
+        if (keySequence.getNextKey().equals("")) {
+            return this;
+        }
+        throw new KeyNotFoundException("No child elements on a " + jsType);
     }
 
     @Override

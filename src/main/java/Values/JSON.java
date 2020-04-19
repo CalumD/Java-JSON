@@ -207,7 +207,7 @@ public abstract class JSON implements IJson {
         return getInternal(new JSONKey(key));
     }
 
-    protected abstract IJson getInternal(JSONKey keyChain) throws KeyNotFoundException;
+    protected abstract IJson getInternal(JSONKey keySequence) throws KeyNotFoundException;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////

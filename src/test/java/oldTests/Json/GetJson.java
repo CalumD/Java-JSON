@@ -4,6 +4,7 @@ import Core.IJson;
 import Core.JSONParser;
 import Exceptions.JSONParseException;
 import Exceptions.KeyDifferentTypeException;
+import Exceptions.KeyInvalidException;
 import Exceptions.KeyNotFoundException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -635,14 +636,14 @@ public class GetJson {
 
     @Test
     public void malformed_key_6() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(obj, "item[0.item[0].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_7() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(obj, "item[].item[0].request.header[2].key")
         );
     }
@@ -656,14 +657,14 @@ public class GetJson {
 
     @Test
     public void malformed_key_9() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(obj, "item[0].item[].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_10() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(obj, "item[0].item[0.request.header[2].key")
         );
     }
@@ -677,14 +678,14 @@ public class GetJson {
 
     @Test
     public void malformed_key_12() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(obj, "item[0].item[0].request.header[.key")
         );
     }
 
     @Test
     public void malformed_key_13() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(obj, "item[0].item[0].request.header[2]key")
         );
     }
@@ -698,14 +699,14 @@ public class GetJson {
 
     @Test
     public void malformed_key_15() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(obj, "item[0].item[0]request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_16() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(obj, "item[0]item[0].request.header[2].key")
         );
     }
@@ -719,7 +720,7 @@ public class GetJson {
 
     @Test
     public void malformed_key_18() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(obj, "item[-12].item[0].request.header[2].key")
         );
     }
@@ -761,7 +762,7 @@ public class GetJson {
 
     @Test
     public void malformed_key_24() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(obj, "item[0].item[0].request.header[a].key")
         );
     }
@@ -789,14 +790,14 @@ public class GetJson {
 
     @Test
     public void malformed_key_28() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(obj, "item[0].item[0]..request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_29() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(obj, "item[0].item[0].request.header[2].key.")
         );
     }
@@ -912,7 +913,7 @@ public class GetJson {
 
     @Test
     public void deep_nest_key_12() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(deepNesting, "variables[0][1][2].nested1?[1][-1].final")
         );
     }
@@ -940,28 +941,28 @@ public class GetJson {
 
     @Test
     public void deep_nest_key_16() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(deepNesting, "variables[0][")
         );
     }
 
     @Test
     public void deep_nest_key_17() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(deepNesting, "variables[0][1")
         );
     }
 
     @Test
     public void deep_nest_key_18() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(deepNesting, "variables[0][1][2")
         );
     }
 
     @Test
     public void deep_nest_key_19() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(deepNesting, "variables[]")
         );
     }
