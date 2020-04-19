@@ -1,6 +1,6 @@
 package Exceptions;
 
-public class KeyNotFoundException extends JSONException {
+public class KeyNotFoundException extends JSONKeyException {
 
     public KeyNotFoundException(String reasonForInvalidity) {
         super(reasonForInvalidity);
