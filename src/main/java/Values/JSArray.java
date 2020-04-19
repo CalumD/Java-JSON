@@ -100,7 +100,7 @@ public class JSArray extends JSON {
 
         try {
             //else get from children
-            getJSONByKey(keys);
+            getJSONObjectAt(keys);
             return true;
         } catch (KeyNotFoundException e) {
             return false;
@@ -136,7 +136,7 @@ public class JSArray extends JSON {
     }
 
     @Override
-    public IJson getJSONByKey(String key) throws KeyNotFoundException {
+    public IJson getJSONObjectAt(String key) throws KeyNotFoundException {
         //if the key is simply to show that this index exists then show it exists
         if (key.equals("")) {
             return this;
@@ -155,7 +155,7 @@ public class JSArray extends JSON {
             //find the object at that array index
             IJson ret = this;
             for (String i : nestedIndexString) {
-                ret = ret.getJSONByKey(i);
+                ret = ret.getJSONObjectAt(i);
             }
             return ret;
         }
@@ -165,8 +165,13 @@ public class JSArray extends JSON {
             return myValue.get(Integer.parseInt(key));
         } catch (Exception e) {
             throw new KeyNotFoundException(
-                "It looks like you are trying to access an array with invalid id");
+                    "It looks like you are trying to access an array with invalid id");
         }
+    }
+
+    @Override
+    protected IJson getInternal(JSONKey keyChain) throws KeyNotFoundException {
+        throw new UnsupportedOperationException("Still need to implement this");
     }
 
     @Override
@@ -198,5 +203,10 @@ public class JSArray extends JSON {
             ret.add(String.valueOf(i));
         }
         return ret;
+    }
+
+    @Override
+    public List<IJson> getValues() {
+        return getValue();
     }
 }

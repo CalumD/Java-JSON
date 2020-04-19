@@ -1,10 +1,8 @@
 package Values;
 
+import Core.IJson;
 import Exceptions.JSONParseException;
 import Exceptions.KeyNotFoundException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class JSString extends JSON {
 
@@ -83,6 +81,11 @@ public class JSString extends JSON {
     }
 
     @Override
+    protected IJson getInternal(JSONKey keyChain) throws KeyNotFoundException {
+        throw new UnsupportedOperationException("Still need to implement this");
+    }
+
+    @Override
     public boolean equals(Object other) {
         if (other == null) {
             return false;
@@ -107,15 +110,10 @@ public class JSString extends JSON {
     }
 
     @Override
-    public JSON getJSONByKey(String key) {
+    public JSON getJSONObjectAt(String key) {
         if (contains(key)) {
             return this;
         }
         throw new KeyNotFoundException("Key: " + key + ", not found in JSON.");
-    }
-
-    @Override
-    public List<String> getKeys() {
-        return new ArrayList<>();
     }
 }

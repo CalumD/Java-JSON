@@ -863,8 +863,8 @@ public class GetJson {
                         "Peggy Brown\",\"id\":1},{\"name\":\"Roach Mcguire\",\"id\":2}]}");
 
         int count = 3;
-        for (String key : obj.getKeys("friends")) {
-            obj.getValue("friends[" + key + "]");
+        for (String key : obj.getKeysOf("friends")) {
+            obj.getValueAt("friends[" + key + "]");
             count--;
         }
 
@@ -879,8 +879,8 @@ public class GetJson {
                         "\"friend2\":{\"name\":\"Peggy Brown\",\"id\":1},\"friend3\":{\"name\":\"Roach Mcguire\",\"id\":2}}}");
 
         int count = 3;
-        for (String key : obj.getKeys("friends")) {
-            obj.getValue("friends." + key);
+        for (String key : obj.getKeysOf("friends")) {
+            obj.getValueAt("friends." + key);
             count--;
         }
 

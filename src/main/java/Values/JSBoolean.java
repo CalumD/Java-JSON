@@ -1,10 +1,8 @@
 package Values;
 
+import Core.IJson;
 import Exceptions.JSONParseException;
 import Exceptions.KeyNotFoundException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class JSBoolean extends JSON {
 
@@ -75,7 +73,7 @@ public class JSBoolean extends JSON {
     }
 
     @Override
-    public JSON getJSONByKey(String key) {
+    public JSON getJSONObjectAt(String key) {
         if (contains(key)) {
             return this;
         }
@@ -83,7 +81,7 @@ public class JSBoolean extends JSON {
     }
 
     @Override
-    public List<String> getKeys() {
-        return new ArrayList<>();
+    protected IJson getInternal(JSONKey keyChain) throws KeyNotFoundException {
+        throw new UnsupportedOperationException("Still need to implement this");
     }
 }

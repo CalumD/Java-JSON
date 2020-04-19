@@ -99,7 +99,7 @@ public final class JSONParser {
      */
     public static Object getObject(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
-        return fromObject.getValue(key);
+        return fromObject.getValueAt(key);
     }
 
     /**
@@ -130,7 +130,7 @@ public final class JSONParser {
      */
     public static List<String> getKeys(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
-        return fromObject.getKeys(key);
+        return fromObject.getKeysOf(key);
     }
 
     /**
@@ -146,7 +146,7 @@ public final class JSONParser {
      */
     public static List<IJson> getList(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
-        return fromObject.getList(key);
+        return fromObject.getArrayAt(key);
     }
 
     /**
@@ -162,7 +162,7 @@ public final class JSONParser {
      */
     public static boolean getBoolean(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
-        return fromObject.getBoolean(key);
+        return fromObject.getBooleanAt(key);
     }
 
     /**
@@ -178,7 +178,7 @@ public final class JSONParser {
      */
     public static double getDouble(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
-        return fromObject.getDouble(key);
+        return fromObject.getDoubleAt(key);
     }
 
     /**
@@ -194,7 +194,7 @@ public final class JSONParser {
      */
     public static long getLong(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
-        return fromObject.getLong(key);
+        return fromObject.getLongAt(key);
     }
 
     /**
@@ -211,7 +211,7 @@ public final class JSONParser {
      */
     public static String getString(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
-        return fromObject.getString(key);
+        return fromObject.getStringAt(key);
     }
 
     /**
@@ -227,7 +227,7 @@ public final class JSONParser {
      */
     public static IJson getAny(IJson fromObject, String key)
         throws KeyNotFoundException, KeyDifferentTypeException {
-        return fromObject.getAny(key);
+        return fromObject.getAnyAt(key);
     }
 
     /**

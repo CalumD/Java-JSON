@@ -232,91 +232,91 @@ public class BuildJson {
     @Test
     public void get_1() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertFalse(getter.getBoolean("bools.bool1"));
+        assertFalse(getter.getBooleanAt("bools.bool1"));
     }
 
     @Test
     public void get_2() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertEquals(4.5, getter.getDouble("new"), 0);
+        assertEquals(4.5, getter.getDoubleAt("new"), 0);
     }
 
     @Test
     public void get_3() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertEquals(1000000L, getter.getLong("camerlong"), 0);
+        assertEquals(1000000L, getter.getLongAt("camerlong"), 0);
     }
 
     @Test
     public void get_4() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertEquals("World", getter.getString("Aloha"));
+        assertEquals("World", getter.getStringAt("Aloha"));
     }
 
     @Test
     public void get_5() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertFalse(getter.getBoolean("last[1].new.vars.object.deepArray[0].value"));
+        assertFalse(getter.getBooleanAt("last[1].new.vars.object.deepArray[0].value"));
     }
 
     @Test
     public void get_6() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertTrue(getter.getBoolean("last[1].new.arrs[0].nope"));
+        assertTrue(getter.getBooleanAt("last[1].new.arrs[0].nope"));
     }
 
     @Test
     public void get_7() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertFalse(getter.getBoolean("last[0].old.a[0][0].nest1"));
+        assertFalse(getter.getBooleanAt("last[0].old.a[0][0].nest1"));
     }
 
     @Test
     public void get_8() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertEquals(1337L, getter.getLong("last[0].old.a[1]"), 0);
+        assertEquals(1337L, getter.getLongAt("last[0].old.a[1]"), 0);
     }
 
     @Test
     public void get_9() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertFalse(getter.getBoolean("last[0].old.a[2].canItBe?"));
+        assertFalse(getter.getBooleanAt("last[0].old.a[2].canItBe?"));
     }
 
     @Test
     public void get_10() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertTrue(getter.getBoolean("last[0].old.a[3]"));
+        assertTrue(getter.getBooleanAt("last[0].old.a[3]"));
     }
 
     @Test
     public void get_11() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertEquals("Secret Internal String", getter.getString("last[0].old.b[0]"));
+        assertEquals("Secret Internal String", getter.getStringAt("last[0].old.b[0]"));
     }
 
     @Test
     public void get_12() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertEquals(0.45, getter.getDouble("last[0].old.a[0][0].degrees"), 0);
+        assertEquals(0.45, getter.getDoubleAt("last[0].old.a[0][0].degrees"), 0);
     }
 
     @Test
     public void get_13() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertEquals("Another one", getter.getString("last[0].old.b[1]"));
+        assertEquals("Another one", getter.getStringAt("last[0].old.b[1]"));
     }
 
     @Test
     public void get_14() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertTrue(getter.getBoolean("last[0].old.a[0][1].success"));
+        assertTrue(getter.getBooleanAt("last[0].old.a[0][1].success"));
     }
 
     @Test
     public void get_15() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();
-        assertEquals(1L, getter.getLong("last[0].old.a[0][1].final[0]"), 0);
+        assertEquals(1L, getter.getLongAt("last[0].old.a[0][1].final[0]"), 0);
     }
 }
 

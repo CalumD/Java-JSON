@@ -7,6 +7,7 @@ import Exceptions.KeyNotFoundException;
 import Values.JSType;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -51,7 +52,7 @@ public interface IJson extends Serializable {
      * @param keys This is the keys into the JSON to check for
      * @return True if all keys have values, false if any do not
      */
-    boolean contains(List<String> keys);
+    boolean containsAllKeys(Collection<String> keys);
 
 
     /**
@@ -93,7 +94,7 @@ public interface IJson extends Serializable {
     List<IJson> getValues();
 
     /**
-     * Calls getList(key) with an empty key. E.g. Refers to the current object.
+     * Calls getArray(key) with an empty key. E.g. Refers to the current object.
      *
      * @return The list value of the current object.
      * @throws KeyNotFoundException      Shouldn't really be thrown by this method since it exists
@@ -101,7 +102,7 @@ public interface IJson extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
      *                                   expected.
      */
-    List<IJson> getList() throws KeyDifferentTypeException;
+    List<IJson> getArray() throws KeyDifferentTypeException;
 
     /**
      * Calls getBoolean(key) with an empty key. E.g. Refers to the current object.
@@ -140,6 +141,17 @@ public interface IJson extends Serializable {
     String getString() throws KeyDifferentTypeException;
 
     /**
+     * Calls getJSONObject(key) with an empty key. E.g. Refers to the current object.
+     *
+     * @return The JSON object value of the current object.
+     * @throws KeyNotFoundException      Shouldn't really be thrown by this method since it exists
+     *                                   itself.
+     * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
+     *                                   expected.
+     */
+    IJson getJSONObject() throws KeyDifferentTypeException;
+
+    /**
      * Calls getObject(key) with an empty key. E.g. Refers to the current object.
      *
      * @return The 'anything' value of the current object.
@@ -159,7 +171,7 @@ public interface IJson extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    Object getValue(String key) throws JSONException;
+    Object getValueAt(String key) throws JSONException;
 
     /**
      * This is used to get the object at the given key.
@@ -168,7 +180,7 @@ public interface IJson extends Serializable {
      * @return The object at the given key
      * @throws KeyNotFoundException Thrown if there was no object found at that key.
      */
-    IJson getJSONByKey(String keys) throws JSONException;
+    IJson getJSONObjectAt(String keys) throws JSONException;
 
     /**
      * Used to find out the type of the current object.
@@ -177,7 +189,7 @@ public interface IJson extends Serializable {
      * @return The Type of the object at the given key.
      * @throws JSONException Thrown if the Key was not found in the object.
      */
-    JSType getDataType(String key) throws JSONException;
+    JSType getDataTypeOf(String key) throws JSONException;
 
     /**
      * Gets the keys from the object at the given key.
@@ -189,7 +201,7 @@ public interface IJson extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    List<String> getKeys(String key) throws JSONException;
+    List<String> getKeysOf(String key) throws JSONException;
 
     /**
      * Gets the values from the object at the given key.
@@ -201,7 +213,7 @@ public interface IJson extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    List<IJson> getValues(String key) throws JSONException;
+    List<IJson> getValuesOf(String key) throws JSONException;
 
     /**
      * Gets the values of the array at the given key.
@@ -213,7 +225,7 @@ public interface IJson extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    List<IJson> getList(String key) throws JSONException;
+    List<IJson> getArrayAt(String key) throws JSONException;
 
     /**
      * Gets the boolean at the given key.
@@ -225,7 +237,7 @@ public interface IJson extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    boolean getBoolean(String key) throws JSONException;
+    boolean getBooleanAt(String key) throws JSONException;
 
     /**
      * Gets the double at the given key.
@@ -237,7 +249,7 @@ public interface IJson extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    double getDouble(String key) throws JSONException;
+    double getDoubleAt(String key) throws JSONException;
 
     /**
      * Gets the long at the given key.
@@ -249,7 +261,7 @@ public interface IJson extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    long getLong(String key) throws JSONException;
+    long getLongAt(String key) throws JSONException;
 
     /**
      * Gets the string at the given key.
@@ -262,17 +274,17 @@ public interface IJson extends Serializable {
      * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
      *                                   match the return type of this method.
      */
-    String getString(String key) throws JSONException;
+    String getStringAt(String key) throws JSONException;
 
     /**
      * Gets whatever the object is at the given key.
      *
      * @param key This is the key to search for within the current object.
      * @return The value of the object at the given key.
-     * @throws KeyNotFoundException      Thrown if there was not an object at the path (or if the
-     *                                   path syntax is bad).
+     * @throws KeyNotFoundException Thrown if there was not an object at the path (or if the
+     *                              path syntax is bad).
      */
-    IJson getAny(String key) throws JSONException;
+    IJson getAnyAt(String key) throws JSONException;
 
 
 
@@ -325,7 +337,7 @@ public interface IJson extends Serializable {
 
     /**
      * Creates a string representation of the current object with a given depth of object expansion
-     * And a set level of indentation
+     * And a custom level of indentation
      *
      * @param depth The depth of objects to show in the output
      * @return The string representation of this object, with new lines and object indentation

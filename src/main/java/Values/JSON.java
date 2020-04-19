@@ -4,7 +4,10 @@ import Core.IJson;
 import Exceptions.JSONException;
 import Exceptions.JSONParseException;
 import Exceptions.KeyDifferentTypeException;
+import Exceptions.KeyNotFoundException;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public abstract class JSON implements IJson {
@@ -36,7 +39,12 @@ public abstract class JSON implements IJson {
 
     private JSON parseSelf(List<String> jsonFragment) {
         StringBuilder concater = new StringBuilder();
-        jsonFragment.forEach(line -> concater.append(line).append('\n'));
+        jsonFragment.forEach(line -> {
+            concater.append(line);
+            if (!line.endsWith("\n")) {
+                concater.append('\n');
+            }
+        });
         return parseSelf(concater.toString());
     }
 
@@ -44,7 +52,7 @@ public abstract class JSON implements IJson {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public boolean contains(List<String> keys) {
+    public boolean containsAllKeys(Collection<String> keys) {
         if (keys == null) return false;
         for (String key : keys) {
             if (key == null) return false;
@@ -56,138 +64,150 @@ public abstract class JSON implements IJson {
     }
 
     @Override
-    public Object getValue() {
-        return getValue("");
-    }
-
-    @Override
     public JSType getDataType() {
         return jsType;
     }
 
     @Override
     public List<String> getKeys() {
-        return getKeys("");
+        return new ArrayList<>();
     }
 
     @Override
     public List<IJson> getValues() {
-        return getValues("");
+        List<IJson> result = new ArrayList<>(1);
+        result.add(this);
+        return result;
     }
 
     @Override
-    public List<IJson> getList() throws KeyDifferentTypeException {
-        return getList("");
+    public List<IJson> getArray() throws KeyDifferentTypeException {
+        return getArrayAt("");
     }
 
     @Override
     public boolean getBoolean() throws KeyDifferentTypeException {
-        return getBoolean("");
+        return getBooleanAt("");
     }
 
     @Override
     public double getDouble() throws KeyDifferentTypeException {
-        return getDouble("");
+        return getDoubleAt("");
     }
 
     @Override
     public long getLong() throws KeyDifferentTypeException {
-        return getLong("");
+        return getLongAt("");
     }
 
     @Override
     public String getString() throws KeyDifferentTypeException {
-        return getString("");
+        return getStringAt("");
+    }
+
+    @Override
+    public IJson getJSONObject() throws KeyDifferentTypeException {
+        return getJSONObjectAt("");
     }
 
     @Override
     public IJson getAny() {
-        return getAny("");
+        return getAnyAt("");
     }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
-    public Object getValue(String key) throws JSONException {
-        return getInternal(key, JSType.OBJECT).getValue();
+    public Object getValueAt(String key) throws JSONException {
+        return getMatching(key).getValue();
     }
 
     @Override
-    public IJson getJSONByKey(String key) throws JSONException {
-        return ((JSObject) getInternal(key, JSType.OBJECT)).getValue();
+    public JSType getDataTypeOf(String key) throws JSONException {
+        return getMatching(key).getDataType();
     }
 
     @Override
-    public JSType getDataType(String key) throws JSONException {
-        return getJSONByKey(key).getDataType();
+    public List<String> getKeysOf(String key) throws JSONException {
+        return getMatching(key).getKeys();
     }
 
     @Override
-    public List<String> getKeys(String key) throws JSONException {
-        return getInternal(key).getKeys();
+    public List<IJson> getValuesOf(String key) throws JSONException {
+        return getMatching(key).getValues();
     }
 
     @Override
-    public List<IJson> getValues(String key) throws JSONException {
-        return getInternal(key).getValues();
+    public IJson getJSONObjectAt(String key) throws JSONException {
+        return ((JSObject) getMatching(key, JSType.OBJECT)).getValue();
     }
 
     @Override
-    public List<IJson> getList(String key) throws JSONException {
-        return ((JSArray) getInternal(key, JSType.ARRAY)).getValue();
+    public List<IJson> getArrayAt(String key) throws JSONException {
+        return ((JSArray) getMatching(key, JSType.ARRAY)).getValue();
     }
 
     @Override
-    public boolean getBoolean(String key) throws JSONException {
-        return ((JSBoolean) getInternal(key, JSType.BOOLEAN)).getValue();
+    public boolean getBooleanAt(String key) throws JSONException {
+        return ((JSBoolean) getMatching(key, JSType.BOOLEAN)).getValue();
     }
 
     @Override
-    public double getDouble(String key) throws JSONException {
-        return getInternal(key, JSType.DOUBLE).getDouble();
+    public double getDoubleAt(String key) throws JSONException {
+        return getMatching(key, JSType.DOUBLE).getDouble();
     }
 
     @Override
-    public long getLong(String key) throws JSONException {
-        return getInternal(key, JSType.LONG).getLong();
+    public long getLongAt(String key) throws JSONException {
+        return getMatching(key, JSType.LONG).getLong();
     }
 
     @Override
-    public String getString(String key) throws JSONException {
-        return ((JSString) getInternal(key, JSType.STRING)).getValue();
+    public String getStringAt(String key) throws JSONException {
+        return ((JSString) getMatching(key, JSType.STRING)).getValue();
     }
 
     @Override
-    public IJson getAny(String key) throws JSONException {
-        return getInternal(key);
+    public IJson getAnyAt(String key) throws JSONException {
+        return getMatching(key);
     }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
-    private IJson getInternal(String key, JSType requiredType) {
+    private IJson getMatching(String key, JSType requiredType) {
 
         // Acquire accurate typing
-        IJson ret = getInternal(key);
+        IJson ret = getMatching(key);
         JSType actualTyping = ret.getDataType();
 
         // check cast to asked typing
         if (!actualTyping.equals(requiredType)) {
-            throw getKeyDifferentTypeException(key, requiredType, actualTyping);
+            throw new KeyDifferentTypeException(
+                    "The Type of Object found for key {" + key + "} was not expected. "
+                            + "Expected: " + requiredType + "  ->  Received: " + actualTyping
+            );
         }
 
         return ret;
     }
 
-    private IJson getInternal(String key) {
-        // Attempt retrieval of object from structure.
-        return getJSONByKey(key); // Throws KeyNotFoundException
+    private IJson getMatching(String key) {
+
+        // Sanity Check
+        if (key == null) {
+            throw new KeyNotFoundException("Key provided was Null");
+        }
+
+        // Check for base level keys
+        if (key.equals("")) {
+            return this;
+        }
+
+        // Attempt deeper retrieval of object from structure.
+        return getInternal(new JSONKey(key));
     }
 
-    private KeyDifferentTypeException getKeyDifferentTypeException(String key, JSType expected, JSType actual) {
-        return new KeyDifferentTypeException(
-                "The Type of Object found for key {" + key + "} was not expected. Expected: " + expected
-                        + "  ->  Received: " + actual);
-    }
+    protected abstract IJson getInternal(JSONKey keyChain) throws KeyNotFoundException;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////

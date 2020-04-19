@@ -1,10 +1,8 @@
 package Values;
 
+import Core.IJson;
 import Exceptions.JSONParseException;
 import Exceptions.KeyNotFoundException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class JSNumber extends JSON {
 
@@ -62,7 +60,7 @@ public class JSNumber extends JSON {
     public Object getValue() {
         return myLongValue == null
                 ? myDoubleValue
-                : Long.valueOf(myLongValue);
+                : myLongValue;
     }
 
     @Override
@@ -128,7 +126,7 @@ public class JSNumber extends JSON {
     }
 
     @Override
-    public JSON getJSONByKey(String key) {
+    public JSON getJSONObjectAt(String key) {
         if (contains(key)) {
             return this;
         }
@@ -136,7 +134,7 @@ public class JSNumber extends JSON {
     }
 
     @Override
-    public List<String> getKeys() {
-        return new ArrayList<>();
+    protected IJson getInternal(JSONKey keyChain) throws KeyNotFoundException {
+        throw new UnsupportedOperationException("Still need to implement this");
     }
 }

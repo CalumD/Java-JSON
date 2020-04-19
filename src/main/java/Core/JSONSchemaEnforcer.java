@@ -97,7 +97,7 @@ public class JSONSchemaEnforcer {
 
         if (schema.contains(resolvePath(pathSoFar, "type"))) {
             try {
-                switch (schema.getString(resolvePath(pathSoFar, "type"))) {
+                switch (schema.getStringAt(resolvePath(pathSoFar, "type"))) {
                     case "number":
                     case "integer":
                         validateNumber(toValidate, localSchema);
@@ -150,70 +150,70 @@ public class JSONSchemaEnforcer {
             try {
                 if (schema.contains("multipleOf")) {
                     if (value instanceof Long) {
-                        if ((((Long) value) % schema.getLong("multipleOf")) != 0) {
-                            valueUnexpected("multipleOf: " + schema.getLong("multipleOf"),
-                                value.toString());
+                        if ((((Long) value) % schema.getLongAt("multipleOf")) != 0) {
+                            valueUnexpected("multipleOf: " + schema.getLongAt("multipleOf"),
+                                    value.toString());
                         }
                     } else {
-                        if ((((Double) value) % schema.getDouble("multipleOf")) != 0) {
-                            valueUnexpected("multipleOf: " + schema.getDouble("multipleOf"),
-                                value.toString());
+                        if ((((Double) value) % schema.getDoubleAt("multipleOf")) != 0) {
+                            valueUnexpected("multipleOf: " + schema.getDoubleAt("multipleOf"),
+                                    value.toString());
                         }
                     }
                 }
                 if (schema.contains("minimum")) {
                     if (value instanceof Long) {
-                        if (((Long) value) < schema.getLong("minimum")) {
-                            valueUnexpected("minimum: " + schema.getLong("minimum"),
-                                value.toString());
+                        if (((Long) value) < schema.getLongAt("minimum")) {
+                            valueUnexpected("minimum: " + schema.getLongAt("minimum"),
+                                    value.toString());
                         }
                     } else {
-                        if (((Double) value) < schema.getDouble("minimum")) {
-                            valueUnexpected("minimum: " + schema.getDouble("minimum"),
-                                value.toString());
+                        if (((Double) value) < schema.getDoubleAt("minimum")) {
+                            valueUnexpected("minimum: " + schema.getDoubleAt("minimum"),
+                                    value.toString());
                         }
                     }
                 }
                 if (schema.contains("exclusiveMinimum")) {
                     if (value instanceof Long) {
-                        if (((Long) value) <= schema.getLong("exclusiveMinimum")) {
+                        if (((Long) value) <= schema.getLongAt("exclusiveMinimum")) {
                             valueUnexpected(
-                                "exclusiveMinimum: " + schema.getLong("exclusiveMinimum"),
-                                value.toString());
+                                    "exclusiveMinimum: " + schema.getLongAt("exclusiveMinimum"),
+                                    value.toString());
                         }
                     } else {
-                        if (((Double) value) <= schema.getDouble("exclusiveMinimum")) {
+                        if (((Double) value) <= schema.getDoubleAt("exclusiveMinimum")) {
                             valueUnexpected(
-                                "exclusiveMinimum: " + schema.getDouble("exclusiveMinimum"),
-                                value.toString());
+                                    "exclusiveMinimum: " + schema.getDoubleAt("exclusiveMinimum"),
+                                    value.toString());
                         }
                     }
                 }
                 if (schema.contains("maximum")) {
                     if (value instanceof Long) {
-                        if (((Long) value) > schema.getLong("maximum")) {
-                            valueUnexpected("maximum: " + schema.getLong("maximum"),
-                                value.toString());
+                        if (((Long) value) > schema.getLongAt("maximum")) {
+                            valueUnexpected("maximum: " + schema.getLongAt("maximum"),
+                                    value.toString());
                         }
                     } else {
-                        if (((Double) value) > schema.getDouble("maximum")) {
-                            valueUnexpected("maximum: " + schema.getDouble("maximum"),
-                                value.toString());
+                        if (((Double) value) > schema.getDoubleAt("maximum")) {
+                            valueUnexpected("maximum: " + schema.getDoubleAt("maximum"),
+                                    value.toString());
                         }
                     }
                 }
                 if (schema.contains("exclusiveMaximum")) {
                     if (value instanceof Long) {
-                        if (((Long) value) >= schema.getLong("exclusiveMaximum")) {
+                        if (((Long) value) >= schema.getLongAt("exclusiveMaximum")) {
                             valueUnexpected(
-                                "exclusiveMaximum: " + schema.getLong("exclusiveMaximum"),
-                                value.toString());
+                                    "exclusiveMaximum: " + schema.getLongAt("exclusiveMaximum"),
+                                    value.toString());
                         }
                     } else {
-                        if (((Double) value) >= schema.getDouble("exclusiveMaximum")) {
+                        if (((Double) value) >= schema.getDoubleAt("exclusiveMaximum")) {
                             valueUnexpected(
-                                "exclusiveMaximum: " + schema.getDouble("exclusiveMaximum"),
-                                value.toString());
+                                    "exclusiveMaximum: " + schema.getDoubleAt("exclusiveMaximum"),
+                                    value.toString());
                         }
                     }
                 }
@@ -242,27 +242,27 @@ public class JSONSchemaEnforcer {
             try {
                 String limiter = value.length() > 100 ? value.substring(0, 100) + "..." : value;
                 if (schema.contains("minLength")) {
-                    if (value.length() < schema.getLong("minLength")) {
-                        valueUnexpected("minLength: " + schema.getLong("minLength"), limiter);
+                    if (value.length() < schema.getLongAt("minLength")) {
+                        valueUnexpected("minLength: " + schema.getLongAt("minLength"), limiter);
                     }
                 }
                 if (schema.contains("maxLength")) {
-                    if (value.length() > schema.getLong("maxLength")) {
-                        valueUnexpected("maxLength: " + schema.getLong("maxLength"), limiter);
+                    if (value.length() > schema.getLongAt("maxLength")) {
+                        valueUnexpected("maxLength: " + schema.getLongAt("maxLength"), limiter);
                     }
                 }
                 if (schema.contains("pattern")) {
-                    if (!(value.matches(schema.getString("pattern")))) {
-                        valueUnexpected("pattern: " + schema.getString("pattern"), limiter);
+                    if (!(value.matches(schema.getStringAt("pattern")))) {
+                        valueUnexpected("pattern: " + schema.getStringAt("pattern"), limiter);
                     }
                 }
                 if (schema.contains("enum")) {
                     HashSet<String> allowed = new HashSet<>();
-                    for (IJson elem : ((JSArray) schema.getJSONByKey("enum")).getValue()) {
+                    for (IJson elem : ((JSArray) schema.getJSONObjectAt("enum")).getValue()) {
                         allowed.add((String) elem.getValue());
                     }
                     if (!allowed.contains(value)) {
-                        valueUnexpected("enum: " + schema.getJSONByKey("enum"), limiter);
+                        valueUnexpected("enum: " + schema.getJSONObjectAt("enum"), limiter);
                     }
                 }
             } catch (ClassCastException | KeyNotFoundException | KeyDifferentTypeException e) {
@@ -297,8 +297,7 @@ public class JSONSchemaEnforcer {
                             "Required attribute declared but no properties attribute found.");
                     }
                     HashSet<String> requiredKeys = new HashSet<>();
-                    for (IJson key : ((JSArray) localSchema.getJSONByKey("required"))
-                            .getValue()) {
+                    for (IJson key : ((JSArray) localSchema.getJSONObjectAt("required")).getValue()) {
                         requiredKeys.add(((JSString) key).getValue());
                     }
                     if (requiredKeys.size() == 0) {
@@ -314,10 +313,10 @@ public class JSONSchemaEnforcer {
                     }
                 }
                 if (localSchema.contains("additionalProperties")) {
-                    if (localSchema.getJSONByKey("additionalProperties") instanceof JSBoolean) {
-                        if (!localSchema.getBoolean("additionalProperties")) {
+                    if (localSchema.getJSONObjectAt("additionalProperties") instanceof JSBoolean) {
+                        if (!localSchema.getBooleanAt("additionalProperties")) {
                             HashSet<String> allowedKeys = new HashSet<>(
-                                    localSchema.getJSONByKey("properties").getKeys());
+                                    localSchema.getJSONObjectAt("properties").getKeys());
 
                             for (String key : value.getKeys()) {
                                 if (!allowedKeys.contains(key)) {
@@ -334,20 +333,20 @@ public class JSONSchemaEnforcer {
                         }
                     } else {
                         HashSet<String> allowedKeys = new HashSet<>(
-                                localSchema.getJSONByKey("properties").getKeys());
+                                localSchema.getJSONObjectAt("properties").getKeys());
 
                         if (localSchema.contains("additionalProperties.$ref")) {
                             for (String key : value.getKeys()) {
                                 if (!allowedKeys.contains(key)) {
-                                    validateByType(value.getJSONByKey(key), schema,
-                                            localSchema.getString("additionalProperties.$ref")
+                                    validateByType(value.getJSONObjectAt(key), schema,
+                                            localSchema.getStringAt("additionalProperties.$ref")
                                                     .substring(2));
                                 }
                             }
                         } else {
                             for (String key : value.getKeys()) {
                                 if (!allowedKeys.contains(key)) {
-                                    validateByType(value.getJSONByKey(key), schema,
+                                    validateByType(value.getJSONObjectAt(key), schema,
                                             resolvePath(pathSoFar, "additionalProperties"));
                                 }
                             }
@@ -355,36 +354,34 @@ public class JSONSchemaEnforcer {
                     }
                 }
                 if (localSchema.contains("properties")) {
-                    if (!(localSchema.getJSONByKey("properties") instanceof JSObject)) {
+                    if (!(localSchema.getJSONObjectAt("properties") instanceof JSObject)) {
                         throw new KeyDifferentTypeException(
                                 "Properties declaration in object must be an object.");
                     }
-                    for (String key : localSchema.getJSONByKey("properties").getKeys()) {
+                    for (String key : localSchema.getJSONObjectAt("properties").getKeys()) {
                         if (obj.contains(key)) {
-                            validateByType(obj.getJSONByKey(key), schema,
+                            validateByType(obj.getJSONObjectAt(key), schema,
                                     resolvePath(pathSoFar, "properties." + key));
                         }
                     }
                 }
                 if (localSchema.contains("propertyNames.pattern")) {
                     for (String key : value.getKeys()) {
-                        if (!(key.matches(localSchema.getString("propertyNames.pattern")))) {
+                        if (!(key.matches(localSchema.getStringAt("propertyNames.pattern")))) {
                             valueUnexpected(
-                                "pattern: " + localSchema.getString("propertyNames.pattern"), key);
+                                    "pattern: " + localSchema.getStringAt("propertyNames.pattern"), key);
                         }
                     }
                 }
                 if (localSchema.contains("minProperties")) {
-                    if (value.getKeys().size() < (Long) localSchema.getJSONByKey("minProperties")
-                            .getValue()) {
-                        valueUnexpected("minProperties: " + localSchema.getLong("minProperties"),
+                    if (value.getKeys().size() < (Long) localSchema.getJSONObjectAt("minProperties").getValue()) {
+                        valueUnexpected("minProperties: " + localSchema.getLongAt("minProperties"),
                                 String.valueOf(value.getKeys().size()));
                     }
                 }
                 if (localSchema.contains("maxProperties")) {
-                    if (value.getKeys().size() > (Long) localSchema.getJSONByKey("maxProperties")
-                            .getValue()) {
-                        valueUnexpected("maxProperties: " + localSchema.getLong("maxProperties"),
+                    if (value.getKeys().size() > (Long) localSchema.getJSONObjectAt("maxProperties").getValue()) {
+                        valueUnexpected("maxProperties: " + localSchema.getLongAt("maxProperties"),
                                 String.valueOf(value.getKeys().size()));
                     }
                 }
@@ -419,43 +416,43 @@ public class JSONSchemaEnforcer {
 
             try {
                 if (localSchema.contains("uniqueItems")) {
-                    if (localSchema.getBoolean("uniqueItems")) {
+                    if (localSchema.getBooleanAt("uniqueItems")) {
                         //for all elements except the last
                         for (int i = 0; i < value.getValue().size() - 1; i++) {
                             //ensure that the rest are different.
                             for (int j = i + 1; j < value.getValue().size(); j++) {
                                 if (value.getValue().get(i).equals(value.getValue().get(j))) {
                                     throw new SchemaException(
-                                        "Found a non unique item in an array, index{" + i
-                                            + "}, when unique items should be enforced.");
+                                            "Found a non unique item in an array, index{" + i
+                                                    + "}, when unique items should be enforced.");
                                 }
                             }
                         }
                     }
                 }
                 if (localSchema.contains("minItems")) {
-                    if (value.getValue().size() < localSchema.getLong("minItems")) {
-                        valueUnexpected("minItems: " + localSchema.getLong("minItems"),
-                            String.valueOf(value.getValue().size()));
+                    if (value.getValue().size() < localSchema.getLongAt("minItems")) {
+                        valueUnexpected("minItems: " + localSchema.getLongAt("minItems"),
+                                String.valueOf(value.getValue().size()));
                     }
                 }
                 if (localSchema.contains("maxItems")) {
-                    if (value.getValue().size() > localSchema.getLong("maxItems")) {
-                        valueUnexpected("maxItems: " + localSchema.getLong("maxItems"),
-                            String.valueOf(value.getValue().size()));
+                    if (value.getValue().size() > localSchema.getLongAt("maxItems")) {
+                        valueUnexpected("maxItems: " + localSchema.getLongAt("maxItems"),
+                                String.valueOf(value.getValue().size()));
                     }
                 }
                 if (localSchema.contains("items")) {
-                    if (localSchema.getJSONByKey("items") instanceof JSArray) {
+                    if (localSchema.getJSONObjectAt("items") instanceof JSArray) {
                         for (int i = 0; i < value.getValue().size(); i++) {
                             validateByType(value.getValue().get(i), schema,
                                     resolvePath(pathSoFar, "items[" + i + "]"));
                         }
                         if (localSchema.contains("additionalItems")) {
-                            if (localSchema.getJSONByKey("additionalItems") instanceof JSBoolean) {
-                                if (!(localSchema.getBoolean("additionalItems"))) {
+                            if (localSchema.getJSONObjectAt("additionalItems") instanceof JSBoolean) {
+                                if (!(localSchema.getBooleanAt("additionalItems"))) {
                                     if (value.getValue().size() > ((JSArray) localSchema
-                                            .getJSONByKey("items")).getValue().size()) {
+                                            .getJSONObjectAt("items")).getValue().size()) {
                                         throw new SchemaException(
                                                 "Found additional attribute in {" + arr
                                                         + "}, schema enforced no additional items in that array.");
@@ -464,15 +461,15 @@ public class JSONSchemaEnforcer {
                             } else {
                                 if (localSchema.contains("additionalItems.$ref")) {
                                     for (
-                                            int i = ((JSArray) localSchema.getJSONByKey("items")).getValue()
+                                            int i = ((JSArray) localSchema.getJSONObjectAt("items")).getValue()
                                                     .size(); i < value.getValue().size(); i++) {
                                         validateByType(value.getValue().get(i), schema,
-                                            localSchema.getString("additionalItems.$ref")
+                                                localSchema.getStringAt("additionalItems.$ref")
                                                 .substring(2));
                                     }
                                 } else {
                                     for (
-                                            int i = ((JSArray) localSchema.getJSONByKey("items")).getValue()
+                                            int i = ((JSArray) localSchema.getJSONObjectAt("items")).getValue()
                                                     .size(); i < value.getValue().size(); i++) {
                                         validateByType(value.getValue().get(i), schema,
                                                 resolvePath(pathSoFar, "items"));
@@ -481,11 +478,11 @@ public class JSONSchemaEnforcer {
                             }
                         }
                     }
-                    if (localSchema.getJSONByKey("items") instanceof JSObject) {
+                    if (localSchema.getJSONObjectAt("items") instanceof JSObject) {
                         if (localSchema.contains("items.$ref")) {
                             for (IJson elem : value.getValue()) {
                                 validateByType(elem, schema,
-                                        localSchema.getString("items.$ref").substring(2));
+                                        localSchema.getStringAt("items.$ref").substring(2));
                             }
                         } else {
                             for (IJson elem : value.getValue()) {
@@ -558,7 +555,7 @@ public class JSONSchemaEnforcer {
     private static IJson getSchema(IJson schema, String path) throws SchemaException {
         path = path.replaceAll("/", ".");
         try {
-            return schema.getJSONByKey(path);
+            return schema.getJSONObjectAt(path);
         } catch (KeyNotFoundException e) {
             throw new SchemaException("Path not found in schema. " + e.getMessage());
         }

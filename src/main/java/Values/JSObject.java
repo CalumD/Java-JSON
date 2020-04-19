@@ -43,6 +43,7 @@ public class JSObject extends JSON {
             } catch (ClassCastException e) {
                 parsingTape.createParseError("\"", "Invalid type for object key.");
             }
+            assert key != null;
             validateObjectKey(key, parsingTape);
 
             // Validate Colon
@@ -152,7 +153,7 @@ public class JSObject extends JSON {
         }
 
         try {
-            getJSONByKey(keys);
+            getJSONObjectAt(keys);
             return true;
         } catch (KeyNotFoundException e) {
             return false;
@@ -191,7 +192,7 @@ public class JSObject extends JSON {
     }
 
     @Override
-    public IJson getJSONByKey(String keys) throws KeyNotFoundException {
+    public IJson getJSONObjectAt(String keys) throws KeyNotFoundException {
         String temporaryErrorText = "SOMETHING";
         if (keys.equals("")) {
             return this;
@@ -291,7 +292,7 @@ public class JSObject extends JSON {
         if (arrayAccess != null) {
             //if the stuff after the next dot reference matches our substrings, then get the current key and passdown on the array access
             if (keys.substring(keys.indexOf(".") + 1).equals(keys)) {
-                ret = json.get(key).getJSONByKey(arrayAccess);
+                ret = json.get(key).getJSONObjectAt(arrayAccess);
                 //if nothing was found, then throw
                 if (ret == null) {
                     throw new KeyNotFoundException(
@@ -302,7 +303,7 @@ public class JSObject extends JSON {
                 }
                 //continue down the nested key path
                 if (nestedArrays) {
-                    return ret.getJSONByKey(nestedKey);
+                    return ret.getJSONObjectAt(nestedKey);
                 }
                 //return this found object
                 else {
@@ -313,9 +314,9 @@ public class JSObject extends JSON {
             else {
                 //straight pass through the nested keys, based on current key and array access
                 if (nestedArrays) {
-                    ret = json.get(key).getJSONByKey(arrayAccess).getJSONByKey(nestedKey);
+                    ret = json.get(key).getJSONObjectAt(arrayAccess).getJSONObjectAt(nestedKey);
                 } else {
-                    ret = json.get(key).getJSONByKey(arrayAccess);
+                    ret = json.get(key).getJSONObjectAt(arrayAccess);
                 }
                 //if no object was found then throw
                 if (ret == null) {
@@ -328,7 +329,7 @@ public class JSObject extends JSON {
                 }
                 //else return the contents from the remainder of the key not yet decoded.
                 else {
-                    return ret.getJSONByKey(keys.substring(keys.indexOf(".") + 1));
+                    return ret.getJSONObjectAt(keys.substring(keys.indexOf(".") + 1));
                 }
             }
         }
@@ -337,19 +338,24 @@ public class JSObject extends JSON {
             try {
                 //if the next thing is an array, check it has content based on remaining un-decoded key subs
                 if (ret.getDataType() == JSType.ARRAY
-                        && (ret = ret.getJSONByKey(keys.substring(key.length() + 1))) == null) {
+                        && (ret = ret.getJSONObjectAt(keys.substring(key.length() + 1))) == null) {
                     throw new KeyNotFoundException(
-                            "The Key provided could not be found in the JSON. Reached: " +temporaryErrorText +
+                            "The Key provided could not be found in the JSON. Reached: " + temporaryErrorText +
                                     keys.split("\\.")[1] +
                                     "_     ::" +
                                     "It looks like you are trying to access an array with invalid id"
                     );
                 }
-                return ret.getJSONByKey(keys.substring(key.length() + 1));
+                return ret.getJSONObjectAt(keys.substring(key.length() + 1));
             } catch (StringIndexOutOfBoundsException e) {
                 return ret;
             }
         }
+    }
+
+    @Override
+    protected IJson getInternal(JSONKey keyChain) throws KeyNotFoundException {
+        throw new UnsupportedOperationException("Still need to implement this");
     }
 
     @Override
@@ -376,7 +382,13 @@ public class JSObject extends JSON {
         result.append("\n").append(indent).append('}');
     }
 
+    @Override
     public List<String> getKeys() {
         return new ArrayList<>(json.keySet());
+    }
+
+    @Override
+    public List<IJson> getValues() {
+        return new ArrayList<>(json.values());
     }
 }
