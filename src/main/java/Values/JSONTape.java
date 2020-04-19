@@ -11,11 +11,6 @@ public class JSONTape extends Tape<JSON> {
     }
 
     public JSON parseNextElement() {
-        //Sanity Check
-        if (fullInput == null || fullInput.length() == 0) {
-            throw new JSONParseException("You cannot create json from nothing. Input was "
-                    + (fullInput == null ? "null." : "empty."));
-        }
 
         // Reach the first legitimate character.
         consumeWhiteSpace();
@@ -56,6 +51,7 @@ public class JSONTape extends Tape<JSON> {
             case '/':
             case '#':
                 consumeComment();
+                break;
             default:
                 createParseError(VALID_JSON);
         }

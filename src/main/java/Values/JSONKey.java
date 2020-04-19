@@ -1,17 +1,21 @@
 package Values;
 
-import Exceptions.JSONParseException;
+import Exceptions.KeyDifferentTypeException;
+import Exceptions.KeyInvalidException;
+import Exceptions.KeyNotFoundException;
 
 import java.util.List;
 
 class JSONKey {
 
     private final List<String> callChain;
+    private final String fullKey;
+    private int currentCallChainIndex = 0;
 
-    JSONKey(String key) throws JSONParseException {
+    JSONKey(String key) throws KeyInvalidException {
         // Sanity Check
         if (key == null) {
-            throw new JSONParseException("Key cannot be null");
+            throw new KeyInvalidException("Key cannot be null");
         }
 
         // Consume any leading/trailing spaces
@@ -28,6 +32,36 @@ class JSONKey {
         }
 
         // Parse out the key
-        callChain = new KeyTape(key).parseAllElements();
+        fullKey = key;
+        callChain = new KeyTape(fullKey).parseAllElements();
+    }
+
+    String getNextKey() {
+        return callChain.get(currentCallChainIndex++);
+    }
+
+    void createKeyNotFoundException() throws KeyNotFoundException {
+        createException(" not found on element: ");
+    }
+
+    void createKeyDifferentTypeException() throws KeyDifferentTypeException {
+        createException(" is not a valid accessor on element: ");
+    }
+
+    private void createException(String message) {
+        if (currentCallChainIndex == callChain.size()) {
+            currentCallChainIndex--;
+        }
+        if (currentCallChainIndex == callChain.size()) {
+            currentCallChainIndex--;
+        }
+        throw new KeyDifferentTypeException(
+                callChain.get(currentCallChainIndex) + message
+                        + fullKey
+                        .substring(
+                                0,
+                                fullKey.indexOf(callChain.get(currentCallChainIndex))
+                        )
+        );
     }
 }
