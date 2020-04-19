@@ -11,7 +11,7 @@ public class JSArray extends JSON {
 
     private final List<IJson> myValue;
 
-    JSArray(JSONParsingTape parsingTape) throws JSONParseException {
+    JSArray(JSONTape parsingTape) throws JSONParseException {
         super(parsingTape);
         jsType = JSType.ARRAY;
         char checkingChar;
@@ -24,7 +24,7 @@ public class JSArray extends JSON {
         // Initial Array parsing Checks
         if (checkingChar == ',') {
             parsingTape.createParseError(
-                    JSONParsingTape.VALID_JSON,
+                    JSONTape.VALID_JSON,
                     "Missing Valid JSON at start of array."
             );
         }
@@ -49,7 +49,7 @@ public class JSArray extends JSON {
                     // Validate if we see a comma, there are more children to come
                     parsingTape.consumeWhiteSpace();
                     if (parsingTape.checkCurrentChar() == ']') {
-                        parsingTape.createParseError(JSONParsingTape.VALID_JSON,
+                        parsingTape.createParseError(JSONTape.VALID_JSON,
                                 "Comma suggests more array elements, but array terminates.");
                     }
                     break;

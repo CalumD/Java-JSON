@@ -8,7 +8,7 @@ public class JSString extends JSON {
 
     private final String myValue;
 
-    JSString(JSONParsingTape parsingTape) throws JSONParseException {
+    JSString(JSONTape parsingTape) throws JSONParseException {
         super(parsingTape);
 
         // Setup tracking variables;

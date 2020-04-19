@@ -1,0 +1,137 @@
+package Values;
+
+import Exceptions.JSONParseException;
+
+public abstract class Tape<T> {
+
+    private static final int DEFAULT_PARSE_ERROR_CONTEXT_SIZE = 30;
+    private static final String DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL = "_";
+    private static final String DEFAULT_PARSE_ERROR_MESSAGE = "Unexpected symbol found while parsing.";
+
+    protected final String fullInput;
+    protected int currentIndex = 0;
+
+    public Tape(String fullInput) {
+        this.fullInput = fullInput;
+    }
+
+    public abstract T parseNextElement();
+
+    int getCurrentIndex() {
+        return currentIndex;
+    }
+
+    char checkCurrentChar() {
+        return checkCharAtOffsetFromCurrent(0);
+    }
+
+    char checkNextChar() {
+        return checkCharAtOffsetFromCurrent(1);
+    }
+
+    char consumeOne() {
+        return checkCharAt(currentIndex++);
+    }
+
+    boolean checkNextFragment(String fragment) {
+        return checkNextFragment(fragment, true);
+    }
+
+    boolean checkNextFragment(String fragment, boolean consumeIfMatches) {
+        boolean matches = fragment.equals(fullInput.substring(currentIndex, currentIndex + fragment.length()));
+        if (matches && consumeIfMatches) {
+            currentIndex += fragment.length();
+        }
+        return matches;
+    }
+
+    String requestRegion(int fromHere, int toHere) {
+        return fullInput.substring(fromHere, toHere);
+    }
+
+    void createParseErrorFromOffset(int relativeOffset, String expectedFragment, String customErrorMessage) {
+        currentIndex += relativeOffset;
+        createParseError(expectedFragment, customErrorMessage);
+    }
+
+    void createParseError(String expectedFragment, String customErrorMessage) {
+        String gotFragment = "...";
+
+        // Check if we are far enough into the string to just
+        if (currentIndex > DEFAULT_PARSE_ERROR_CONTEXT_SIZE) {
+            gotFragment += getNonSpaceSnippet();
+        } else {
+            gotFragment = fullInput.substring(0, currentIndex);
+        }
+        gotFragment += DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL;
+
+        // Count lines til here:
+        int lineCount = 1;
+        for (int charIndex = 0; charIndex < currentIndex; charIndex++) {
+            if (fullInput.charAt(charIndex) == '\n') {
+                lineCount++;
+            }
+        }
+
+        // Throw the exception
+        throw new JSONParseException(customErrorMessage
+                + "\nLine: " + lineCount
+                + "\nGot: " + gotFragment
+                + "\nExpected: " + expectedFragment
+        );
+    }
+
+    void createParseError(String expectedFragment) {
+        createParseError(expectedFragment, DEFAULT_PARSE_ERROR_MESSAGE);
+    }
+
+    protected void consumeWhiteSpace() {
+        try {
+            while (true) {
+                switch (fullInput.charAt(currentIndex)) {
+                    case ' ':
+                    case '\n':
+                    case '\r':
+                    case '\t':
+                        currentIndex++;
+                        break;
+                    default:
+                        return;
+                }
+            }
+        } catch (IndexOutOfBoundsException e) {
+            throw new JSONParseException(
+                    "Reached end of input before parsing was complete. Are you missing a terminating delimiter?"
+            );
+        }
+    }
+
+    private char checkCharAtOffsetFromCurrent(int relativeOffset) {
+        return checkCharAt(currentIndex + relativeOffset);
+    }
+
+    private char checkCharAt(int absoluteOffset) {
+        return fullInput.charAt(absoluteOffset);
+    }
+
+    private String getNonSpaceSnippet() {
+        // Count back 20 'real' (non-space) characters to show a snippet of "up-to here" code.
+        char currentChar;
+        int snippetIndex, snippetLength;
+        for (snippetIndex = currentIndex - 1, snippetLength = 0;
+             ((snippetIndex > 0) && (snippetLength < DEFAULT_PARSE_ERROR_CONTEXT_SIZE));
+             snippetIndex--, snippetLength++
+        ) {
+            currentChar = checkCharAt(snippetIndex);
+            switch (currentChar) {
+                case ' ':
+                case '\n':
+                case '\r':
+                case '\t':
+                    snippetLength--;
+                    break;
+            }
+        }
+        return fullInput.substring(snippetIndex, currentIndex);
+    }
+}

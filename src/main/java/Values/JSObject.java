@@ -12,7 +12,7 @@ public class JSObject extends JSON {
 
     private final HashMap<String, IJson> json;
 
-    JSObject(JSONParsingTape parsingTape) throws JSONParseException {
+    JSObject(JSONTape parsingTape) throws JSONParseException {
         super(parsingTape);
         jsType = JSType.OBJECT;
         char checkingChar;
@@ -67,7 +67,7 @@ public class JSObject extends JSON {
                     // Validate if we see a comma, there are more children to come
                     parsingTape.consumeWhiteSpace();
                     if (parsingTape.checkCurrentChar() == '}') {
-                        parsingTape.createParseError(JSONParsingTape.VALID_JSON,
+                        parsingTape.createParseError(JSONTape.VALID_JSON,
                                 "Comma suggests more object elements, but object terminates.");
                     }
                     break;
@@ -81,7 +81,7 @@ public class JSObject extends JSON {
         }
     }
 
-    private void validateObjectKey(String key, JSONParsingTape parsingTape) {
+    private void validateObjectKey(String key, JSONTape parsingTape) {
         if (key.equals("")) {
             parsingTape.createParseError("<Valid Key>", "Illegal Object Key (Empty).");
         }

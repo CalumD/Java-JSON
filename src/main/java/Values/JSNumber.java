@@ -9,7 +9,7 @@ public class JSNumber extends JSON {
     private Long myLongValue;
     private Double myDoubleValue;
 
-    JSNumber(JSONParsingTape parsingTape) throws JSONParseException {
+    JSNumber(JSONTape parsingTape) throws JSONParseException {
         super(parsingTape);
         int numberStartIndex = parsingTape.getCurrentIndex();
 
@@ -17,7 +17,7 @@ public class JSNumber extends JSON {
         boolean isFloating = false;
 
         while (!foundEnd) {
-            switch(parsingTape.checkCurrentChar()) {
+            switch (parsingTape.checkCurrentChar()) {
                 case '.':
                     isFloating = true;
                 case '-':

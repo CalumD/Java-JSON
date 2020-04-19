@@ -19,7 +19,7 @@ public abstract class JSON implements IJson {
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
-    JSON(JSONParsingTape parsingTape) throws JSONParseException {
+    JSON(JSONTape parsingTape) throws JSONParseException {
         // This is only used to enforce each extending class has this matching constructor to execute the parse.
     }
 
@@ -34,7 +34,7 @@ public abstract class JSON implements IJson {
     }
 
     private JSON parseSelf(String jsonFragment) {
-        return new JSONParsingTape(jsonFragment).parseNextElement();
+        return new JSONTape(jsonFragment).parseNextElement();
     }
 
     private JSON parseSelf(List<String> jsonFragment) {
@@ -199,7 +199,7 @@ public abstract class JSON implements IJson {
         }
 
         // Check for base level keys
-        if (key.equals("")) {
+        if (key.replaceAll("\\s", "").equals("")) {
             return this;
         }
 

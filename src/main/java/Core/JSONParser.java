@@ -3,7 +3,7 @@ package Core;
 import Exceptions.JSONParseException;
 import Exceptions.KeyDifferentTypeException;
 import Exceptions.KeyNotFoundException;
-import Values.JSONParsingTape;
+import Values.JSONTape;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,7 +28,7 @@ public final class JSONParser {
             throw new JSONParseException("Empty JSON String, cannot parse");
         }
 
-        return new JSONParsingTape(jsonAsString).parseNextElement();
+        return new JSONTape(jsonAsString).parseNextElement();
     }
 
     /**
@@ -47,7 +47,7 @@ public final class JSONParser {
             throw new JSONParseException("Empty JSON String, cannot parse");
         }
 
-        return new JSONParsingTape(fileContents).parseNextElement();
+        return new JSONTape(fileContents).parseNextElement();
     }
 
     /**

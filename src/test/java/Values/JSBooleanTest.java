@@ -12,8 +12,8 @@ public class JSBooleanTest extends JSONTest {
 
     @BeforeEach
     public void setup() {
-        boolTrue = new JSBoolean(new JSONParsingTape("true"));
-        boolFalse = new JSBoolean(new JSONParsingTape("false"));
+        boolTrue = new JSBoolean(new JSONTape("true"));
+        boolFalse = new JSBoolean(new JSONTape("false"));
     }
 
     @SuppressWarnings({"SimplifiableJUnitAssertion", "ConstantConditions"})
@@ -37,7 +37,7 @@ public class JSBooleanTest extends JSONTest {
 
     @Test
     public void checkDoesEqualAgainstSimilarJSBoolean() {
-        assertEquals(boolTrue, new JSBoolean(new JSONParsingTape("TRUE")));
+        assertEquals(boolTrue, new JSBoolean(new JSONTape("TRUE")));
     }
 
     @Test
