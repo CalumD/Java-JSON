@@ -783,7 +783,7 @@ public class GetJson {
 
     @Test
     public void malformed_key_27() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(obj, "item[0]].item[0].request.header[2].key")
         );
     }
