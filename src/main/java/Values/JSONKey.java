@@ -41,27 +41,40 @@ class JSONKey {
     }
 
     void createKeyNotFoundException() throws KeyNotFoundException {
-        createException(" not found on element: ");
+        currentCallChainIndex--;
+        throw new KeyNotFoundException(
+                callChain.get(currentCallChainIndex).substring(1)
+                        + " not found on element: "
+                        + createUpToString()
+        );
     }
 
     void createKeyDifferentTypeException() throws KeyDifferentTypeException {
-        createException(" is not a valid accessor on element: ");
+        currentCallChainIndex--;
+        throw new KeyDifferentTypeException(
+                callChain.get(currentCallChainIndex).substring(1)
+                        + " is not a valid accessor on element: "
+                        + createUpToString()
+        );
     }
 
-    private void createException(String message) {
-        if (currentCallChainIndex == callChain.size()) {
-            currentCallChainIndex--;
+    private String createUpToString() {
+        StringBuilder upToString = new StringBuilder();
+        for (int index = 0; index < currentCallChainIndex; index++) {
+            if (callChain.get(index).startsWith("[")) {
+                upToString.append(callChain.get(index)).append(']');
+            } else {
+                upToString.append('.').append(callChain.get(index).substring(1));
+            }
         }
-        if (currentCallChainIndex == callChain.size()) {
-            currentCallChainIndex--;
+        if (upToString.length() == 0) {
+            return "<base element>";
         }
-        throw new KeyDifferentTypeException(
-                callChain.get(currentCallChainIndex) + message
-                        + fullKey
-                        .substring(
-                                0,
-                                fullKey.indexOf(callChain.get(currentCallChainIndex))
-                        )
-        );
+
+        if (upToString.charAt(0) == '.') {
+            upToString.deleteCharAt(0);
+        }
+
+        return upToString.toString();
     }
 }
