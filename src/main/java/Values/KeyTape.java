@@ -1,5 +1,6 @@
 package Values;
 
+import Exceptions.JSONKeyException;
 import Exceptions.JSONParseException;
 import Exceptions.KeyInvalidException;
 
@@ -14,7 +15,7 @@ class KeyTape extends Tape<String> {
         super(fullInput);
     }
 
-    public List<String> parseAllElements() {
+    public List<String> parseAllElements() throws JSONKeyException {
         try {
             if (fullInput.endsWith(".")) {
                 createParseErrorFromOffset(
