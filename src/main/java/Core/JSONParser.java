@@ -87,18 +87,18 @@ public final class JSONParser {
     }
 
     /**
-     * Calls getObject(key) with an empty key. E.g. Refers to the current object.
+     * Calls getValue(key) with the given key.
      *
      * @param fromObject The object to get from.
-     * @param key The key in the object to get the value of.
+     * @param key        The key in the object to get the value of.
      * @return The value of the current object.
      * @throws KeyNotFoundException      Shouldn't really be thrown by this method since it exists
      *                                   itself.
      * @throws KeyDifferentTypeException Thrown if the type of this object was not what was
      *                                   expected.
      */
-    public static Object getObject(IJson fromObject, String key)
-        throws KeyNotFoundException, KeyDifferentTypeException {
+    public static Object getValue(IJson fromObject, String key)
+            throws KeyNotFoundException, KeyDifferentTypeException {
         return fromObject.getValueAt(key);
     }
 
@@ -145,8 +145,24 @@ public final class JSONParser {
      *                                   match the return type of this method.
      */
     public static List<IJson> getList(IJson fromObject, String key)
-        throws KeyNotFoundException, KeyDifferentTypeException {
+            throws KeyNotFoundException, KeyDifferentTypeException {
         return fromObject.getArrayAt(key);
+    }
+
+    /**
+     * Gets the JSON Object at the given key.
+     *
+     * @param fromObject The object to get from.
+     * @param key        The key in the object to get the object at.
+     * @return The json object at that key on the given object.
+     * @throws KeyNotFoundException      Thrown if there was not an object at the path (or if the
+     *                                   path syntax is bad).
+     * @throws KeyDifferentTypeException Thrown if the type of the object found at that path doesn't
+     *                                   match the return type of this method.
+     */
+    public static IJson getJSONObject(IJson fromObject, String key)
+            throws KeyNotFoundException, KeyDifferentTypeException {
+        return fromObject.getJSONObjectAt(key);
     }
 
     /**

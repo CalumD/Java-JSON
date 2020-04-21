@@ -35,7 +35,7 @@ public class GetJson {
 
     @Test
     public void get_elem_0_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getObject(obj, "");
+        JSONParser.getValue(obj, "");
     }
 
     @Test
@@ -124,7 +124,7 @@ public class GetJson {
 
     @Test
     public void get_elem_6_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getObject(obj, "item[0]");
+        JSONParser.getValue(obj, "item[0]");
     }
 
 
@@ -152,7 +152,7 @@ public class GetJson {
 
     @Test
     public void get_elem_8_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getObject(obj, "item[0].item[0]");
+        JSONParser.getValue(obj, "item[0].item[0]");
     }
 
 
@@ -164,7 +164,7 @@ public class GetJson {
 
     @Test
     public void get_elem_9_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getObject(obj, "item[0].item[0].request");
+        JSONParser.getValue(obj, "item[0].item[0].request");
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -239,7 +239,7 @@ public class GetJson {
 
     @Test
     public void get_elem_14_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getObject(obj, "item[0].item[0].request.header[1]");
+        JSONParser.getValue(obj, "item[0].item[0].request.header[1]");
     }
 
 
@@ -511,7 +511,7 @@ public class GetJson {
     @Test
     public void object_type_mismatch_0() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getObject(obj, "variables")
+                JSONParser.getJSONObject(obj, "variables")
         );
 
     }
@@ -519,7 +519,7 @@ public class GetJson {
     @Test
     public void object_type_mismatch_1() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getObject(obj, "variables[1]")
+                JSONParser.getJSONObject(obj, "variables[1]")
         );
 
     }
@@ -527,7 +527,7 @@ public class GetJson {
     @Test
     public void object_type_mismatch_2() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getObject(obj, "variables[0]")
+                JSONParser.getJSONObject(obj, "variables[0]")
         );
 
     }
@@ -535,7 +535,7 @@ public class GetJson {
     @Test
     public void object_type_mismatch_3() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getObject(obj, "item[0].item[0].request.method")
+                JSONParser.getJSONObject(obj, "item[0].item[0].request.method")
         );
 
     }
@@ -543,7 +543,7 @@ public class GetJson {
     @Test
     public void object_type_mismatch_4() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getObject(obj, "variables[2]")
+                JSONParser.getJSONObject(obj, "variables[2]")
         );
 
     }
@@ -748,7 +748,7 @@ public class GetJson {
 
     @Test
     public void malformed_key_22() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyDifferentTypeException.class, () ->
                 JSONParser.getAny(obj, "item[0].item[0][0].request.header[2].key")
         );
     }
@@ -769,7 +769,7 @@ public class GetJson {
 
     @Test
     public void malformed_key_25() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyDifferentTypeException.class, () ->
                 JSONParser.getAny(obj, "[0]")
         );
     }
@@ -804,7 +804,7 @@ public class GetJson {
 
     @Test
     public void malformed_key_30() {
-        assertThrows(KeyNotFoundException.class, () ->
+        assertThrows(KeyInvalidException.class, () ->
                 JSONParser.getAny(obj, "item[0].item[0].requ est.header[2].key")
         );
     }
@@ -899,8 +899,8 @@ public class GetJson {
 
     @Test
     public void deep_nest_key_10() {
-        assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(deepNesting, "variables[0][1].[2].nested1?[1][3].final")
+        assertThrows(KeyInvalidException.class, () ->
+                JSONParser.getAny(deepNesting, "variables[0][1]..[2].nested1?[1][3].final")
         );
     }
 
@@ -928,7 +928,7 @@ public class GetJson {
     @Test
     public void deep_nest_key_14() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getObject(deepNesting, "variables[0][1][2].nested1?[1]")
+                JSONParser.getJSONObject(deepNesting, "variables[0][1][2].nested1?[1]")
         );
     }
 
