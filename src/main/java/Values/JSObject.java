@@ -97,10 +97,6 @@ public class JSObject extends JSON {
 
     @Override
     public boolean contains(String keys) {
-        if (keys.equals("")) {
-            return false;
-        }
-
         try {
             getJSONObjectAt(keys);
             return true;

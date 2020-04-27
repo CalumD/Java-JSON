@@ -67,11 +67,6 @@ public class JSArray extends JSON {
 
     @Override
     public boolean contains(String keys) {
-        //if the key is for this array, then show that this array exists
-        if (keys.equals("")) {
-            return true;
-        }
-
         try {
             //else get from children
             getJSONObjectAt(keys);

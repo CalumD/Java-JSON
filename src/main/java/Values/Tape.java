@@ -39,12 +39,8 @@ public abstract class Tape<T> {
     }
 
     boolean checkNextFragment(String fragment) {
-        return checkNextFragment(fragment, true);
-    }
-
-    boolean checkNextFragment(String fragment, boolean consumeIfMatches) {
         boolean matches = fragment.equals(fullInput.substring(currentIndex, currentIndex + fragment.length()));
-        if (matches && consumeIfMatches) {
+        if (matches) {
             currentIndex += fragment.length();
         }
         return matches;
@@ -64,7 +60,7 @@ public abstract class Tape<T> {
 
         // Check if we are far enough into the string to just
         if (currentIndex > DEFAULT_PARSE_ERROR_CONTEXT_SIZE) {
-            gotFragment += getNonSpaceSnippet();
+            gotFragment += getNonSpaceSnippetForException();
         } else {
             gotFragment = fullInput.substring(0, currentIndex);
         }
@@ -119,7 +115,7 @@ public abstract class Tape<T> {
         return fullInput.charAt(absoluteOffset);
     }
 
-    private String getNonSpaceSnippet() {
+    private String getNonSpaceSnippetForException() {
         // Count back 20 'real' (non-space) characters to show a snippet of "up-to here" code.
         char currentChar;
         int snippetIndex, snippetLength;

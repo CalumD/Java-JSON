@@ -45,8 +45,8 @@ class KeyTape extends Tape<String> {
             String nextElement = null;
             switch (checkCurrentChar()) {
                 case '[':
+                    currentIndex++;
                     try {
-                        currentIndex++;
                         consumeWhiteSpace();
                         switch (checkCurrentChar()) {
                             case '\'':

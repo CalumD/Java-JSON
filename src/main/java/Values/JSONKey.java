@@ -9,7 +9,6 @@ import java.util.List;
 class JSONKey {
 
     private final List<String> callChain;
-    private final String fullKey;
     private int currentCallChainIndex = 0;
 
     JSONKey(String key) throws KeyInvalidException {
@@ -32,8 +31,7 @@ class JSONKey {
         }
 
         // Parse out the key
-        fullKey = key;
-        callChain = new KeyTape(fullKey).parseAllElements();
+        callChain = new KeyTape(key).parseAllElements();
     }
 
     String getNextKey() {
@@ -59,6 +57,10 @@ class JSONKey {
     }
 
     private String createUpToString() {
+        if (currentCallChainIndex <= 0) {
+            return "<base element>";
+        }
+
         StringBuilder upToString = new StringBuilder();
         for (int index = 0; index < currentCallChainIndex; index++) {
             if (callChain.get(index).startsWith("[")) {
@@ -66,9 +68,6 @@ class JSONKey {
             } else {
                 upToString.append('.').append(callChain.get(index).substring(1));
             }
-        }
-        if (upToString.length() == 0) {
-            return "<base element>";
         }
 
         if (upToString.charAt(0) == '.') {
