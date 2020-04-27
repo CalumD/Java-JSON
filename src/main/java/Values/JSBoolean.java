@@ -1,8 +1,6 @@
 package Values;
 
-import Core.IJson;
 import Exceptions.JSONParseException;
-import Exceptions.KeyNotFoundException;
 
 public class JSBoolean extends JSON {
 
@@ -33,18 +31,8 @@ public class JSBoolean extends JSON {
     }
 
     @Override
-    public boolean contains(String keys) {
-        return keys.equals("");
-    }
-
-    @Override
     public String asString(int depth) {
         return String.valueOf(myValue);
-    }
-
-    @Override
-    protected void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
-        result.append(asString(depth));
     }
 
     @Override
@@ -70,21 +58,5 @@ public class JSBoolean extends JSON {
     @Override
     public int hashCode() {
         return Boolean.hashCode(myValue);
-    }
-
-    @Override
-    public JSON getJSONObjectAt(String key) {
-        if (contains(key)) {
-            return this;
-        }
-        throw new KeyNotFoundException("Key: " + key + ", not found in JSON.");
-    }
-
-    @Override
-    protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
-        if (keySequence.getNextKey().equals("")) {
-            return this;
-        }
-        throw new KeyNotFoundException("No child elements on a " + jsType);
     }
 }

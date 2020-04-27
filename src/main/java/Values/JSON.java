@@ -33,6 +33,11 @@ public abstract class JSON implements IJson {
         return parseSelf(jsonFragment);
     }
 
+    @Override
+    public boolean contains(String key) {
+        return key.equals("");
+    }
+
     private JSON parseSelf(String jsonFragment) {
         return new JSONTape(jsonFragment).parseNextElement();
     }
@@ -207,8 +212,12 @@ public abstract class JSON implements IJson {
         return getInternal(new JSONKey(key));
     }
 
-    protected abstract IJson getInternal(JSONKey keySequence) throws KeyNotFoundException;
-
+    protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
+        if (keySequence.getNextKey().equals("")) {
+            return this;
+        }
+        throw new KeyNotFoundException("No child elements on a " + jsType);
+    }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
@@ -249,7 +258,9 @@ public abstract class JSON implements IJson {
         return result.toString();
     }
 
-    abstract void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth);
+    protected void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
+        result.append(asString(depth));
+    }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////

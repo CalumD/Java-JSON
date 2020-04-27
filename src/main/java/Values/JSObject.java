@@ -96,6 +96,47 @@ public class JSObject extends JSON {
     }
 
     @Override
+    public boolean contains(String keys) {
+        if (keys.equals("")) {
+            return false;
+        }
+
+        try {
+            getJSONObjectAt(keys);
+            return true;
+        } catch (KeyNotFoundException e) {
+            return false;
+        }
+    }
+
+    @Override
+    protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
+        String nextKey = keySequence.getNextKey();
+        if (nextKey.equals("")) {
+            return this;
+        }
+        if (!nextKey.startsWith("{")) {
+            keySequence.createKeyDifferentTypeException();
+        }
+        JSON childElement = (JSON) json.get(nextKey.substring(1));
+        if (childElement == null) {
+            keySequence.createKeyNotFoundException();
+        }
+        assert childElement != null;
+        return childElement.getInternal(keySequence);
+    }
+
+    @Override
+    public List<String> getKeys() {
+        return new ArrayList<>(json.keySet());
+    }
+
+    @Override
+    public List<IJson> getValues() {
+        return new ArrayList<>(json.values());
+    }
+
+    @Override
     public String asString(int depth) {
         StringBuilder ret = new StringBuilder("{");
 
@@ -119,7 +160,7 @@ public class JSObject extends JSON {
         //print the full internals based on the next depth though
         for (String key : json.keySet()) {
             ret.append("\"").append(key).append("\"").append(":")
-                .append(json.get(key).asString(depth - 1)).append(",");
+                    .append(json.get(key).asString(depth - 1)).append(",");
         }
 
         if (ret.charAt(ret.length() - 1) == ',') {
@@ -130,17 +171,27 @@ public class JSObject extends JSON {
     }
 
     @Override
-    public boolean contains(String keys) {
-        if (keys.equals("")) {
-            return false;
+    protected void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
+        if (json.isEmpty()) {
+            result.append("{}");
+            return;
         }
 
-        try {
-            getJSONObjectAt(keys);
-            return true;
-        } catch (KeyNotFoundException e) {
-            return false;
+        indent.append(tabSize);
+        result.append('{').append('\n').append(indent);
+        if (depth == 0) {
+            result.append("<").append(json.size()).append(">");
+        } else {
+            json.forEach((key, value) -> {
+                result.append('"').append(key).append("\": ");
+                ((JSON) value).asPrettyString(indent, tabSize, result, depth - 1);
+                result.append(",\n").append(indent);
+            });
+            result.delete(result.length() - 2 - indent.length(), result.length() - 1);
         }
+
+        indent.delete(0, tabSize.length());
+        result.append("\n").append(indent).append('}');
     }
 
     @Override
@@ -172,56 +223,5 @@ public class JSObject extends JSON {
     @Override
     public int hashCode() {
         return json.hashCode();
-    }
-
-    @Override
-    protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
-        String nextKey = keySequence.getNextKey();
-        if (nextKey.equals("")) {
-            return this;
-        }
-        if (!nextKey.startsWith("{")) {
-            keySequence.createKeyDifferentTypeException();
-        }
-        JSON childElement = (JSON) json.get(nextKey.substring(1));
-        if (childElement == null) {
-            keySequence.createKeyNotFoundException();
-        }
-        assert childElement != null;
-        return childElement.getInternal(keySequence);
-    }
-
-    @Override
-    void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
-        if (json.isEmpty()) {
-            result.append("{}");
-            return;
-        }
-
-        indent.append(tabSize);
-        result.append('{').append('\n').append(indent);
-        if (depth == 0) {
-            result.append("<").append(json.size()).append(">");
-        } else {
-            json.forEach((key, value) -> {
-                result.append('"').append(key).append("\": ");
-                ((JSON)value).asPrettyString(indent, tabSize, result, depth - 1);
-                result.append(",\n").append(indent);
-            });
-            result.delete(result.length() - 2 - indent.length(), result.length() -1);
-        }
-
-        indent.delete(0, tabSize.length());
-        result.append("\n").append(indent).append('}');
-    }
-
-    @Override
-    public List<String> getKeys() {
-        return new ArrayList<>(json.keySet());
-    }
-
-    @Override
-    public List<IJson> getValues() {
-        return new ArrayList<>(json.values());
     }
 }

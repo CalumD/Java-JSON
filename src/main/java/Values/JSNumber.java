@@ -1,8 +1,7 @@
 package Values;
 
-import Core.IJson;
 import Exceptions.JSONParseException;
-import Exceptions.KeyNotFoundException;
+import Exceptions.KeyDifferentTypeException;
 
 public class JSNumber extends JSON {
 
@@ -65,14 +64,19 @@ public class JSNumber extends JSON {
 
     @Override
     public double getDouble() {
+        if (jsType.equals(JSType.LONG)) {
+            throw new KeyDifferentTypeException("This number is a double, not a long.");
+        }
         return myDoubleValue;
     }
 
     @Override
     public long getLong() {
+        if (jsType.equals(JSType.DOUBLE)) {
+            throw new KeyDifferentTypeException("This number is a long, not a double.");
+        }
         return myLongValue;
     }
-
 
 
     @Override
@@ -80,16 +84,6 @@ public class JSNumber extends JSON {
         return myLongValue == null
                 ? String.valueOf(myDoubleValue)
                 : String.valueOf(myLongValue);
-    }
-
-    @Override
-    protected void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
-        result.append(asString(1));
-    }
-
-    @Override
-    public boolean contains(String keys) {
-        return keys.equals("");
     }
 
     @Override
@@ -123,21 +117,5 @@ public class JSNumber extends JSON {
         return myLongValue == null
                 ? Double.hashCode(myDoubleValue)
                 : Long.hashCode(myLongValue);
-    }
-
-    @Override
-    public JSON getJSONObjectAt(String key) {
-        if (contains(key)) {
-            return this;
-        }
-        throw new KeyNotFoundException("Key: " + key + ", not found in JSON.");
-    }
-
-    @Override
-    protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
-        if (keySequence.getNextKey().equals("")) {
-            return this;
-        }
-        throw new KeyNotFoundException("No child elements on a " + jsType);
     }
 }

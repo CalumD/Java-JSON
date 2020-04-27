@@ -1,8 +1,6 @@
 package Values;
 
-import Core.IJson;
 import Exceptions.JSONParseException;
-import Exceptions.KeyNotFoundException;
 
 public class JSString extends JSON {
 
@@ -65,27 +63,8 @@ public class JSString extends JSON {
     }
 
     @Override
-    public boolean contains(String keys) {
-        return keys.equals("");
-    }
-
-    @Override
-    protected void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
-        result.append(asString(depth));
-    }
-
-    @Override
     public String asString(int depth) {
-        // TODO: Check if I need to re-introduce backslash escapes here.
         return "\"" + myValue + "\"";
-    }
-
-    @Override
-    protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
-        if (keySequence.getNextKey().equals("")) {
-            return this;
-        }
-        throw new KeyNotFoundException("No child elements on a " + jsType);
     }
 
     @Override
@@ -100,11 +79,12 @@ public class JSString extends JSON {
         if (other instanceof Character[] || other instanceof String) {
             return myValue.equals(other.toString());
         }
-        if (other instanceof JSString) {
+
+        if (getClass() != other.getClass()) {
+            return false;
+        } else {
             return this.myValue.equals(((JSString) other).myValue);
         }
-
-        return false;
     }
 
     @Override
@@ -112,11 +92,4 @@ public class JSString extends JSON {
         return myValue.hashCode();
     }
 
-    @Override
-    public JSON getJSONObjectAt(String key) {
-        if (contains(key)) {
-            return this;
-        }
-        throw new KeyNotFoundException("Key: " + key + ", not found in JSON.");
-    }
 }

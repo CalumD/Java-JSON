@@ -66,9 +66,58 @@ public class JSArray extends JSON {
     }
 
     @Override
+    public boolean contains(String keys) {
+        //if the key is for this array, then show that this array exists
+        if (keys.equals("")) {
+            return true;
+        }
+
+        try {
+            //else get from children
+            getJSONObjectAt(keys);
+            return true;
+        } catch (KeyNotFoundException e) {
+            return false;
+        }
+    }
+
+    @Override
+    protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
+        String nextKey = keySequence.getNextKey();
+        if (nextKey.equals("")) {
+            return this;
+        }
+        if (!nextKey.startsWith("[")) {
+            keySequence.createKeyDifferentTypeException();
+        }
+        JSON childElement = null;
+        try {
+            childElement = (JSON) myValue.get(Integer.parseInt(nextKey.substring(1)));
+        } catch (IndexOutOfBoundsException e) {
+            keySequence.createKeyNotFoundException();
+        }
+        assert childElement != null;
+        return childElement.getInternal(keySequence);
+    }
+
+    @Override
+    public List<String> getKeys() {
+        ArrayList<String> ret = new ArrayList<>();
+        for (int i = 0; i < myValue.size(); i++) {
+            ret.add(String.valueOf(i));
+        }
+        return ret;
+    }
+
+    @Override
+    public List<IJson> getValues() {
+        return getValue();
+    }
+
+    @Override
     public String asString(int depth) {
         //if this is an empty array, then be sensible
-        if (myValue.size() == 0) {
+        if (myValue.isEmpty()) {
             return "[]";
         }
 
@@ -91,20 +140,26 @@ public class JSArray extends JSON {
     }
 
     @Override
-    public boolean contains(String keys) {
-
-        //if the key is for this array, then show that this array exists
-        if (keys.equals("")) {
-            return true;
+    protected void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
+        if (myValue.isEmpty()) {
+            result.append("[]");
+            return;
         }
 
-        try {
-            //else get from children
-            getJSONObjectAt(keys);
-            return true;
-        } catch (KeyNotFoundException e) {
-            return false;
+        indent.append(tabSize);
+        result.append('[').append('\n').append(indent);
+        if (depth == 0) {
+            result.append("<").append(myValue.size()).append(">");
+        } else {
+            myValue.forEach(value -> {
+                ((JSON) value).asPrettyString(indent, tabSize, result, depth - 1);
+                result.append(",\n").append(indent);
+            });
+            result.delete(result.length() - 2 - indent.length(), result.length() - 1);
         }
+
+        indent.delete(0, tabSize.length());
+        result.append("\n").append(indent).append(']');
     }
 
     @Override
@@ -133,94 +188,5 @@ public class JSArray extends JSON {
     @Override
     public int hashCode() {
         return myValue.hashCode();
-    }
-
-    @Override
-    public IJson getJSONObjectAt(String key) throws KeyNotFoundException {
-        //if the key is simply to show that this index exists then show it exists
-        if (key.equals("")) {
-            return this;
-        }
-
-        //if the next key starts as a sub array index
-        if (key.startsWith("[")) {
-            //recursive descent through nested arrays
-            String[] nestedIndexString = key.split("\\[");
-
-            //for each nest, get the contents of the array index
-            for (int i = 0; i < nestedIndexString.length; i++) {
-                nestedIndexString[i] = nestedIndexString[i].replace("]", "");
-            }
-
-            //find the object at that array index
-            IJson ret = this;
-            for (String i : nestedIndexString) {
-                ret = ret.getJSONObjectAt(i);
-            }
-            return ret;
-        }
-
-        //else, we are looking for a value in THIS array
-        try {
-            return myValue.get(Integer.parseInt(key));
-        } catch (Exception e) {
-            throw new KeyNotFoundException(
-                    "It looks like you are trying to access an array with invalid id");
-        }
-    }
-
-    @Override
-    protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
-        String nextKey = keySequence.getNextKey();
-        if (nextKey.equals("")) {
-            return this;
-        }
-        if (!nextKey.startsWith("[")) {
-            keySequence.createKeyDifferentTypeException();
-        }
-        JSON childElement = null;
-        try {
-            childElement = (JSON) myValue.get(Integer.parseInt(nextKey.substring(1)));
-        } catch (IndexOutOfBoundsException e) {
-            keySequence.createKeyNotFoundException();
-        }
-        assert childElement != null;
-        return childElement.getInternal(keySequence);
-    }
-
-    @Override
-    void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
-        if (myValue.isEmpty()) {
-            result.append("[]");
-            return;
-        }
-
-        indent.append(tabSize);
-        result.append('[').append('\n').append(indent);
-        if (depth == 0) {
-            result.append("<").append(myValue.size()).append(">");
-        } else {
-            myValue.forEach(value -> {
-                ((JSON)value).asPrettyString(indent, tabSize, result, depth - 1);
-                result.append(",\n").append(indent);
-            });
-            result.delete(result.length() - 2 - indent.length(), result.length() -1);
-        }
-
-        indent.delete(0, tabSize.length());
-        result.append("\n").append(indent).append(']');
-    }
-
-    public List<String> getKeys() {
-        ArrayList<String> ret = new ArrayList<>();
-        for (int i = 0; i < myValue.size(); i++) {
-            ret.add(String.valueOf(i));
-        }
-        return ret;
-    }
-
-    @Override
-    public List<IJson> getValues() {
-        return getValue();
     }
 }
