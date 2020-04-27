@@ -1,7 +1,7 @@
 package oldTests.Json;
 
-import Core.JSONParser;
-import Exceptions.JSONParseException;
+import api.JSONParser;
+import exceptions.JSONParseException;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

@@ -1,11 +1,11 @@
 package oldTests.Json;
 
-import Core.IJson;
-import Core.JSONParser;
-import Exceptions.JSONParseException;
-import Exceptions.KeyDifferentTypeException;
-import Exceptions.KeyInvalidException;
-import Exceptions.KeyNotFoundException;
+import api.IJson;
+import api.JSONParser;
+import exceptions.JSONParseException;
+import exceptions.KeyDifferentTypeException;
+import exceptions.KeyInvalidException;
+import exceptions.KeyNotFoundException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
