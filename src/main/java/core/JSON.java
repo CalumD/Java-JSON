@@ -35,7 +35,7 @@ public abstract class JSON implements IJson {
 
     @Override
     public boolean contains(String key) {
-        return key.equals("");
+        return "".equals(key);
     }
 
     private JSON parseSelf(String jsonFragment) {
