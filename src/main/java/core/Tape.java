@@ -39,6 +39,9 @@ public abstract class Tape<T> {
     }
 
     boolean checkNextFragment(String fragment) {
+        if (fragment.length() > fullInput.substring(currentIndex).length()) {
+            return false;
+        }
         boolean matches = fragment.equals(fullInput.substring(currentIndex, currentIndex + fragment.length()));
         if (matches) {
             currentIndex += fragment.length();

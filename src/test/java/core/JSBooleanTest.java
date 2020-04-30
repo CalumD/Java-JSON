@@ -1,11 +1,12 @@
 package core;
 
+import exceptions.JSONParseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class JSBooleanTest extends JSONTest {
+public class JSBooleanTest {
 
     private JSBoolean boolTrue;
     private JSBoolean boolFalse;
@@ -57,6 +58,36 @@ public class JSBooleanTest extends JSONTest {
     @Test
     public void checkRegularBooleanDoesEqualWithFalse() {
         assertTrue(boolFalse.equals(false));
+    }
+
+    @Test
+    public void testTRUEAlternative() {
+        assertTrue(new JSBoolean(new JSONTape("TRUE")).getValue());
+    }
+
+    @Test
+    public void testTrueAlternative() {
+        assertTrue(new JSBoolean(new JSONTape("True")).getValue());
+    }
+
+    @Test
+    public void testTrueRandom() {
+        assertThrows(JSONParseException.class, () -> new JSBoolean(new JSONTape("TrUe")));
+    }
+
+    @Test
+    public void testFalseRandom() {
+        assertThrows(JSONParseException.class, () -> new JSBoolean(new JSONTape("FaLsE")));
+    }
+
+    @Test
+    public void testFALSEAlternative() {
+        assertFalse(new JSBoolean(new JSONTape("FALSE")).getValue());
+    }
+
+    @Test
+    public void testFalseAlternative() {
+        assertFalse(new JSBoolean(new JSONTape("False")).getValue());
     }
 
     @Test
