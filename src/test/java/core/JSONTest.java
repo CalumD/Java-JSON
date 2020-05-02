@@ -26,6 +26,9 @@ public abstract class JSONTest {
     public abstract void getKeys();
 
     @Test
+    public abstract void getValue();
+
+    @Test
     public abstract void getValues();
 
     @Test
