@@ -19,6 +19,8 @@ public class JSNumber extends JSON {
             try {
                 switch (parsingTape.checkCurrentChar()) {
                     case '.':
+                    case 'e':
+                    case 'E':
                         isFloating = true;
                     case '-':
                     case '+':
@@ -32,9 +34,6 @@ public class JSNumber extends JSON {
                     case '7':
                     case '8':
                     case '9':
-                    case 'e':
-                    case 'E':
-                    case '^':
                         parsingTape.consumeOne();
                         break;
                     default:
@@ -60,10 +59,12 @@ public class JSNumber extends JSON {
     }
 
     @Override
-    public Object getValue() {
-        return myLongValue == null
-                ? myDoubleValue
-                : myLongValue;
+    public Number getValue() {
+        if (myLongValue == null) {
+            return myDoubleValue;
+        } else {
+            return myLongValue;
+        }
     }
 
     @Override
