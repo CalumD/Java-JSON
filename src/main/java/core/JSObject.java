@@ -98,7 +98,7 @@ public class JSObject extends JSON {
     @Override
     public boolean contains(String keys) {
         try {
-            getJSONObjectAt(keys);
+            getAnyAt(keys);
             return true;
         } catch (KeyNotFoundException e) {
             return false;
@@ -142,15 +142,8 @@ public class JSObject extends JSON {
         }
         //just print the boiler plate object stuff
         else if (depth == 0) {
-            ret.append('<');
-
-            String[] keys = new String[json.size()];
-            json.keySet().toArray(keys);
-            for (int i = 0; i < keys.length - 1; i++) {
-                ret.append(keys[i]).append(',');
-            }
-            ret.append(keys[keys.length - 1]).append(">}");
-            return ret.toString();
+            getKeysAsCompressedForString(ret);
+            return ret.append('}').toString();
         }
 
         //print the full internals based on the next depth though
@@ -166,6 +159,17 @@ public class JSObject extends JSON {
         return ret.append("}").toString();
     }
 
+    private void getKeysAsCompressedForString(StringBuilder stringBuilder) {
+        stringBuilder.append('<');
+
+        String[] keys = new String[json.size()];
+        json.keySet().toArray(keys);
+        for (int i = 0; i < keys.length - 1; i++) {
+            stringBuilder.append(keys[i]).append(',');
+        }
+        stringBuilder.append(keys[keys.length - 1]).append(">");
+    }
+
     @Override
     protected void asPrettyString(StringBuilder indent, String tabSize, StringBuilder result, int depth) {
         if (json.isEmpty()) {
@@ -176,7 +180,7 @@ public class JSObject extends JSON {
         indent.append(tabSize);
         result.append('{').append('\n').append(indent);
         if (depth == 0) {
-            result.append("<").append(json.size()).append(">");
+            getKeysAsCompressedForString(result);
         } else {
             json.forEach((key, value) -> {
                 result.append('"').append(key).append("\": ");

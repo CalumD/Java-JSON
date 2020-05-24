@@ -330,7 +330,7 @@ public class JSArrayTest extends JSONTest {
     @Test
     @Override
     public void toPrettyString() {
-        assertEquals("[\n   <6>\n]", array.toPrettyString());
+        assertEquals("[\n  <6>\n]", array.toPrettyString());
     }
 
     @Test
@@ -342,21 +342,21 @@ public class JSArrayTest extends JSONTest {
     @Test
     @Override
     public void asPrettyString() {
-        assertEquals("[\n   [],\n   0,\n   0.1,\n   \"\",\n   true,\n   {} \n]", array.asPrettyString());
+        assertEquals("[\n  [],\n  0,\n  0.1,\n  \"\",\n  true,\n  {} \n]", array.asPrettyString());
     }
 
     @Test
     @Override
     public void asPrettyStringWithDepth() {
-        assertEquals("[\n   [],\n   0,\n   0.1,\n   \"\",\n   true,\n   {} \n]", array.asPrettyString(5));
-        assertEquals("[\n   [\n      [\n         <1>\n      ] \n   ] \n]", new JSArray(new JSONTape("[[[[1]]]]")).asPrettyString(2));
+        assertEquals("[\n  [],\n  0,\n  0.1,\n  \"\",\n  true,\n  {} \n]", array.asPrettyString(5));
+        assertEquals("[\n  [\n    [\n      <1>\n    ] \n  ] \n]", new JSArray(new JSONTape("[[[[1]]]]")).asPrettyString(2));
     }
 
     @Test
     @Override
     public void asPrettyStringWithDepthAndIndent() {
-        assertEquals("[\n       [],\n       0,\n       0.1,\n       \"\",\n       true,\n       {} \n]", array.asPrettyString(5, 6));
-        assertEquals("[\n       [\n              [\n                     <1>\n              ] \n       ] \n]", new JSArray(new JSONTape("[[[[1]]]]")).asPrettyString(2, 6));
+        assertEquals("[\n      [],\n      0,\n      0.1,\n      \"\",\n      true,\n      {} \n]", array.asPrettyString(5, 6));
+        assertEquals("[\n      [\n            [\n                  <1>\n            ] \n      ] \n]", new JSArray(new JSONTape("[[[[1]]]]")).asPrettyString(2, 6));
     }
 
     @SuppressWarnings({"SimplifiableJUnitAssertion", "ConstantConditions"})

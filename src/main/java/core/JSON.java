@@ -250,7 +250,7 @@ public abstract class JSON implements IJson {
         StringBuilder prettyTabSizeBuilder = new StringBuilder();
         do {
             prettyTabSizeBuilder.append(' ');
-        } while (indentWidth-- > 0);
+        } while (indentWidth-- > 1);
 
         StringBuilder result = new StringBuilder();
         asPrettyString(new StringBuilder(), prettyTabSizeBuilder.toString(), result, depth);
