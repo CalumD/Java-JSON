@@ -159,21 +159,34 @@ public class JSArray extends JSON {
 
     @Override
     public boolean equals(Object other) {
-        if (other == null || (getClass() != other.getClass())) {
+        if (other == null || ((getClass() != other.getClass()) && (!(other instanceof List)))) {
             return false;
         }
         if (other == this) {
             return true;
         }
 
-        JSArray o = (JSArray) other;
+        if (other instanceof List) {
+            List<?> o = (List<?>) other;
 
-        if (this.myValue.size() != o.myValue.size()) {
-            return false;
-        }
-        for (int i = 0; i < this.myValue.size(); i++) {
-            if (!(this.myValue.get(i).equals(o.myValue.get(i)))) {
+            if (this.myValue.size() != o.size()) {
                 return false;
+            }
+            for (int i = 0; i < this.myValue.size(); i++) {
+                if (!(this.myValue.get(i).equals(o.get(i)))) {
+                    return false;
+                }
+            }
+        } else {
+            JSArray o = (JSArray) other;
+
+            if (this.myValue.size() != o.myValue.size()) {
+                return false;
+            }
+            for (int i = 0; i < this.myValue.size(); i++) {
+                if (!(this.myValue.get(i).equals(o.myValue.get(i)))) {
+                    return false;
+                }
             }
         }
 
