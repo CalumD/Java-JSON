@@ -30,6 +30,8 @@ public class JSStringTest extends JSONTest {
     @Test
     public void testParseException() {
         assertThrows(JSONParseException.class, () -> new JSString(new JSONTape("This String Doesnt Have Delimiters")));
+        assertThrows(JSONParseException.class, () -> new JSString(new JSONTape("'No Terminating Delimiter")));
+        assertThrows(JSONParseException.class, () -> new JSString(new JSONTape("No Initial Delimiter'")));
     }
 
     @Test
