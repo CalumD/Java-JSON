@@ -69,7 +69,7 @@ public class JSArray extends JSON {
     public boolean contains(String keys) {
         try {
             //else get from children
-            getJSONObjectAt(keys);
+            getAnyAt(keys);
             return true;
         } catch (KeyNotFoundException e) {
             return false;

@@ -188,7 +188,7 @@ public abstract class JSON implements IJson {
         // check cast to asked typing
         if (!actualTyping.equals(requiredType)) {
             throw new KeyDifferentTypeException(
-                    "The Type of Object found for key {" + key + "} was not expected. "
+                    "The Type of Object found for key " + key + " was not expected. "
                             + "Expected: " + requiredType + "  ->  Received: " + actualTyping
             );
         }

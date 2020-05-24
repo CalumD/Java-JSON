@@ -216,19 +216,9 @@ public class JSStringTest extends JSONTest {
     }
 
     @Test
-    public void getDoubleAtMe() {
-        assertThrows(KeyDifferentTypeException.class, () -> string.getDoubleAt(""));
-    }
-
-    @Test
     @Override
     public void getLongAt() {
         assertThrows(KeyNotFoundException.class, () -> string.getLongAt("someKey"));
-    }
-
-    @Test
-    public void getLongAtMe() {
-        assertThrows(KeyDifferentTypeException.class, () -> string.getLongAt(""));
     }
 
     @Test
