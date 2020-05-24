@@ -28,7 +28,7 @@ public class JSObject extends JSON {
             parsingTape.consumeOne();
             return;
         }
-        if (checkingChar != '"') {
+        if (checkingChar != '"' && checkingChar != '\'') {
             parsingTape.createParseError("\"", "Missing Key at start of Object.");
         }
 

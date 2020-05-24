@@ -312,6 +312,11 @@ public class JSArrayTest extends JSONTest {
     }
 
     @Test
+    public void getVeryNestedValue() {
+        assertTrue(new JSArray(new JSONTape("[[[[{'nest':[{'furtherNest':true}]}]]]]")).getBooleanAt("[0][0][0][0].nest[0]['furtherNest']"));
+    }
+
+    @Test
     public void getAnyAtMe() {
         assertEquals(array, array.getAnyAt(""));
     }
