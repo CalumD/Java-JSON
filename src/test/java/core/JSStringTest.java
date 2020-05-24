@@ -35,7 +35,7 @@ public class JSStringTest extends JSONTest {
     }
 
     @Test
-    public void testParseSuccess() {
+    public void testSpecialCharactersSuccess() {
         try {
             assertEquals("\uD83D\uDC4D", new JSString(new JSONTape("'\uD83D\uDC4D'")).getValue());
             assertEquals(" !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~", new JSString(new JSONTape("' !\"#$%&\\'()*+,-./:;<=>?@[\\\\]^_`{|}~'")).getValue());
