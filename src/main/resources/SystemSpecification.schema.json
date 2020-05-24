@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "http://json-schema.org/draft-07/schema",
   "$id": "",
   "title": "CS4099 System Config Schema",
   "description": "This schema should be used to lay out the structure of a single 'system' of the SH framework for lightweight component and channel abstractions for uni-kernel based distributed systems.",
@@ -156,7 +156,7 @@
         "custom": {
           "description": "This is any additional data this instance of the role may need. This is custom and optional, but must be a valid JSON object.",
           "type": "object",
-          "$schema": "http://json-schema.org/draft-07/schema#",
+          "$schema": "http://json-schema.org/draft-07/schema",
           "properties": {}
         }
       },
