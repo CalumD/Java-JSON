@@ -4,7 +4,10 @@ import exceptions.KeyDifferentTypeException;
 import exceptions.KeyInvalidException;
 import exceptions.KeyNotFoundException;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 class JSONKey {
 
@@ -17,12 +20,14 @@ class JSONKey {
             throw new KeyInvalidException("Key cannot be null");
         }
 
+        final Set<Character> whitespaces = new HashSet<>(Arrays.asList(' ', '\n', '\r', '\t'));
+
         // Consume any leading/trailing spaces
         int start = 0, stop = key.length() - 1;
-        while (key.charAt(start) == ' ') {
+        while (whitespaces.contains(key.charAt(start))) {
             start++;
         }
-        while (key.charAt(stop) == ' ') {
+        while (whitespaces.contains(key.charAt(stop))) {
             stop--;
         }
         stop++;
@@ -35,7 +40,11 @@ class JSONKey {
     }
 
     String getNextKey() {
-        return callChain.get(currentCallChainIndex++);
+        try {
+            return callChain.get(currentCallChainIndex++);
+        } catch (IndexOutOfBoundsException e) {
+            throw new KeyNotFoundException("End of Key reached. Have already traversed the whole hierarchy.");
+        }
     }
 
     void createKeyNotFoundException() throws KeyNotFoundException {
@@ -62,11 +71,15 @@ class JSONKey {
         }
 
         StringBuilder upToString = new StringBuilder();
+        String callChainElement;
         for (int index = 0; index < currentCallChainIndex; index++) {
-            if (callChain.get(index).startsWith("[")) {
-                upToString.append(callChain.get(index)).append(']');
-            } else {
-                upToString.append('.').append(callChain.get(index).substring(1));
+            callChainElement = callChain.get(index);
+            if (callChainElement.startsWith("[")) {
+                upToString.append(callChainElement).append(']');
+            } else if (callChainElement.startsWith("{")) {
+                upToString.append('.').append(callChainElement.substring(1));
+            } else if (callChainElement.startsWith("<")) {
+                upToString.append("[\"").append(callChainElement.substring(1).replaceAll("(?<!\\\\)\"", "\\\\\"")).append("\"]");
             }
         }
 

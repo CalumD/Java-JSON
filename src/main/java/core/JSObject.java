@@ -111,7 +111,7 @@ public class JSObject extends JSON {
         if (nextKey.equals("")) {
             return this;
         }
-        if (!nextKey.startsWith("{")) {
+        if (!nextKey.startsWith("{") && !nextKey.startsWith("<")) {
             keySequence.createKeyDifferentTypeException();
         }
         JSON childElement = (JSON) json.get(nextKey.substring(1));

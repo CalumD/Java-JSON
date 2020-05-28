@@ -52,7 +52,7 @@ class KeyTape extends Tape<String> {
                             case '\'':
                             case '"':
                             case '`':
-                                // special object key accessor E.G. : "foo['bar']"
+                                // special object key accessor E.G. : "foo['bar bar']"
                                 nextElement = parseObjectAccess();
                                 break;
                             default:
@@ -168,7 +168,7 @@ class KeyTape extends Tape<String> {
             EXCLUDE_KEY_DELIMITERS++;
         }
 
-        return '{' + requestRegion(startIndex + SKIP_KEY_START, getCurrentIndex() - EXCLUDE_KEY_DELIMITERS);
+        return '<' + requestRegion(startIndex + SKIP_KEY_START, getCurrentIndex() - EXCLUDE_KEY_DELIMITERS);
     }
 
     private void consumeUntilMatch(String delimiter) {
