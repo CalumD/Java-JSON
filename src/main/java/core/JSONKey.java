@@ -48,18 +48,16 @@ class JSONKey {
     }
 
     void createKeyNotFoundException() throws KeyNotFoundException {
-        currentCallChainIndex--;
         throw new KeyNotFoundException(
-                callChain.get(currentCallChainIndex).substring(1)
+                callChain.get(--currentCallChainIndex).substring(1)
                         + " not found on element: "
                         + createUpToString()
         );
     }
 
     void createKeyDifferentTypeException() throws KeyDifferentTypeException {
-        currentCallChainIndex--;
         throw new KeyDifferentTypeException(
-                callChain.get(currentCallChainIndex).substring(1)
+                callChain.get(--currentCallChainIndex).substring(1)
                         + " is not a valid accessor on element: "
                         + createUpToString()
         );
