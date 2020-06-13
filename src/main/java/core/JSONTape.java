@@ -48,10 +48,6 @@ public class JSONTape extends Tape<JSON> {
             case '9':
                 nextElement = new JSNumber(this);
                 break;
-            case '/':
-            case '#':
-                consumeComment();
-                break;
             default:
                 createParseError(VALID_JSON);
         }
@@ -105,9 +101,6 @@ public class JSONTape extends Tape<JSON> {
                     default:
                         createParseError("/ or *");
                 }
-                break;
-            default:
-                throw new UnsupportedOperationException("Unsupported comment sequence.");
         }
     }
 

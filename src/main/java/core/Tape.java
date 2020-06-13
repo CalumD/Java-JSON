@@ -80,7 +80,7 @@ public abstract class Tape<T> {
         // Throw the exception
         throw new JSONParseException(customErrorMessage
                 + "\nLine: " + lineCount
-                + "\nGot: " + gotFragment
+                + "\nReached: " + gotFragment
                 + "\nExpected: " + expectedFragment
         );
     }

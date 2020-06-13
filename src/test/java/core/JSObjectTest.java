@@ -46,7 +46,6 @@ public class JSObjectTest extends JSONTest {
         assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{'key':1,}")));
         assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{'key':1]")));
         assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{'key'=1}")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{\"samekey\":1,'samekey': 1}")));
         assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{\"samekey\":1,2: 3}")));
     }
 
@@ -60,6 +59,16 @@ public class JSObjectTest extends JSONTest {
         } catch (JSONParseException e) {
             fail("Create from string should not throw an exception for valid input.");
         }
+    }
+
+    @Test
+    public void duplicateKeysNotAllowed() {
+        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{\"samekey\":1,'samekey': 1}")));
+    }
+
+    @Test
+    public void keysAreCaseSensitive() {
+        assertEquals("{\"Samekey\":1,\"samekey\":1}", new JSObject(new JSONTape("{\"samekey\":1,'Samekey': 1}")).asString());
     }
 
     @Test
