@@ -2,7 +2,7 @@ package core;
 
 import exceptions.JSONParseException;
 
-public class JSONTape extends Tape<JSON> {
+public class JSONTape extends Tape<JSON, JSONParseException> {
 
     static final String VALID_JSON = "{ / [ / \" / <number> / <boolean> ";
 
@@ -52,6 +52,11 @@ public class JSONTape extends Tape<JSON> {
                 createParseError(VALID_JSON);
         }
         return nextElement;
+    }
+
+    @Override
+    protected JSONParseException newTypedException(String message) {
+        return new JSONParseException(message);
     }
 
     @Override

@@ -1,8 +1,8 @@
 package core;
 
-import exceptions.JSONParseException;
+import exceptions.JSONException;
 
-public abstract class Tape<T> {
+public abstract class Tape<T, E extends JSONException> {
 
     private static final int DEFAULT_PARSE_ERROR_CONTEXT_SIZE = 30;
     private static final String DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL = "_";
@@ -15,7 +15,7 @@ public abstract class Tape<T> {
         this.fullInput = fullInput;
         //Sanity Check
         if (fullInput == null || fullInput.length() == 0) {
-            throw new JSONParseException("You cannot create something from nothing. Input was "
+            throw newTypedException("You cannot create something from nothing. Input was "
                     + (fullInput == null ? "null." : "empty."));
         }
     }
@@ -78,7 +78,7 @@ public abstract class Tape<T> {
         }
 
         // Throw the exception
-        throw new JSONParseException(customErrorMessage
+        throw newTypedException(customErrorMessage
                 + "\nLine: " + lineCount
                 + "\nReached: " + gotFragment
                 + "\nExpected: " + expectedFragment
@@ -88,6 +88,8 @@ public abstract class Tape<T> {
     void createParseError(String expectedFragment) {
         createParseError(expectedFragment, DEFAULT_PARSE_ERROR_MESSAGE);
     }
+
+    protected abstract E newTypedException(String message);
 
     protected void consumeWhiteSpace() {
         try {
@@ -104,7 +106,7 @@ public abstract class Tape<T> {
                 }
             }
         } catch (IndexOutOfBoundsException e) {
-            throw new JSONParseException(
+            throw newTypedException(
                     "Reached end of input before parsing was complete. Are you missing a terminating delimiter?"
             );
         }

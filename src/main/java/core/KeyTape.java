@@ -7,7 +7,7 @@ import exceptions.KeyInvalidException;
 import java.util.ArrayList;
 import java.util.List;
 
-class KeyTape extends Tape<String> {
+class KeyTape extends Tape<String, JSONKeyException> {
 
     private static final String VALID_KEY_ACCESSOR = "[ / <Object Key>";
 
@@ -79,6 +79,11 @@ class KeyTape extends Tape<String> {
         } catch (JSONParseException e) {
             throw new KeyInvalidException(e.getMessage(), e);
         }
+    }
+
+    @Override
+    protected JSONKeyException newTypedException(String message) {
+        return new KeyInvalidException(message);
     }
 
     private String parseArrayAccess() {
