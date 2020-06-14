@@ -139,20 +139,28 @@ class KeyTape extends Tape<String, JSONKeyException> {
 
         switch (checkCurrentChar()) {
             case '\'':
-                consumeUntilMatch("']");
+                consumeUntilMatchEndOfAdvancedObjectAccess("'");
                 break;
             case '"':
-                consumeUntilMatch("\"]");
+                consumeUntilMatchEndOfAdvancedObjectAccess("\"");
                 break;
             case '`':
-                consumeUntilMatch("`]");
+                consumeUntilMatchEndOfAdvancedObjectAccess("`");
                 break;
             default:
                 try {
                     while (true) {
                         switch (checkCurrentChar()) {
                             case '.':
-                                return '{' + requestRegion(startIndex, currentIndex++);
+                                String nextKey = '{' + requestRegion(startIndex, currentIndex++);
+                                if (currentIndex >= fullInput.length()) {
+                                    createParseErrorFromOffset(
+                                            -1,
+                                            "<object ref> / <end of key>",
+                                            "Trailing dot separator in key suggests more elements, but end of string was found."
+                                    );
+                                }
+                                return nextKey;
                             case '[':
                                 return '{' + requestRegion(startIndex, currentIndex);
                             case ' ':
@@ -180,9 +188,16 @@ class KeyTape extends Tape<String, JSONKeyException> {
         return '<' + requestRegion(startIndex + SKIP_KEY_START, getCurrentIndex() - EXCLUDE_KEY_DELIMITERS);
     }
 
-    private void consumeUntilMatch(String delimiter) {
-        while (!checkNextFragment(delimiter)) {
-            currentIndex++;
+    private void consumeUntilMatchEndOfAdvancedObjectAccess(String delimiter) {
+        boolean consuming = true;
+        while (consuming) {
+            while (!checkNextFragment(delimiter)) {
+                currentIndex++;
+            }
+            consumeWhiteSpace();
+            if (checkNextFragment("]")) {
+                consuming = false;
+            }
         }
     }
 
