@@ -11,7 +11,7 @@ public abstract class Tape<T> {
     protected final String fullInput;
     protected int currentIndex = 0;
 
-    public Tape(String fullInput) {
+    Tape(String fullInput) {
         this.fullInput = fullInput;
         //Sanity Check
         if (fullInput == null || fullInput.length() == 0) {
@@ -20,7 +20,7 @@ public abstract class Tape<T> {
         }
     }
 
-    public abstract T parseNextElement();
+    abstract T parseNextElement();
 
     int getCurrentIndex() {
         return currentIndex;

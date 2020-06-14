@@ -95,6 +95,10 @@ class KeyTape extends Tape<String> {
                     "Failed to parse array accessor in key. Reached end of key before delimiter ']' was found.");
         }
 
+        return validateDeclaredArrayIndex(startingIndex);
+    }
+
+    protected String validateDeclaredArrayIndex(int startingIndex) {
         // Validate that the region is a valid integer
         int arrayIndex = -1;
         try {
@@ -177,7 +181,7 @@ class KeyTape extends Tape<String> {
         }
     }
 
-    private void validateTrailingArrayElements() {
+    protected void validateTrailingArrayElements() {
         consumeWhiteSpace();
         try {
             switch (checkCurrentChar()) {
