@@ -136,22 +136,24 @@ class KeyTape extends Tape<String, JSONKeyException> {
 
     private String parseObjectAccess() {
         final int startIndex = getCurrentIndex();
+        int endOfAdvancedObjectAccess = -1;
 
         switch (checkCurrentChar()) {
             case '\'':
-                consumeUntilMatchEndOfAdvancedObjectAccess("'");
+                endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess("'");
                 break;
             case '"':
-                consumeUntilMatchEndOfAdvancedObjectAccess("\"");
+                endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess("\"");
                 break;
             case '`':
-                consumeUntilMatchEndOfAdvancedObjectAccess("`");
+                endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess("`");
                 break;
             default:
                 try {
                     while (true) {
                         switch (checkCurrentChar()) {
                             case '.':
+                                // Next key is for an object - which can safely follow this object.
                                 String nextKey = '{' + requestRegion(startIndex, currentIndex++);
                                 if (currentIndex >= fullInput.length()) {
                                     createParseErrorFromOffset(
@@ -162,6 +164,7 @@ class KeyTape extends Tape<String, JSONKeyException> {
                                 }
                                 return nextKey;
                             case '[':
+                                // Next key is for an array / advanced object accessor - which can safely follow this object.
                                 return '{' + requestRegion(startIndex, currentIndex);
                             case ' ':
                                 createParseError(
@@ -169,8 +172,8 @@ class KeyTape extends Tape<String, JSONKeyException> {
                                         "Spaces are invalid in dot separated keys. " +
                                                 "Use obj[\"key\"] notation if key contains spaces."
                                 );
-                                break;
                             default:
+                                // Regular part of a key's name
                                 currentIndex++;
                                 break;
                         }
@@ -188,17 +191,20 @@ class KeyTape extends Tape<String, JSONKeyException> {
         return '<' + requestRegion(startIndex + SKIP_KEY_START, getCurrentIndex() - EXCLUDE_KEY_DELIMITERS);
     }
 
-    private void consumeUntilMatchEndOfAdvancedObjectAccess(String delimiter) {
+    private int consumeUntilMatchEndOfAdvancedObjectAccess(String delimiter) {
         boolean consuming = true;
+        int closingQuote = 0;
         while (consuming) {
             while (!checkNextFragment(delimiter)) {
                 currentIndex++;
             }
+            closingQuote = currentIndex - 1;
             consumeWhiteSpace();
             if (checkNextFragment("]")) {
                 consuming = false;
             }
         }
+        return (currentIndex - closingQuote);
     }
 
     protected void validateTrailingArrayElements() {
@@ -222,14 +228,10 @@ class KeyTape extends Tape<String, JSONKeyException> {
     }
 
     private boolean consumeTrailingDotDelimiter() {
-        try {
-            // If we are followed by a object separator, then consume that too
-            if (checkCurrentChar() == '.') {
-                consumeOne();
-                return true;
-            }
-        } catch (StringIndexOutOfBoundsException e) {
-            // Ignore, won't need to include the end of the string in the next key element anyway.
+        // If we are followed by a object separator, then consume that too
+        if (checkCurrentChar() == '.') {
+            consumeOne();
+            return true;
         }
         return false;
     }

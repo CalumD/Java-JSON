@@ -3,8 +3,7 @@ package core;
 import exceptions.JSONParseException;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class JSONTapeTest {
 
@@ -204,5 +203,27 @@ class JSONTapeTest {
         assertEquals("{}", tape.parseNextElement().asString());
         assertEquals("{\"key2\":2}", tape.parseNextElement().asString());
         assertThrows(JSONParseException.class, () -> tape.parseNextElement().asString());
+    }
+
+    @Test
+    public void longMultilineObjectWithExceptionCausesNiceExplanation() {
+        JSONTape tape = new JSONTape("{\"key\":\"This is a nice long string which should give enough " +
+                "breathing room for a nice error Message" +
+                "\nWhy dont we even split it over multiple " +
+                "\n lines to make the output more interesting. The error is trailing comma for end of object\", }");
+        assertThrows(JSONParseException.class, tape::parseNextElement);
+        tape = new JSONTape("{\"key\":\"This is a nice long string which should give enough " +
+                "breathing room for a nice error Message" +
+                "\nWhy dont we even split it over multiple " +
+                "\n lines to make the output more interesting. The error is trailing comma for end of object\", }");
+        try {
+            tape.parseNextElement();
+            fail("The previous line should have thrown an error");
+        } catch (JSONParseException e) {
+            assertEquals("Comma suggests more object elements, but object terminates.\n" +
+                    "Line: 3\n" +
+                    "Reached: ...is trailing comma for end of object\", _\n" +
+                    "Expected: { / [ / \" / <number> / <boolean> ", e.getMessage());
+        }
     }
 }
