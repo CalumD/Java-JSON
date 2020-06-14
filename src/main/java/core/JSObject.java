@@ -53,7 +53,7 @@ public class JSObject extends JSON {
             }
 
             // Parse value
-            JSON nextChild = parsingTape.parseNextElement();
+            IJson nextChild = parsingTape.parseNextElement();
             json.put(key, nextChild);
 
             // Check delimiters.

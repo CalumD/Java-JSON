@@ -24,12 +24,12 @@ public abstract class JSON implements IJson {
     }
 
     @Override
-    public JSON createFromString(String jsonFragment) throws JSONParseException {
+    public IJson createFromString(String jsonFragment) throws JSONParseException {
         return parseSelf(jsonFragment);
     }
 
     @Override
-    public JSON createFromMultilineString(List<String> jsonFragment) throws JSONParseException {
+    public IJson createFromMultilineString(List<String> jsonFragment) throws JSONParseException {
         return parseSelf(jsonFragment);
     }
 
@@ -38,11 +38,11 @@ public abstract class JSON implements IJson {
         return "".equals(key);
     }
 
-    private JSON parseSelf(String jsonFragment) {
+    private IJson parseSelf(String jsonFragment) {
         return new JSONTape(jsonFragment).parseNextElement();
     }
 
-    private JSON parseSelf(List<String> jsonFragment) {
+    private IJson parseSelf(List<String> jsonFragment) {
         StringBuilder concater = new StringBuilder();
         jsonFragment.forEach(line -> {
             concater.append(line);
