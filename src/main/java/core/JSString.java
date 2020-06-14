@@ -12,7 +12,7 @@ public class JSString extends JSON {
         // Setup tracking variables;
         final char stringDelimiter = parsingTape.checkCurrentChar();
         if (stringDelimiter != '"' && stringDelimiter != '\'') {
-            parsingTape.createParseError("\" / '", stringDelimiter + " is not a valid string delimiter.");
+            throw parsingTape.createParseError("\" / '", stringDelimiter + " is not a valid string delimiter.");
         }
         final StringBuilder string = new StringBuilder();
         boolean currentlyEscaped = false;
@@ -27,7 +27,7 @@ public class JSString extends JSON {
             try {
                 currentChar = parsingTape.consumeOne();
             } catch (IndexOutOfBoundsException e) {
-                parsingTape.createParseErrorFromOffset(
+                throw parsingTape.createParseErrorFromOffset(
                         -1,
                         String.valueOf(stringDelimiter),
                         "Didn't find matching " + stringDelimiter + ", before end of string."

@@ -29,7 +29,7 @@ public class JSObject extends JSON {
             return;
         }
         if (checkingChar != '"' && checkingChar != '\'') {
-            parsingTape.createParseError("\"", "Missing Key at start of Object.");
+            throw parsingTape.createParseError("\"", "Missing Key at start of Object.");
         }
 
 
@@ -41,7 +41,7 @@ public class JSObject extends JSON {
             try {
                 key = ((JSString)parsingTape.parseNextElement()).getValue();
             } catch (ClassCastException e) {
-                parsingTape.createParseError("\"", "Invalid type for object key.");
+                throw parsingTape.createParseError("\"", "Invalid type for object key.");
             }
             assert key != null;
             validateObjectKey(key, parsingTape);
@@ -49,7 +49,7 @@ public class JSObject extends JSON {
             // Validate Colon
             parsingTape.consumeWhiteSpace();
             if (parsingTape.consumeOne() != ':') {
-                parsingTape.createParseError(":", "Invalid Key:Value separator. Must use a colon(:).");
+                throw parsingTape.createParseError(":", "Invalid Key:Value separator. Must use a colon(:).");
             }
 
             // Parse value
@@ -67,12 +67,12 @@ public class JSObject extends JSON {
                     // Validate if we see a comma, there are more children to come
                     parsingTape.consumeWhiteSpace();
                     if (parsingTape.checkCurrentChar() == '}') {
-                        parsingTape.createParseError(JSONTape.VALID_JSON,
+                        throw parsingTape.createParseError(JSONTape.VALID_JSON,
                                 "Comma suggests more object elements, but object terminates.");
                     }
                     break;
                 default:
-                    parsingTape.createParseErrorFromOffset(
+                    throw parsingTape.createParseErrorFromOffset(
                             -1,
                             ", / }",
                             "Invalid object child delimiter."
@@ -83,10 +83,10 @@ public class JSObject extends JSON {
 
     private void validateObjectKey(String key, JSONTape parsingTape) {
         if (key.equals("")) {
-            parsingTape.createParseError("<Valid Key>", "Illegal Object Key (Empty).");
+            throw parsingTape.createParseError("<Valid Key>", "Illegal Object Key (Empty).");
         }
         if (json.containsKey(key)) {
-            parsingTape.createParseError("<Unique Key>", "Illegal Object key (Duplicate): " + key);
+            throw parsingTape.createParseError("<Unique Key>", "Illegal Object key (Duplicate): " + key);
         }
     }
 

@@ -54,7 +54,7 @@ public class JSNumber extends JSON {
                 jsType = JSType.LONG;
             }
         } catch (NumberFormatException e) {
-            parsingTape.createParseError("<number>", e.getMessage());
+            throw parsingTape.createParseError("<number>", e.getMessage());
         }
     }
 

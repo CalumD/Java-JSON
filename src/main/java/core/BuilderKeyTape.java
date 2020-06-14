@@ -17,7 +17,7 @@ public class BuilderKeyTape extends KeyTape {
             }
             arrayIndex = Integer.parseInt(indexRegion);
         } catch (NumberFormatException e) {
-            createParseErrorFromOffset(
+            throw createParseErrorFromOffset(
                     startingIndex - getCurrentIndex(),
                     "<positive integer>",
                     "Failed to parse array accessor in key. Element was not a valid integer."
@@ -26,7 +26,7 @@ public class BuilderKeyTape extends KeyTape {
 
         // Validate that the integer is a positive number since you can access a list with negative numbers.
         if (arrayIndex < 0) {
-            createParseErrorFromOffset(
+            throw createParseErrorFromOffset(
                     startingIndex - getCurrentIndex(),
                     "<positive integer>",
                     "Array accessor in key was negative integer. Must be positive."

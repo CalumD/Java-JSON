@@ -23,7 +23,7 @@ public class JSArray extends JSON {
 
         // Initial Array parsing Checks
         if (checkingChar == ',') {
-            parsingTape.createParseError(
+            throw parsingTape.createParseError(
                     JSONTape.VALID_JSON,
                     "Missing Valid JSON at start of array."
             );
@@ -49,12 +49,12 @@ public class JSArray extends JSON {
                     // Validate if we see a comma, there are more children to come
                     parsingTape.consumeWhiteSpace();
                     if (parsingTape.checkCurrentChar() == ']') {
-                        parsingTape.createParseError(JSONTape.VALID_JSON,
+                        throw parsingTape.createParseError(JSONTape.VALID_JSON,
                                 "Comma suggests more array elements, but array terminates.");
                     }
                     break;
                 default:
-                    parsingTape.createParseError(", / ]",
+                    throw parsingTape.createParseError(", / ]",
                             "Invalid array child delimiter.");
             }
         }

@@ -53,12 +53,12 @@ public abstract class Tape<T, E extends JSONException> {
         return fullInput.substring(fromHere, toHere);
     }
 
-    void createParseErrorFromOffset(int relativeOffset, String expectedFragment, String customErrorMessage) {
+    E createParseErrorFromOffset(int relativeOffset, String expectedFragment, String customErrorMessage) {
         currentIndex += relativeOffset;
-        createParseError(expectedFragment, customErrorMessage);
+        return createParseError(expectedFragment, customErrorMessage);
     }
 
-    void createParseError(String expectedFragment, String customErrorMessage) {
+    E createParseError(String expectedFragment, String customErrorMessage) {
         String gotFragment = "...";
 
         // Check if we are far enough into the string to just
@@ -78,7 +78,7 @@ public abstract class Tape<T, E extends JSONException> {
         }
 
         // Throw the exception
-        throw newTypedException(customErrorMessage
+        return newTypedException(customErrorMessage
                 + "\nLine: " + lineCount
                 + "\nReached: " + gotFragment
                 + "\nExpected: " + expectedFragment
@@ -86,7 +86,7 @@ public abstract class Tape<T, E extends JSONException> {
     }
 
     void createParseError(String expectedFragment) {
-        createParseError(expectedFragment, DEFAULT_PARSE_ERROR_MESSAGE);
+        throw createParseError(expectedFragment, DEFAULT_PARSE_ERROR_MESSAGE);
     }
 
     protected abstract E newTypedException(String message);
