@@ -9,7 +9,7 @@ public class BuilderKeyTape extends KeyTape {
     @Override
     protected String validateDeclaredArrayIndex(int startingIndex) {
         // Validate that the region is a valid integer
-        int arrayIndex = -1;
+        int arrayIndex;
         try {
             String indexRegion = requestRegion(startingIndex, getCurrentIndex());
             if (indexRegion.equals("")) {

@@ -95,7 +95,7 @@ class KeyTape extends Tape<String, JSONKeyException> {
 
     protected String validateDeclaredArrayIndex(int startingIndex) {
         // Validate that the region is a valid integer
-        int arrayIndex = -1;
+        int arrayIndex;
         try {
             arrayIndex = Integer.parseInt(requestRegion(startingIndex, getCurrentIndex()));
         } catch (NumberFormatException e) {
@@ -126,7 +126,7 @@ class KeyTape extends Tape<String, JSONKeyException> {
 
     private String parseObjectAccess() {
         final int startIndex = getCurrentIndex();
-        int endOfAdvancedObjectAccess = -1;
+        int endOfAdvancedObjectAccess;
 
         switch (checkCurrentChar()) {
             case '\'':

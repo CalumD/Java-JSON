@@ -37,7 +37,7 @@ public class JSObject extends JSON {
         boolean moreChildren = true;
         while (moreChildren) {
             // Get the Key
-            String key = null;
+            String key;
             try {
                 key = ((JSString)parsingTape.parseNextElement()).getValue();
             } catch (ClassCastException e) {

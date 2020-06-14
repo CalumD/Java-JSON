@@ -17,7 +17,7 @@ public class JSString extends JSON {
         final StringBuilder string = new StringBuilder();
         boolean currentlyEscaped = false;
         boolean endFound = false;
-        char currentChar = '.';
+        char currentChar;
 
         // Consume the initial delimiter;
         parsingTape.consumeOne();
