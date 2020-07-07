@@ -53,7 +53,7 @@ public class JSNumberTest extends JSONTest {
             new JSNumber(new JSONTape("1e-005"));
             new JSNumber(new JSONTape("-4.3e10"));
         } catch (JSONParseException e) {
-            fail("Create from string should not throw an exception for valid input.");
+            fail("Create from string should not throw an exception for valid input.", e);
         }
     }
 
@@ -67,7 +67,7 @@ public class JSNumberTest extends JSONTest {
         try {
             numberLong.createFromMultilineString(multiline);
         } catch (JSONParseException e) {
-            fail("Create from string should not throw an exception for valid input.");
+            fail("Create from string should not throw an exception for valid input.", e);
         }
     }
 

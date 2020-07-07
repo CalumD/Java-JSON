@@ -112,13 +112,12 @@ public class JSObject extends JSON {
             return this;
         }
         if (!nextKey.startsWith("{") && !nextKey.startsWith("<")) {
-            keySequence.createKeyDifferentTypeException();
+            throw keySequence.createKeyDifferentTypeException();
         }
         JSON childElement = (JSON) json.get(nextKey.substring(1));
         if (childElement == null) {
-            keySequence.createKeyNotFoundException();
+            throw keySequence.createKeyNotFoundException();
         }
-        assert childElement != null;
         return childElement.getInternal(keySequence);
     }
 

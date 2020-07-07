@@ -6,6 +6,9 @@ import exceptions.KeyNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class JSONKeyTest {
@@ -15,7 +18,7 @@ class JSONKeyTest {
 
     @BeforeEach
     public void setup() {
-        key = new JSONKey(ALL_VARIATION_KEY);
+        key = new JSONKey(ALL_VARIATION_KEY, false);
     }
 
     @Test
@@ -26,7 +29,7 @@ class JSONKeyTest {
             new JSONKey("\n\n\n\n\nkey");
             new JSONKey("\r\r\r\r\rkey");
         } catch (Exception e) {
-            fail("The try should not have caused an exception in this instance.");
+            fail("The try should not have caused an exception in this instance.", e);
         }
     }
 
@@ -38,7 +41,10 @@ class JSONKeyTest {
             new JSONKey("key\n\n\n\n\n\n");
             new JSONKey("key\r\r\r\r\r\r");
         } catch (Exception e) {
-            fail("The try should not have caused an exception in this instance.");
+            assertEquals("Bad use of '.' separator in key.\n" +
+                    "Line: 1\n" +
+                    "Reached: key1._\n" +
+                    "Expected: [ / <Object Key>", e.getMessage());
         }
     }
 
@@ -70,7 +76,7 @@ class JSONKeyTest {
             assertEquals("{last", key.getNextKey());
             assertEquals("", key.getNextKey());
         } catch (Exception e) {
-            fail("The try should not have caused an exception in this instance.");
+            fail("The try should not have caused an exception in this instance.", e);
         }
 
         try {
@@ -79,7 +85,7 @@ class JSONKeyTest {
         } catch (KeyNotFoundException e) {
             assertEquals(e.getMessage(), "End of Key reached. Have already traversed the whole hierarchy.");
         } catch (Exception e) {
-            fail("This class should only have thrown a KeyNotFound Exception");
+            fail("This class should only have thrown a KeyNotFound Exception", e);
         }
     }
 
@@ -94,8 +100,7 @@ class JSONKeyTest {
     public void keyNotFound1() {
         try {
             key.getNextKey();
-            key.createKeyNotFoundException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyNotFoundException();
         } catch (KeyNotFoundException e) {
             assertEquals("complicated not found on element: <base element>", e.getMessage());
         }
@@ -106,8 +111,7 @@ class JSONKeyTest {
         try {
             key.getNextKey();
             key.getNextKey();
-            key.createKeyNotFoundException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyNotFoundException();
         } catch (KeyNotFoundException e) {
             assertEquals("key not found on element: complicated", e.getMessage());
         }
@@ -119,8 +123,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyNotFoundException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyNotFoundException();
         } catch (KeyNotFoundException e) {
             assertEquals("4 not found on element: complicated.key", e.getMessage());
         }
@@ -133,8 +136,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyNotFoundException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyNotFoundException();
         } catch (KeyNotFoundException e) {
             assertEquals("5 not found on element: complicated.key[4]", e.getMessage());
         }
@@ -148,8 +150,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyNotFoundException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyNotFoundException();
         } catch (KeyNotFoundException e) {
             assertEquals("6 not found on element: complicated.key[4][5]", e.getMessage());
         }
@@ -164,8 +165,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyNotFoundException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyNotFoundException();
         } catch (KeyNotFoundException e) {
             assertEquals("n3sted not found on element: complicated.key[4][5][6]", e.getMessage());
         }
@@ -181,8 +181,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyNotFoundException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyNotFoundException();
         } catch (KeyNotFoundException e) {
             assertEquals("objects not found on element: complicated.key[4][5][6].n3sted", e.getMessage());
         }
@@ -199,8 +198,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyNotFoundException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyNotFoundException();
         } catch (KeyNotFoundException e) {
             assertEquals("thes\\\"e  K\"e'ys not found on element: complicated.key[4][5][6].n3sted.objects", e.getMessage());
         }
@@ -218,8 +216,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyNotFoundException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyNotFoundException();
         } catch (KeyNotFoundException e) {
             assertEquals("too not found on element: complicated.key[4][5][6].n3sted.objects[\"thes\\\"e  K\\\"e'ys\"]", e.getMessage());
         }
@@ -238,8 +235,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyNotFoundException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyNotFoundException();
         } catch (KeyNotFoundException e) {
             assertEquals("0 not found on element: complicated.key[4][5][6].n3sted.objects[\"thes\\\"e  K\\\"e'ys\"][\"too\"]", e.getMessage());
         }
@@ -259,8 +255,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyNotFoundException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyNotFoundException();
         } catch (KeyNotFoundException e) {
             assertEquals("\uD83C\uDF54 not found on element: complicated.key[4][5][6].n3sted.objects[\"thes\\\"e  K\\\"e'ys\"][\"too\"][0]", e.getMessage());
         }
@@ -281,8 +276,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyNotFoundException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyNotFoundException();
         } catch (KeyNotFoundException e) {
             assertEquals("last not found on element: complicated.key[4][5][6].n3sted.objects[\"thes\\\"e  K\\\"e'ys\"][\"too\"][0].\uD83C\uDF54", e.getMessage());
         }
@@ -319,8 +313,7 @@ class JSONKeyTest {
     public void keyDifferentType1() {
         try {
             key.getNextKey();
-            key.createKeyDifferentTypeException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyDifferentTypeException();
         } catch (KeyDifferentTypeException e) {
             assertEquals("complicated is not a valid accessor on element: <base element>", e.getMessage());
         }
@@ -331,8 +324,7 @@ class JSONKeyTest {
         try {
             key.getNextKey();
             key.getNextKey();
-            key.createKeyDifferentTypeException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyDifferentTypeException();
         } catch (KeyDifferentTypeException e) {
             assertEquals("key is not a valid accessor on element: complicated", e.getMessage());
         }
@@ -344,8 +336,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyDifferentTypeException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyDifferentTypeException();
         } catch (KeyDifferentTypeException e) {
             assertEquals("4 is not a valid accessor on element: complicated.key", e.getMessage());
         }
@@ -358,8 +349,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyDifferentTypeException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyDifferentTypeException();
         } catch (KeyDifferentTypeException e) {
             assertEquals("5 is not a valid accessor on element: complicated.key[4]", e.getMessage());
         }
@@ -373,8 +363,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyDifferentTypeException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyDifferentTypeException();
         } catch (KeyDifferentTypeException e) {
             assertEquals("6 is not a valid accessor on element: complicated.key[4][5]", e.getMessage());
         }
@@ -389,8 +378,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyDifferentTypeException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyDifferentTypeException();
         } catch (KeyDifferentTypeException e) {
             assertEquals("n3sted is not a valid accessor on element: complicated.key[4][5][6]", e.getMessage());
         }
@@ -406,8 +394,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyDifferentTypeException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyDifferentTypeException();
         } catch (KeyDifferentTypeException e) {
             assertEquals("objects is not a valid accessor on element: complicated.key[4][5][6].n3sted", e.getMessage());
         }
@@ -424,8 +411,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyDifferentTypeException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyDifferentTypeException();
         } catch (KeyDifferentTypeException e) {
             assertEquals("thes\\\"e  K\"e'ys is not a valid accessor on element: complicated.key[4][5][6].n3sted.objects", e.getMessage());
         }
@@ -443,8 +429,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyDifferentTypeException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyDifferentTypeException();
         } catch (KeyDifferentTypeException e) {
             assertEquals("too is not a valid accessor on element: complicated.key[4][5][6].n3sted.objects[\"thes\\\"e  K\\\"e'ys\"]", e.getMessage());
         }
@@ -463,8 +448,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyDifferentTypeException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyDifferentTypeException();
         } catch (KeyDifferentTypeException e) {
             assertEquals("0 is not a valid accessor on element: complicated.key[4][5][6].n3sted.objects[\"thes\\\"e  K\\\"e'ys\"][\"too\"]", e.getMessage());
         }
@@ -484,8 +468,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyDifferentTypeException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyDifferentTypeException();
         } catch (KeyDifferentTypeException e) {
             assertEquals("\uD83C\uDF54 is not a valid accessor on element: complicated.key[4][5][6].n3sted.objects[\"thes\\\"e  K\\\"e'ys\"][\"too\"][0]", e.getMessage());
         }
@@ -506,8 +489,7 @@ class JSONKeyTest {
             key.getNextKey();
             key.getNextKey();
             key.getNextKey();
-            key.createKeyDifferentTypeException();
-            fail("Previous line should have thrown an exception");
+            throw key.createKeyDifferentTypeException();
         } catch (KeyDifferentTypeException e) {
             assertEquals("last is not a valid accessor on element: complicated.key[4][5][6].n3sted.objects[\"thes\\\"e  K\\\"e'ys\"][\"too\"][0].\uD83C\uDF54", e.getMessage());
         }
@@ -531,5 +513,25 @@ class JSONKeyTest {
         assertThrows(IndexOutOfBoundsException.class, () ->
                 key.createKeyDifferentTypeException()
         );
+    }
+
+    @Test
+    public void getAllKeys() {
+        List<String> keys = new ArrayList<>();
+        keys.add("{complicated");
+        keys.add("{key");
+        keys.add("[4");
+        keys.add("[5");
+        keys.add("[6");
+        keys.add("{n3sted");
+        keys.add("{objects");
+        keys.add("<thes\\\"e  K\"e'ys");
+        keys.add("<too");
+        keys.add("[0");
+        keys.add("{🍔");
+        keys.add("{last");
+        keys.add("");
+
+        assertEquals(keys, key.getAllKeys());
     }
 }

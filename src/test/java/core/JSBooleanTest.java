@@ -46,7 +46,7 @@ public class JSBooleanTest extends JSONTest {
         try {
             boolTrue.createFromString("true");
         } catch (JSONParseException e) {
-            fail("Create from string should not throw an exception for valid input.");
+            fail("Create from string should not throw an exception for valid input.", e);
         }
     }
 
@@ -60,7 +60,7 @@ public class JSBooleanTest extends JSONTest {
         try {
             boolTrue.createFromMultilineString(multiline);
         } catch (JSONParseException e) {
-            fail("Create from string should not throw an exception for valid input.");
+            fail("Create from string should not throw an exception for valid input.", e);
         }
     }
 

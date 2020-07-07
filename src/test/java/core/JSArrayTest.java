@@ -48,7 +48,7 @@ public class JSArrayTest extends JSONTest {
             array.createFromString("[]");
             array.createFromString("[[[[[[]]]]]]");
         } catch (JSONParseException e) {
-            fail("Create from string should not throw an exception for valid input.");
+            fail("Create from string should not throw an exception for valid input.", e);
         }
     }
 
@@ -66,7 +66,7 @@ public class JSArrayTest extends JSONTest {
         try {
             array.createFromMultilineString(multiline);
         } catch (JSONParseException e) {
-            fail("Create from string should not throw an exception for valid input.");
+            fail("Create from string should not throw an exception for valid input.", e);
         }
     }
 

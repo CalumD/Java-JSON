@@ -2,7 +2,7 @@ package oldTests.Json;
 
 import api.IJson;
 import api.IJsonBuilder;
-import api.JSONBuilder;
+import core.JSONBuilder;
 import exceptions.BuildException;
 import exceptions.KeyDifferentTypeException;
 import exceptions.KeyNotFoundException;
@@ -42,7 +42,7 @@ public class BuildJson {
 
             getter = last.convertToJSON();
         } catch (BuildException e) {
-            fail("Failed to Build the object to check 'get' ordering");
+            fail("Failed to Build the object to check 'get' ordering", e);
         }
     }
 
@@ -193,13 +193,6 @@ public class BuildJson {
 
     @Test
     public void fails_5() {
-        assertThrows(BuildException.class, () ->
-                builder.addBoolean("init[0][1]", true)
-        );
-    }
-
-    @Test
-    public void fails_6() {
         assertThrows(BuildException.class, () -> {
             builder.addBoolean("one[]", true);
             builder.addBoolean("one[0]", true);
@@ -207,21 +200,14 @@ public class BuildJson {
     }
 
     @Test
-    public void fails_7() {
+    public void fails_6() {
         assertThrows(BuildException.class, () ->
                 builder.addBoolean("one.two[[", true)
         );
     }
 
     @Test
-    public void fails_8() {
-        assertThrows(BuildException.class, () ->
-                builder.addBoolean("one.two]]", true)
-        );
-    }
-
-    @Test
-    public void fails_9() {
+    public void fails_7() {
         assertThrows(BuildException.class, () ->
                 builder.addBoolean("", true)
         );

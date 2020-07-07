@@ -40,7 +40,7 @@ public class JSStringTest extends JSONTest {
             assertEquals("\uD83D\uDC4D", new JSString(new JSONTape("'\uD83D\uDC4D'")).getValue());
             assertEquals(" !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~", new JSString(new JSONTape("' !\"#$%&\\'()*+,-./:;<=>?@[\\\\]^_`{|}~'")).getValue());
         } catch (Exception e) {
-            fail("The previous String creation should be supported with UTF as well as ascii");
+            fail("The previous String creation should be supported with UTF as well as ascii", e);
         }
     }
 
@@ -50,7 +50,7 @@ public class JSStringTest extends JSONTest {
         try {
             string.createFromString("\"Should Create From String\"");
         } catch (JSONParseException e) {
-            fail("Create from string should not throw an exception for valid input.");
+            fail("Create from string should not throw an exception for valid input.", e);
         }
     }
 
@@ -64,7 +64,7 @@ public class JSStringTest extends JSONTest {
         try {
             string.createFromMultilineString(multiline);
         } catch (JSONParseException e) {
-            fail("Create from string should not throw an exception for valid input.");
+            fail("Create from string should not throw an exception for valid input.", e);
         }
     }
 

@@ -83,15 +83,14 @@ public class JSArray extends JSON {
             return this;
         }
         if (!nextKey.startsWith("[")) {
-            keySequence.createKeyDifferentTypeException();
+            throw keySequence.createKeyDifferentTypeException();
         }
-        JSON childElement = null;
+        JSON childElement;
         try {
             childElement = (JSON) myValue.get(Integer.parseInt(nextKey.substring(1)));
         } catch (IndexOutOfBoundsException e) {
-            keySequence.createKeyNotFoundException();
+            throw keySequence.createKeyNotFoundException();
         }
-        assert childElement != null;
         return childElement.getInternal(keySequence);
     }
 

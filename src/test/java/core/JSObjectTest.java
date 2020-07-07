@@ -57,7 +57,7 @@ public class JSObjectTest extends JSONTest {
             object.createFromString("{'easy': \"value\"}");
             object.createFromString("{\"easy\": 'value'}");
         } catch (JSONParseException e) {
-            fail("Create from string should not throw an exception for valid input.");
+            fail("Create from string should not throw an exception for valid input.", e);
         }
     }
 
@@ -83,7 +83,7 @@ public class JSObjectTest extends JSONTest {
         try {
             object.createFromMultilineString(multiline);
         } catch (JSONParseException e) {
-            fail("Create from string should not throw an exception for valid input.");
+            fail("Create from string should not throw an exception for valid input.", e);
         }
     }
 

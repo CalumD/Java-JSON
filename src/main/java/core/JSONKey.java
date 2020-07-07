@@ -4,10 +4,7 @@ import exceptions.KeyDifferentTypeException;
 import exceptions.KeyInvalidException;
 import exceptions.KeyNotFoundException;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 class JSONKey {
 
@@ -20,19 +17,25 @@ class JSONKey {
             throw new KeyInvalidException("Key cannot be null");
         }
 
-        final Set<Character> whitespaces = new HashSet<>(Arrays.asList(' ', '\n', '\r', '\t'));
+        if (!key.equals("")) {
+            final Set<Character> whitespaces = new HashSet<>(Arrays.asList(' ', '\n', '\r', '\t'));
 
-        // Consume any leading/trailing spaces
-        int start = 0, stop = key.length() - 1;
-        while (whitespaces.contains(key.charAt(start))) {
-            start++;
-        }
-        while (whitespaces.contains(key.charAt(stop))) {
-            stop--;
-        }
-        stop++;
-        if (start != 0 || stop != key.length()) {
-            key = key.substring(start, stop);
+            // Consume any leading/trailing spaces
+            int start = 0, stop = key.length() - 1;
+            while (whitespaces.contains(key.charAt(start))) {
+                start++;
+            }
+            while (whitespaces.contains(key.charAt(stop))) {
+                stop--;
+            }
+            stop++;
+            if (start != 0 || stop != key.length()) {
+                key = key.substring(start, stop);
+            }
+        } else {
+            callChain = new ArrayList<>();
+            callChain.add("");
+            return;
         }
 
         // Parse out the key
@@ -47,16 +50,20 @@ class JSONKey {
         }
     }
 
-    void createKeyNotFoundException() throws KeyNotFoundException {
-        throw new KeyNotFoundException(
+    List<String> getAllKeys() {
+        return callChain;
+    }
+
+    KeyNotFoundException createKeyNotFoundException() {
+        return new KeyNotFoundException(
                 callChain.get(--currentCallChainIndex).substring(1)
                         + " not found on element: "
                         + createUpToString()
         );
     }
 
-    void createKeyDifferentTypeException() throws KeyDifferentTypeException {
-        throw new KeyDifferentTypeException(
+    KeyDifferentTypeException createKeyDifferentTypeException() {
+        return new KeyDifferentTypeException(
                 callChain.get(--currentCallChainIndex).substring(1)
                         + " is not a valid accessor on element: "
                         + createUpToString()
