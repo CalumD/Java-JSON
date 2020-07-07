@@ -135,6 +135,15 @@ public class BuildJson {
         builder.addString("arr[0][]", "String");
     }
 
+    @Test
+    public void basic_build_16() {
+        builder.addBoolean("init[][]", true);
+    }
+
+    @Test
+    public void basic_build_17() {
+        builder.addBoolean("one.two]]", true);
+    }
 
     //advanced Object Building//////////////////////////////////////////////////////////////////////////////////////
     @Test
@@ -180,14 +189,14 @@ public class BuildJson {
     @Test
     public void fails_3() {
         assertThrows(BuildException.class, () ->
-                builder.addBoolean("init[][]", true)
+                builder.addBoolean("init[1][]", true)
         );
     }
 
     @Test
     public void fails_4() {
         assertThrows(BuildException.class, () ->
-                builder.addBoolean("init[1][]", true)
+                builder.addBoolean("init[0][1]", true)
         );
     }
 

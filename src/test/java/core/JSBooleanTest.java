@@ -37,7 +37,8 @@ public class JSBooleanTest extends JSONTest {
     @Test
     @Override
     public void testDataType() {
-        System.out.println("ree");
+        assertEquals(JSType.BOOLEAN, boolTrue.jsType);
+        assertEquals(JSType.BOOLEAN, boolFalse.jsType);
     }
 
     @Test

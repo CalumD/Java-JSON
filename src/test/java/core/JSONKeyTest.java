@@ -24,10 +24,10 @@ class JSONKeyTest {
     @Test
     public void canCopeWithLeadingSpaces() {
         try {
-            new JSONKey("              key");
-            new JSONKey("\t\t\t\t\tkey");
-            new JSONKey("\n\n\n\n\nkey");
-            new JSONKey("\r\r\r\r\rkey");
+            new JSONKey("              key", false);
+            new JSONKey("\t\t\t\t\tkey", false);
+            new JSONKey("\n\n\n\n\nkey", false);
+            new JSONKey("\r\r\r\r\rkey", false);
         } catch (Exception e) {
             fail("The try should not have caused an exception in this instance.", e);
         }
@@ -36,10 +36,19 @@ class JSONKeyTest {
     @Test
     public void canCopeWithTrailingSpaces() {
         try {
-            new JSONKey("key              ");
-            new JSONKey("key\t\t\t\t\t\t");
-            new JSONKey("key\n\n\n\n\n\n");
-            new JSONKey("key\r\r\r\r\r\r");
+            new JSONKey("key              ", false);
+            new JSONKey("key\t\t\t\t\t\t", false);
+            new JSONKey("key\n\n\n\n\n\n", false);
+            new JSONKey("key\r\r\r\r\r\r", false);
+        } catch (Exception e) {
+            fail("The try should not have caused an exception in this instance.", e);
+        }
+    }
+
+    @Test
+    public void shouldDenyDoubleDotting() {
+        try {
+            new JSONKey("key1..key2", false);
         } catch (Exception e) {
             assertEquals("Bad use of '.' separator in key.\n" +
                     "Line: 1\n" +
@@ -51,11 +60,20 @@ class JSONKeyTest {
     @Test
     public void shouldNotAcceptANull() {
         try {
-            new JSONKey(null);
+            new JSONKey(null, false);
         } catch (KeyInvalidException e) {
             assertEquals(e.getMessage(), "Key cannot be null");
         } catch (Exception e) {
-            fail("This class should only have thrown a KeyInvalid Exception");
+            fail("This class should only have thrown a KeyInvalid Exception", e);
+        }
+    }
+
+    @Test
+    public void shouldNotAcceptEmptyKey() {
+        try {
+            new JSONKey("", false);
+        } catch (Exception e) {
+            fail("The try should not have caused an exception in this instance.", e);
         }
     }
 
@@ -89,6 +107,7 @@ class JSONKeyTest {
         }
     }
 
+    @SuppressWarnings("ThrowableNotThrown")
     @Test
     public void indexOutOfBoundsLower1() {
         assertThrows(IndexOutOfBoundsException.class, () ->
@@ -282,6 +301,7 @@ class JSONKeyTest {
         }
     }
 
+    @SuppressWarnings("ThrowableNotThrown")
     @Test
     public void indexOutOfBoundsUpper1() {
         key.getNextKey();
@@ -302,6 +322,7 @@ class JSONKeyTest {
         );
     }
 
+    @SuppressWarnings("ThrowableNotThrown")
     @Test
     public void indexOutOfBoundsLower2() {
         assertThrows(IndexOutOfBoundsException.class, () ->
@@ -495,6 +516,7 @@ class JSONKeyTest {
         }
     }
 
+    @SuppressWarnings("ThrowableNotThrown")
     @Test
     public void indexOutOfBoundsUpper2() {
         key.getNextKey();
