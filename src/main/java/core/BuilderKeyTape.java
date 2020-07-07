@@ -2,7 +2,7 @@ package core;
 
 public class BuilderKeyTape extends KeyTape {
 
-    public BuilderKeyTape(String fullInput) {
+    BuilderKeyTape(String fullInput) {
         super(fullInput);
     }
 
@@ -13,6 +13,7 @@ public class BuilderKeyTape extends KeyTape {
         try {
             String indexRegion = requestRegion(startingIndex, getCurrentIndex());
             if (indexRegion.equals("")) {
+                terminateArrayAccessorInChain();
                 return '[' + "append";
             }
             arrayIndex = Integer.parseInt(indexRegion);
@@ -33,12 +34,15 @@ public class BuilderKeyTape extends KeyTape {
             );
         }
 
+        terminateArrayAccessorInChain();
+        return '[' + String.valueOf(arrayIndex);
+    }
+
+    private void terminateArrayAccessorInChain() {
         // Consume terminating ']'
         consumeOne();
         if (currentIndex < fullInput.length()) {
             validateTrailingArrayElements();
         }
-
-        return '[' + String.valueOf(arrayIndex);
     }
 }
