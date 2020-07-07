@@ -47,6 +47,10 @@ public class JSONBuilder implements IJsonBuilder, IJSONAble {
         type = objectType;
     }
 
+    public static JSONBuilder builder() {
+        return new JSONBuilder();
+    }
+
     @Override
     public IJson build() throws BuildException {
         return convertToJSON();
