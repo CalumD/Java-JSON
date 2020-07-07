@@ -11,7 +11,7 @@ class JSONKey {
     private final List<String> callChain;
     private int currentCallChainIndex = 0;
 
-    JSONKey(String key) throws KeyInvalidException {
+    JSONKey(String key, boolean useBuilderKeyTape) throws KeyInvalidException {
         // Sanity Check
         if (key == null) {
             throw new KeyInvalidException("Key cannot be null");
@@ -39,7 +39,11 @@ class JSONKey {
         }
 
         // Parse out the key
-        callChain = new KeyTape(key).parseAllElements();
+        if (useBuilderKeyTape) {
+            callChain = new BuilderKeyTape(key).parseAllElements();
+        } else {
+            callChain = new KeyTape(key).parseAllElements();
+        }
     }
 
     String getNextKey() {

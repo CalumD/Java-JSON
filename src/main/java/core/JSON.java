@@ -209,7 +209,7 @@ public abstract class JSON implements IJson {
         }
 
         // Attempt deeper retrieval of object from structure.
-        return getInternal(new JSONKey(key));
+        return getInternal(new JSONKey(key, false));
     }
 
     protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
