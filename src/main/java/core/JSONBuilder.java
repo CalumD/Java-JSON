@@ -13,12 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * This class is an implementation for the Core.IJsonBuilder interface. It is used to dynamically build
- * up a json structure from whatever code may require to save its configuration or state somehow
- * without just dumping the whole class/object to file.
- */
-public class JSONBuilder implements IJsonBuilder {
+public class JSONBuilder implements IJsonBuilder, IJSONAble {
 
     private class NewValueIdentifier {
         final JSONKey keyChain;
@@ -209,15 +204,8 @@ public class JSONBuilder implements IJsonBuilder {
     }
 
     @Override
-    public void addString(String path, String value) throws BuildException {
-        JSONBuilder objectAtPath = validatePath(path);
-
-        if (objectAtPath.type == JSType.ARRAY) {
-            objectAtPath.array.add(value);
-        } else {
-            objectAtPath.strings
-                .put(path.substring(path.lastIndexOf(".") + 1).split("\\[")[0], value);
-        }
+    public IJsonBuilder convertFromJSON(IJson json) {
+        return null;
     }
 
     @Override
