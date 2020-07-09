@@ -27,8 +27,16 @@ class KeyTapeTest {
     }
 
     @Test
-    public void mustNotEndWithWhiteSpaceAsWeCantTellEndOfKeyOtherwise() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("key \n\r\t").parseNextElement());
+    public void firstKeyCanHaveSpaces() {
+        assertEquals("{key \n\r\t", new KeyTape("key \n\r\t").parseNextElement());
+    }
+
+    @Test
+    public void anyAdditionalKeysMustNotHaveSpaces() {
+        assertThrows(KeyInvalidException.class, () -> new KeyTape("key.key 2.key3").parseAllElements());
+        assertThrows(KeyInvalidException.class, () -> new KeyTape("key.'key 2'.key3").parseAllElements());
+        assertThrows(KeyInvalidException.class, () -> new KeyTape("key.`key 2`.key3").parseAllElements());
+        assertThrows(KeyInvalidException.class, () -> new KeyTape("key.\"key 2\".key3").parseAllElements());
     }
 
     @Test
@@ -107,6 +115,19 @@ class KeyTapeTest {
         KeyTape keyTape = new KeyTape("key1");
         assertEquals("{key1", keyTape.parseNextElement());
         assertThrows(KeyInvalidException.class, keyTape::parseNextElement);
+    }
+
+    @Test
+    public void tryParseNextElementThenParseAllElements() {
+        KeyTape keyTape = new KeyTape("key1.key2.key3.key4");
+        assertEquals("{key1", keyTape.parseNextElement());
+        assertEquals("{key2", keyTape.parseNextElement());
+
+        List<String> otherKeys = new ArrayList<>();
+        otherKeys.add("{key3");
+        otherKeys.add("{key4");
+        otherKeys.add("");
+        assertEquals(otherKeys, keyTape.parseAllElements());
     }
 
     @Test

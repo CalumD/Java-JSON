@@ -9,6 +9,7 @@ import java.util.List;
 class KeyTape extends Tape<String, JSONKeyException> {
 
     private static final String VALID_KEY_ACCESSOR = "[ / <Object Key>";
+    private int elementsInKeyWithSpaces = 0, elementsParsed = 0;
 
     public KeyTape(String fullInput) {
         super(fullInput);
@@ -32,6 +33,16 @@ class KeyTape extends Tape<String, JSONKeyException> {
 
     @Override
     public String parseNextElement() {
+        // Since we output keys from Json objects without safety padding round keys with spaces, we should
+        // probably be lenient with the first key here.
+        if (elementsParsed++ > 0 && elementsInKeyWithSpaces > 0) {
+            // Otherwise no spaces allowed in regular object keys.
+            throw createParseError(
+                    "<valid key segment>",
+                    "Spaces are invalid in dot separated keys. " +
+                            "Use obj[\"key\"] notation if key contains spaces."
+            );
+        }
         // Reach the first legitimate character.
         consumeWhiteSpace();
 
@@ -47,7 +58,7 @@ class KeyTape extends Tape<String, JSONKeyException> {
                         case '"':
                         case '`':
                             // special object key accessor E.G. : "foo['bar bar']"
-                            nextElement = parseObjectAccess();
+                            nextElement = parseObjectAccess(true);
                             break;
                         default:
                             nextElement = parseArrayAccess();
@@ -65,7 +76,7 @@ class KeyTape extends Tape<String, JSONKeyException> {
                 // In parsing, we should not start the key with a dot, despite it can follow other accessors.
                 throw createParseError(VALID_KEY_ACCESSOR, "Bad use of '.' separator in key.");
             default:
-                nextElement = parseObjectAccess();
+                nextElement = parseObjectAccess(false);
                 break;
         }
         return nextElement;
@@ -124,19 +135,19 @@ class KeyTape extends Tape<String, JSONKeyException> {
         return '[' + String.valueOf(arrayIndex);
     }
 
-    private String parseObjectAccess() {
+    private String parseObjectAccess(boolean enteredAdvancedObjectAccessSafely) {
         final int startIndex = getCurrentIndex();
         int endOfAdvancedObjectAccess;
 
         switch (checkCurrentChar()) {
             case '\'':
-                endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess("'");
+                endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess(enteredAdvancedObjectAccessSafely, "'");
                 break;
             case '"':
-                endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess("\"");
+                endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess(enteredAdvancedObjectAccessSafely, "\"");
                 break;
             case '`':
-                endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess("`");
+                endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess(enteredAdvancedObjectAccessSafely, "`");
                 break;
             default:
                 try {
@@ -157,12 +168,8 @@ class KeyTape extends Tape<String, JSONKeyException> {
                                 // Next key is for an array / advanced object accessor - which can safely follow this object.
                                 return '{' + requestRegion(startIndex, currentIndex);
                             case ' ':
-                                // No spaces allowed in regular object keys.
-                                throw createParseError(
-                                        "<valid key segment>",
-                                        "Spaces are invalid in dot separated keys. " +
-                                                "Use obj[\"key\"] notation if key contains spaces."
-                                );
+                                elementsInKeyWithSpaces++;
+                                // Deliberate fallthrough for now as we still want to increase the current index
                             default:
                                 // Regular part of a key's name
                                 currentIndex++;
@@ -184,7 +191,11 @@ class KeyTape extends Tape<String, JSONKeyException> {
         return '<' + keyRegion;
     }
 
-    private int consumeUntilMatchEndOfAdvancedObjectAccess(String delimiter) {
+    private int consumeUntilMatchEndOfAdvancedObjectAccess(boolean enteredAdvancedObjectAccessSafely, String delimiter) {
+        if (!enteredAdvancedObjectAccessSafely) {
+            throw createParseErrorFromOffset(0, "<valid object key>",
+                    "Complex keys require square bracket delimiters in addition. (e.g. [`key`])");
+        }
         boolean consuming = true;
         int closingQuote = 0;
         while (consuming) {

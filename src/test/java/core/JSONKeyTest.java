@@ -22,6 +22,28 @@ class JSONKeyTest {
     }
 
     @Test
+    public void callingForRegularKeyShouldNotAllowUsAnonArrayKeys() {
+        try {
+            new JSONKey("key[][][][]", false);
+            fail("The previous method call should have thrown an exception.");
+        } catch (Exception e) {
+            assertEquals("Failed to parse array accessor in key. Element was not a valid integer.\n" +
+                    "Line: 1\n" +
+                    "Reached: key[_\n" +
+                    "Expected: <positive integer>", e.getMessage());
+        }
+    }
+
+    @Test
+    public void callingForBuilderKeyAllowsUsAnonArrayKeys() {
+        try {
+            new JSONKey("key[][][][]", true);
+        } catch (Exception e) {
+            fail("The try should not have caused an exception in this instance.", e);
+        }
+    }
+
+    @Test
     public void canCopeWithLeadingSpaces() {
         try {
             new JSONKey("              key", false);
@@ -301,7 +323,6 @@ class JSONKeyTest {
         }
     }
 
-    @SuppressWarnings("ThrowableNotThrown")
     @Test
     public void indexOutOfBoundsUpper1() {
         key.getNextKey();
@@ -317,9 +338,8 @@ class JSONKeyTest {
         key.getNextKey();
         key.getNextKey();
         key.getNextKey();
-        assertThrows(IndexOutOfBoundsException.class, () ->
-                key.createKeyNotFoundException()
-        );
+        assertEquals("<Anonymous Key> not found on element: complicated.key[4][5][6].n3sted.objects" +
+                "[\"thes\\\"e  K\\\"e'ys\"][\"too\"][0].\uD83C\uDF54.last", key.createKeyNotFoundException().getMessage());
     }
 
     @SuppressWarnings("ThrowableNotThrown")
@@ -496,7 +516,7 @@ class JSONKeyTest {
     }
 
     @Test
-    public void keyDifferentTyp12() {
+    public void keyDifferentType12() {
         try {
             key.getNextKey();
             key.getNextKey();
@@ -516,7 +536,6 @@ class JSONKeyTest {
         }
     }
 
-    @SuppressWarnings("ThrowableNotThrown")
     @Test
     public void indexOutOfBoundsUpper2() {
         key.getNextKey();
@@ -532,9 +551,8 @@ class JSONKeyTest {
         key.getNextKey();
         key.getNextKey();
         key.getNextKey();
-        assertThrows(IndexOutOfBoundsException.class, () ->
-                key.createKeyDifferentTypeException()
-        );
+        assertEquals("<Anonymous Key> is not a valid accessor on element: complicated.key[4][5][6].n3sted" +
+                ".objects[\"thes\\\"e  K\\\"e'ys\"][\"too\"][0].\uD83C\uDF54.last", key.createKeyDifferentTypeException().getMessage());
     }
 
     @Test

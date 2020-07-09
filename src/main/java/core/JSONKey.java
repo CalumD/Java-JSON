@@ -59,19 +59,22 @@ class JSONKey {
     }
 
     KeyNotFoundException createKeyNotFoundException() {
-        return new KeyNotFoundException(
-                callChain.get(--currentCallChainIndex).substring(1)
-                        + " not found on element: "
-                        + createUpToString()
-        );
+        return new KeyNotFoundException(validateKeyStepForErrorMessage(" not found on element: "));
     }
 
     KeyDifferentTypeException createKeyDifferentTypeException() {
-        return new KeyDifferentTypeException(
-                callChain.get(--currentCallChainIndex).substring(1)
-                        + " is not a valid accessor on element: "
-                        + createUpToString()
-        );
+        return new KeyDifferentTypeException(validateKeyStepForErrorMessage(" is not a valid accessor on element: "));
+    }
+
+    private String validateKeyStepForErrorMessage(String message) {
+        if (callChain.get(currentCallChainIndex - 1).equals("")) {
+            return "<Anonymous Key>"
+                    + message
+                    + createUpToString();
+        }
+        return callChain.get(--currentCallChainIndex).substring(1)
+                + message
+                + createUpToString();
     }
 
     private String createUpToString() {

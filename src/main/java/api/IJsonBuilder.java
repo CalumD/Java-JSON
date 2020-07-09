@@ -14,6 +14,8 @@ public interface IJsonBuilder extends IJSONAble {
 
     IJsonBuilder addBuilderBlock(String path, IJsonBuilder value) throws BuildException;
 
+    IJsonBuilder addBuilderBlock(String path, IJson value) throws BuildException;
+
     IJsonBuilder convertFromJSON(IJson json);
 
     IJson build(); // change to .build()?

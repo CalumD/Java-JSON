@@ -40,6 +40,7 @@ public class JSONBuilder implements IJsonBuilder, IJSONAble {
 
     private JSType type = JSType.OBJECT;
 
+
     public JSONBuilder() {
     }
 
@@ -114,6 +115,11 @@ public class JSONBuilder implements IJsonBuilder, IJSONAble {
         return this;
     }
 
+    @Override
+    public IJsonBuilder addBuilderBlock(String path, IJson value) throws BuildException {
+        return addBuilderBlock(path, convertFromJSON(value));
+    }
+
     private String identifyFinalKey(JSONKey keyChain) {
         List<String> chainAsListOfKeys = keyChain.getAllKeys();
         if (chainAsListOfKeys.size() == 1) {
@@ -144,8 +150,11 @@ public class JSONBuilder implements IJsonBuilder, IJSONAble {
                 objectStepInKey = getOrCreateIfNotExists(objectStepInKey, allKeys.get(index), allKeys.get(index + 1));
             }
         } catch (KeyNotFoundException notFoundException) {
-            throw new BuildException(valueIdentifier.keyChain.createKeyNotFoundException().getMessage(), notFoundException);
+            throw new BuildException(
+                    valueIdentifier.keyChain.createKeyNotFoundException().getMessage().replaceAll("\\[append]", "[]")
+                    , notFoundException);
         } catch (KeyDifferentTypeException differentTypeException) {
+            valueIdentifier.keyChain.getNextKey();
             throw new BuildException(valueIdentifier.keyChain.createKeyDifferentTypeException().getMessage(), differentTypeException);
         }
 
@@ -153,6 +162,9 @@ public class JSONBuilder implements IJsonBuilder, IJSONAble {
         if (objectStepInKey.type == JSType.ARRAY) {
             objectStepInKey.array.add(valueIdentifier.value);
             return null;
+        } else if (valueIdentifier.finalKey.equals("")) {
+            valueIdentifier.keyChain.getNextKey();
+            throw new BuildException(valueIdentifier.keyChain.createKeyDifferentTypeException().getMessage());
         }
 
         // Else, let the caller carry out any further actions.
@@ -171,7 +183,7 @@ public class JSONBuilder implements IJsonBuilder, IJSONAble {
             if (currentKey.equals("append") || (Integer.parseInt(currentKey) == currentObject.array.size())) {
                 // If we are not at the end of the keychain, add new typed child object we need to create.
                 if (!nextKey.equals("")) {
-                    JSONBuilder nextBuilder = new JSONBuilder(determineNewChildType(currentKey, nextKey));
+                    JSONBuilder nextBuilder = new JSONBuilder(determineNewChildType(nextKey));
                     currentObject.array.add(nextBuilder);
                     currentObject = nextBuilder;
                 }
@@ -192,7 +204,7 @@ public class JSONBuilder implements IJsonBuilder, IJSONAble {
             if (currentObject.objects.containsKey(currentKey)) {
                 currentObject = currentObject.objects.get(currentKey);
             } else {
-                JSONBuilder nextBuilder = new JSONBuilder(determineNewChildType(currentKey, nextKey));
+                JSONBuilder nextBuilder = new JSONBuilder(determineNewChildType(nextKey));
                 currentObject.objects.put(currentKey, nextBuilder);
                 currentObject = nextBuilder;
             }
@@ -201,15 +213,64 @@ public class JSONBuilder implements IJsonBuilder, IJSONAble {
         return currentObject;
     }
 
-    private JSType determineNewChildType(String currentKey, String nextKey) {
-        return nextKey.equals("")
-                ? currentKey.charAt(0) == '[' ? JSType.ARRAY : JSType.OBJECT
-                : nextKey.charAt(0) == '[' ? JSType.ARRAY : JSType.OBJECT;
+    private JSType determineNewChildType(String nextKey) {
+        return nextKey.charAt(0) == '[' ? JSType.ARRAY : JSType.OBJECT;
     }
 
     @Override
     public IJsonBuilder convertFromJSON(IJson json) {
-        return null;
+        switch (json.getDataType()) {
+            case BOOLEAN:
+                return new JSONBuilder().addBoolean("value", json.getBoolean());
+            case DOUBLE:
+                return new JSONBuilder().addDouble("value", json.getDouble());
+            case LONG:
+                return new JSONBuilder().addLong("value", json.getLong());
+            case STRING:
+                return new JSONBuilder().addString("value", json.getString());
+            case ARRAY:
+                return JSONBuilder.builder().addBuilderBlock("value", (JSONBuilder) convertNonPrimitive(json));
+            default:
+                JSONBuilder returnObject = new JSONBuilder(JSType.OBJECT);
+                for (String key : json.getKeys()) {
+                    Object child = convertNonPrimitive(json.getAnyAt(key));
+                    if (child instanceof Boolean) {
+                        returnObject.addBoolean(key, (boolean) child);
+                    } else if (child instanceof Double) {
+                        returnObject.addDouble(key, (double) child);
+                    } else if (child instanceof Long) {
+                        returnObject.addLong(key, (long) child);
+                    } else if (child instanceof String) {
+                        returnObject.addString(key, (String) child);
+                    } else if (child instanceof JSONBuilder) {
+                        returnObject.objects.put(key, (JSONBuilder) child);
+                    } else {
+                        throw new BuildException("Unable to convert JSON: " + child + " unknown sub typing in object.");
+                    }
+                }
+                return returnObject;
+        }
+    }
+
+    private Object convertNonPrimitive(IJson json) {
+        switch (json.getDataType()) {
+            case BOOLEAN:
+                return json.getBoolean();
+            case DOUBLE:
+                return json.getDouble();
+            case LONG:
+                return json.getLong();
+            case STRING:
+                return json.getString();
+            case ARRAY:
+                JSONBuilder values = new JSONBuilder(JSType.ARRAY);
+                for (IJson element : json.getValues()) {
+                    values.array.add(convertNonPrimitive(element));
+                }
+                return values;
+            default:
+                return convertFromJSON(json);
+        }
     }
 
     @Override

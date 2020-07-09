@@ -62,6 +62,16 @@ public class JSObjectTest extends JSONTest {
     }
 
     @Test
+    public void keysWithSpacesAreOkay() {
+        try {
+            IJson obj = object.createFromString("{\"I have spaces\": 1}");
+            assertEquals(1, obj.getLongAt("['I have spaces']"));
+        } catch (JSONParseException e) {
+            fail("Create from string should not throw an exception for valid input.", e);
+        }
+    }
+
+    @Test
     public void duplicateKeysNotAllowed() {
         assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{\"samekey\":1,'samekey': 1}")));
     }
