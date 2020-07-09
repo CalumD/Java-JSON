@@ -334,4 +334,9 @@ class JSONBuilderTest {
                         "}" +
                         "}", builder.toString());
     }
+
+    @Test
+    public void builderConvertFromJSONThenBackAgainResultsInSameOutput() {
+        fail("Yet to implement this test (Maybe use the file for schema testing).");
+    }
 }
