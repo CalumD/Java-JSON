@@ -337,6 +337,178 @@ class JSONBuilderTest {
 
     @Test
     public void builderConvertFromJSONThenBackAgainResultsInSameOutput() {
-        fail("Yet to implement this test (Maybe use the file for schema testing).");
+        String jsonContent = "{\n" +
+                "  \"$schema\": \"http://json-schema.org/draft-07/schema\",\n" +
+                "  \"$id\": \"\",\n" +
+                "  \"title\": \"CS Schema\",\n" +
+                "  \"description\": \"Th\",\n" +
+                "  \"type\": \"object\",\n" +
+                "  \"properties\": {\n" +
+                "    \"system\": {\n" +
+                "      \"description\": \"r advanced/future work/development.\",\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"name\": {\n" +
+                "          \"description\": \" 'name' config.\",\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"maxLength\": 100\n" +
+                "        },\n" +
+                "        \"description\": {\n" +
+                "          \"description\": \"This.\",\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"maxLength\": 10000\n" +
+                "        },\n" +
+                "        \"rolesDirectory\": {\n" +
+                "          \"description\": \"This '/'.\",\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"maxLength\": 10000\n" +
+                "        },\n" +
+                "        \"roles\": {\n" +
+                "          \"description\": \"This.\",\n" +
+                "          \"type\": \"array\",\n" +
+                "          \"items\": {\n" +
+                "            \"$ref\": \"#/definitions/roleDeclaration\",\n" +
+                "            \"v N e s t e d!\": [[0,1], {}, \"\", 1.0, true]\n" +
+                "          },\n" +
+                "          \"uniqueItems\": true,\n" +
+                "          \"additionalItems\": false\n" +
+                "        },\n" +
+                "        \"machines\": {\n" +
+                "          \"description\": \"Them.\",\n" +
+                "          \"type\": \"array\",\n" +
+                "          \"items\": {\n" +
+                "            \"$ref\": \"#/definitions/machine\"\n" +
+                "          },\n" +
+                "          \"additionalItems\": false\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"required\": [\n" +
+                "        \"rolesDirectory\",\n" +
+                "        \"roles\",\n" +
+                "        \"machines\"\n" +
+                "      ],\n" +
+                "      \"additionalProperties\": false\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"required\": [\n" +
+                "    \"system\"\n" +
+                "  ],\n" +
+                "  \"definitions\": {\n" +
+                "    \"roleDeclaration\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"name\": {\n" +
+                "          \"description\": \"This\",\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"maxLength\": 100\n" +
+                "        },\n" +
+                "        \"description\": {\n" +
+                "          \"description\": \"This.\",\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"maxLength\": 5000\n" +
+                "        },\n" +
+                "        \"id\": {\n" +
+                "          \"description\": \"This.\",\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"minLength\": 1,\n" +
+                "          \"maxLength\": 1000\n" +
+                "        },\n" +
+                "        \"path\": {\n" +
+                "          \"description\": \"This 'system.rolesDirectory' property.\",\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"minLength\": 1,\n" +
+                "          \"maxLength\": 10000\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"required\": [\n" +
+                "        \"id\",\n" +
+                "        \"path\"\n" +
+                "      ],\n" +
+                "      \"additionalProperties\": false\n" +
+                "    },\n" +
+                "    \"machine\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"name\": {\n" +
+                "          \"description\": \"This.\",\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"minLength\": 1,\n" +
+                "          \"maxLength\": 1000\n" +
+                "        },\n" +
+                "        \"address\": {\n" +
+                "          \"description\": \"This\",\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"anyOf\": [\n" +
+                "            {\n" +
+                "              \"format\": \"hostname\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "              \"format\": \"ipv4\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "              \"format\": \"ipv6\"\n" +
+                "            }\n" +
+                "          ]\n" +
+                "        },\n" +
+                "        \"arp\": {\n" +
+                "          \"description\": \"This\",\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"anyOf\": [\n" +
+                "            {\n" +
+                "              \"format\": \"hostname\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "              \"format\": \"ipv4\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "              \"format\": \"ipv6\"\n" +
+                "            }\n" +
+                "          ]\n" +
+                "        },\n" +
+                "        \"components\": {\n" +
+                "          \"description\": \"This\",\n" +
+                "          \"type\": \"array\",\n" +
+                "          \"items\": {\n" +
+                "            \"$ref\": \"#/definitions/roleUse\"\n" +
+                "          },\n" +
+                "          \"additionalItems\": false\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"required\": [\n" +
+                "        \"name\",\n" +
+                "        \"address\",\n" +
+                "        \"components\"\n" +
+                "      ],\n" +
+                "      \"additionalProperties\": false\n" +
+                "    },\n" +
+                "    \"roleUse\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"role\": {\n" +
+                "          \"description\": \"This.\",\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"oneOf\": [\n" +
+                "            {\n" +
+                "              \"$ref\": \"#/definitions/roleDeclaration/properties/id\"\n" +
+                "            }\n" +
+                "          ]\n" +
+                "        },\n" +
+                "        \"custom\": {\n" +
+                "          \"description\": \"This.\",\n" +
+                "          \"type\": \"object\",\n" +
+                "          \"$schema\": \"http://json-schema.org/draft-07/schema\",\n" +
+                "          \"properties\": {}\n" +
+                "        }\n" +
+                "      },\n" +
+                "      \"required\": [\n" +
+                "        \"role\"\n" +
+                "      ],\n" +
+                "      \"additionalProperties\": false\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        IJson parsedJSON = JSONParser.parse(jsonContent);
+        assertEquals(JSONBuilder.builder().convertFromJSON(parsedJSON).convertToJSON(), parsedJSON);
     }
 }
