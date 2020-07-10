@@ -108,4 +108,7 @@ public abstract class JSONTest {
 
     @Test
     public abstract void getHashCode();
+
+    @Test
+    public abstract void jsonIsConvertible();
 }

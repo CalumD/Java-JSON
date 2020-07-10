@@ -1,5 +1,6 @@
 package core;
 
+import api.IJSONAble;
 import api.IJson;
 import exceptions.JSONParseException;
 import exceptions.KeyDifferentTypeException;
@@ -354,5 +355,13 @@ public class JSNumberTest extends JSONTest {
     public void getHashCode() {
         assertEquals(Long.hashCode(321L), numberLong.hashCode(), 0);
         assertEquals(Double.hashCode(1.25), numberDouble.hashCode(), 0);
+    }
+
+    @Test
+    @Override
+    public void jsonIsConvertible() {
+        IJSONAble builder = JSONBuilder.builder().addString("key", "value");
+        assertEquals(builder.convertToJSON(), numberDouble.convertToJSON(builder));
+        assertEquals(builder.convertToJSON(), numberLong.convertToJSON(builder));
     }
 }

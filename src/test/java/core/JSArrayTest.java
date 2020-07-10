@@ -1,5 +1,6 @@
 package core;
 
+import api.IJSONAble;
 import api.IJson;
 import exceptions.JSONParseException;
 import exceptions.KeyDifferentTypeException;
@@ -424,5 +425,12 @@ public class JSArrayTest extends JSONTest {
         check.add(new JSObject(new JSONTape("{}")));
 
         assertEquals(check.hashCode(), array.hashCode(), 0);
+    }
+
+    @Test
+    @Override
+    public void jsonIsConvertible() {
+        IJSONAble builder = JSONBuilder.builder().addString("key", "value");
+        assertEquals(builder.convertToJSON(), array.convertToJSON(builder));
     }
 }
