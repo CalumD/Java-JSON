@@ -1,5 +1,6 @@
 package core;
 
+import api.IJSONAble;
 import api.IJson;
 import exceptions.JSONException;
 import exceptions.JSONParseException;
@@ -31,6 +32,11 @@ public abstract class JSON implements IJson {
     @Override
     public IJson createFromMultilineString(List<String> jsonFragment) throws JSONParseException {
         return parseSelf(jsonFragment);
+    }
+
+    @Override
+    public IJson convertToJSON(IJSONAble jsonable) throws JSONParseException {
+        return jsonable.convertToJSON();
     }
 
     @Override

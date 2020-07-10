@@ -15,6 +15,8 @@ public interface IJson extends Serializable {
 
     IJson createFromMultilineString(List<String> jsonFragment) throws JSONParseException;
 
+    IJson convertToJSON(IJSONAble jsonable) throws JSONParseException;
+
 
     boolean contains(String key);
 

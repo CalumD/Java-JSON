@@ -38,6 +38,10 @@ public final class JSONParser {
         return parse(whole.toString());
     }
 
+    public static IJson parse(IJSONAble jsonable) throws JSONParseException {
+        return jsonable.convertToJSON();
+    }
+
     public static Object getValue(IJson fromObject, String key) {
         return fromObject.getValueAt(key);
     }
