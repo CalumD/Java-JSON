@@ -244,8 +244,6 @@ public class JSONBuilder implements IJsonBuilder, IJSONAble {
                         returnObject.addString(key, (String) child);
                     } else if (child instanceof JSONBuilder) {
                         returnObject.objects.put(key, (JSONBuilder) child);
-                    } else {
-                        throw new BuildException("Unable to convert JSON: " + child + " unknown sub typing in object.");
                     }
                 }
                 return returnObject;
