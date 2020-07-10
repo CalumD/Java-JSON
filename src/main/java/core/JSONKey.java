@@ -91,7 +91,7 @@ class JSONKey {
         for (int index = 0; index < currentCallChainIndex; index++) {
             callChainElement = callChain.get(index);
             if (callChainElement.startsWith("[")) {
-                upToString.append(callChainElement.equals("append") ? "" : callChainElement).append(']');
+                upToString.append(callChainElement.equals("[append") ? "[" : callChainElement).append(']');
             } else if (callChainElement.startsWith("{")) {
                 upToString.append('.').append(callChainElement.substring(1));
             } else if (callChainElement.startsWith("<")) {

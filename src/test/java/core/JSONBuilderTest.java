@@ -511,4 +511,19 @@ class JSONBuilderTest {
         IJson parsedJSON = JSONParser.parse(jsonContent);
         assertEquals(JSONBuilder.builder().convertFromJSON(parsedJSON).convertToJSON(), parsedJSON);
     }
+
+    @Test
+    public void checkWeCantAddToAnonymousBaseArray() {
+        try {
+            JSONBuilder.builder().addLong("[]", 1L).build();
+            fail("The previous method should have thrown an exception.");
+        } catch (BuildException e) {
+            assertEquals("<Anonymous Key> is not a valid accessor on element: []", e.getMessage());
+        }
+    }
+
+    @Test
+    public void addAnonymousKeyNameButProperlyEscaped() {
+        assertEquals("{\"[]\":1}", JSONBuilder.builder().addLong("['[]']", 1L).toString());
+    }
 }
