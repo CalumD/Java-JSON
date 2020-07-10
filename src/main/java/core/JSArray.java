@@ -54,7 +54,7 @@ public class JSArray extends JSON {
                     }
                     break;
                 default:
-                    throw parsingTape.createParseError(", / ]",
+                    throw parsingTape.createParseErrorFromOffset(-1, ", / ]",
                             "Invalid array child delimiter.");
             }
         }
