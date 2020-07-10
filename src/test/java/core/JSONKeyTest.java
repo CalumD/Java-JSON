@@ -9,7 +9,9 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class JSONKeyTest {
 
@@ -573,5 +575,13 @@ class JSONKeyTest {
         keys.add("");
 
         assertEquals(keys, key.getAllKeys());
+    }
+
+    @Test
+    public void shouldNotBeAllowedToAnonArrayReferenceIfItsTheFirstPartOfKey() {
+        JSONKey anonKey = new JSONKey("[]", true);
+        anonKey.getNextKey();
+        assertEquals("[] is not a valid accessor on element: <base element>",
+                anonKey.createKeyDifferentTypeException().getMessage());
     }
 }

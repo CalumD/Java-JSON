@@ -4,7 +4,11 @@ import exceptions.KeyDifferentTypeException;
 import exceptions.KeyInvalidException;
 import exceptions.KeyNotFoundException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 class JSONKey {
 
@@ -72,9 +76,9 @@ class JSONKey {
                     + message
                     + createUpToString();
         }
-        return callChain.get(--currentCallChainIndex).substring(1)
-                + message
-                + createUpToString();
+        return (callChain.get(--currentCallChainIndex).equals("[append"))
+                ? "[]" + message + createUpToString()
+                : callChain.get(currentCallChainIndex).substring(1) + message + createUpToString();
     }
 
     private String createUpToString() {
@@ -87,7 +91,7 @@ class JSONKey {
         for (int index = 0; index < currentCallChainIndex; index++) {
             callChainElement = callChain.get(index);
             if (callChainElement.startsWith("[")) {
-                upToString.append(callChainElement).append(']');
+                upToString.append(callChainElement.equals("append") ? "" : callChainElement).append(']');
             } else if (callChainElement.startsWith("{")) {
                 upToString.append('.').append(callChainElement.substring(1));
             } else if (callChainElement.startsWith("<")) {
