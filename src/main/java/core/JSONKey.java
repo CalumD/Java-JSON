@@ -71,6 +71,9 @@ class JSONKey {
     }
 
     private String validateKeyStepForErrorMessage(String message) {
+        if (currentCallChainIndex <= 0) {
+            return "Invalid usage of a JSONKey tape - trying to create error before collecting values.";
+        }
         if (callChain.get(currentCallChainIndex - 1).equals("")) {
             return "<Anonymous Key>"
                     + message

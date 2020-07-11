@@ -30,9 +30,52 @@ public class JSStringTest extends JSONTest {
 
     @Test
     public void testParseException() {
-        assertThrows(JSONParseException.class, () -> new JSString(new JSONTape("This String Doesnt Have Delimiters")));
-        assertThrows(JSONParseException.class, () -> new JSString(new JSONTape("'No Terminating Delimiter")));
-        assertThrows(JSONParseException.class, () -> new JSString(new JSONTape("No Initial Delimiter'")));
+        try {
+            new JSString(new JSONTape("This String Doesnt Have Delimiters"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("T is not a valid string delimiter.\n" +
+                    "Line: 1\n" +
+                    "Reached: _\n" +
+                    "Expected: \" / ' / `", e.getMessage());
+        }
+        try {
+            new JSString(new JSONTape("'No Terminating Delimiter"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Didn't find matching ', before end of string.\n" +
+                    "Line: 1\n" +
+                    "Reached: 'No Terminating Delimiter_\n" +
+                    "Expected: '", e.getMessage());
+        }
+        try {
+            new JSString(new JSONTape("`No Terminating Delimiter"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Didn't find matching `, before end of string.\n" +
+                    "Line: 1\n" +
+                    "Reached: `No Terminating Delimiter_\n" +
+                    "Expected: `", e.getMessage());
+        }
+        try {
+            new JSString(new JSONTape("\"No Terminating Delimiter"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Didn't find matching \", before end of string.\n" +
+                    "Line: 1\n" +
+                    "Reached: \"No Terminating Delimiter_\n" +
+                    "Expected: \"", e.getMessage());
+        }
+        try {
+            new JSString(new JSONTape("No Initial Delimiter'"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("N is not a valid string delimiter.\n" +
+                    "Line: 1\n" +
+                    "Reached: _\n" +
+                    "Expected: \" / ' / `", e.getMessage());
+
+        }
     }
 
     @Test
@@ -129,25 +172,45 @@ public class JSStringTest extends JSONTest {
     @Test
     @Override
     public void getArray() {
-        assertThrows(KeyDifferentTypeException.class, () -> string.getArray());
+        try {
+            string.getArray();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: ARRAY  ->  Received: STRING", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getBoolean() {
-        assertThrows(KeyDifferentTypeException.class, () -> string.getBoolean());
+        try {
+            string.getBoolean();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: BOOLEAN  ->  Received: STRING", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getDouble() {
-        assertThrows(KeyDifferentTypeException.class, () -> string.getDouble());
+        try {
+            string.getDouble();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: DOUBLE  ->  Received: STRING", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getLong() {
-        assertThrows(KeyDifferentTypeException.class, () -> string.getLong());
+        try {
+            string.getLong();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: LONG  ->  Received: STRING", e.getMessage());
+        }
     }
 
     @Test
@@ -159,7 +222,12 @@ public class JSStringTest extends JSONTest {
     @Test
     @Override
     public void getJSONObject() {
-        assertThrows(KeyDifferentTypeException.class, () -> string.getJSONObject());
+        try {
+            string.getJSONObject();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: OBJECT  ->  Received: STRING", e.getMessage());
+        }
     }
 
     @Test
@@ -171,61 +239,111 @@ public class JSStringTest extends JSONTest {
     @Test
     @Override
     public void getValueAt() {
-        assertThrows(KeyNotFoundException.class, () -> string.getValueAt("someKey"));
+        try {
+            string.getValueAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a STRING", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getDataTypeOf() {
-        assertThrows(KeyNotFoundException.class, () -> string.getDataTypeOf("someKey"));
+        try {
+            string.getDataTypeOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a STRING", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getKeysOf() {
-        assertThrows(KeyNotFoundException.class, () -> string.getKeysOf("someKey"));
+        try {
+            string.getKeysOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a STRING", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getValuesOf() {
-        assertThrows(KeyNotFoundException.class, () -> string.getValuesOf("someKey"));
+        try {
+            string.getValuesOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a STRING", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getJSONObjectAt() {
-        assertThrows(KeyNotFoundException.class, () -> string.getJSONObjectAt("someKey"));
+        try {
+            string.getJSONObjectAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a STRING", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getArrayAt() {
-        assertThrows(KeyNotFoundException.class, () -> string.getArrayAt("someKey"));
+        try {
+            string.getArrayAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a STRING", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getBooleanAt() {
-        assertThrows(KeyNotFoundException.class, () -> string.getBooleanAt("someKey"));
+        try {
+            string.getBooleanAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a STRING", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getDoubleAt() {
-        assertThrows(KeyNotFoundException.class, () -> string.getDoubleAt("someKey"));
+        try {
+            string.getDoubleAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a STRING", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getLongAt() {
-        assertThrows(KeyNotFoundException.class, () -> string.getLongAt("someKey"));
+        try {
+            string.getLongAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a STRING", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getStringAt() {
-        assertThrows(KeyNotFoundException.class, () -> string.getStringAt("someKey"));
+        try {
+            string.getStringAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a STRING", e.getMessage());
+        }
     }
 
     @Test
@@ -236,7 +354,12 @@ public class JSStringTest extends JSONTest {
     @Test
     @Override
     public void getAnyAt() {
-        assertThrows(KeyNotFoundException.class, () -> string.getAnyAt("someKey"));
+        try {
+            string.getAnyAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a STRING", e.getMessage());
+        }
     }
 
     @Test

@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class JSONKeyTest {
@@ -74,7 +73,7 @@ class JSONKeyTest {
         try {
             new JSONKey("key1..key2", false);
         } catch (Exception e) {
-            assertEquals("Bad use of '.' separator in key.\n" +
+            assertEquals("Bad use of '.' separator in key\n" +
                     "Line: 1\n" +
                     "Reached: key1._\n" +
                     "Expected: [ / <Object Key>", e.getMessage());
@@ -131,12 +130,13 @@ class JSONKeyTest {
         }
     }
 
-    @SuppressWarnings("ThrowableNotThrown")
     @Test
     public void indexOutOfBoundsLower1() {
-        assertThrows(IndexOutOfBoundsException.class, () ->
-                key.createKeyNotFoundException()
-        );
+        try {
+            throw key.createKeyNotFoundException();
+        } catch (KeyNotFoundException e) {
+            assertEquals("Invalid usage of a JSONKey tape - trying to create error before collecting values.", e.getMessage());
+        }
     }
 
     @Test
@@ -342,14 +342,6 @@ class JSONKeyTest {
         key.getNextKey();
         assertEquals("<Anonymous Key> not found on element: complicated.key[4][5][6].n3sted.objects" +
                 "[\"thes\\\"e  K\\\"e'ys\"][\"too\"][0].\uD83C\uDF54.last", key.createKeyNotFoundException().getMessage());
-    }
-
-    @SuppressWarnings("ThrowableNotThrown")
-    @Test
-    public void indexOutOfBoundsLower2() {
-        assertThrows(IndexOutOfBoundsException.class, () ->
-                key.createKeyNotFoundException()
-        );
     }
 
     @Test

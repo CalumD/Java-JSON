@@ -31,23 +31,150 @@ public class JSObjectTest extends JSONTest {
 
     @Test
     public void testParseException() {
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("}")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{{}}")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{[]}")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{1,}")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{,1}")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{1, [}")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{\"\":1}")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{\"key:1}")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{key\":1}")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{\"key\"1}")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{\"key\"}")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{'key':1,}")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{'key':1]")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{'key'=1}")));
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{\"samekey\":1,2: 3}")));
+        try {
+            new JSObject(new JSONTape("{"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape(""));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("You cannot create something from nothing. Input was empty.", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("{{}}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Missing Key at start of Object.\n" +
+                    "Line: 1\n" +
+                    "Reached: {_\n" +
+                    "Expected: \"", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("{[]}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Missing Key at start of Object.\n" +
+                    "Line: 1\n" +
+                    "Reached: {_\n" +
+                    "Expected: \"", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("{1,}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Missing Key at start of Object.\n" +
+                    "Line: 1\n" +
+                    "Reached: {_\n" +
+                    "Expected: \"", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("{,1}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Missing Key at start of Object.\n" +
+                    "Line: 1\n" +
+                    "Reached: {_\n" +
+                    "Expected: \"", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("{1, [}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Missing Key at start of Object.\n" +
+                    "Line: 1\n" +
+                    "Reached: {_\n" +
+                    "Expected: \"", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("{\"\":1}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Illegal Object Key (Empty).\n" +
+                    "Line: 1\n" +
+                    "Reached: {\"\"_\n" +
+                    "Expected: <Valid Key>", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("{\"key:1}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Didn't find matching \", before end of string.\n" +
+                    "Line: 1\n" +
+                    "Reached: {\"key:1}_\n" +
+                    "Expected: \"", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("{key\":1}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Missing Key at start of Object.\n" +
+                    "Line: 1\n" +
+                    "Reached: {_\n" +
+                    "Expected: \"", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("{\"key\"1}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid Key:Value separator. Must use a colon(:).\n" +
+                    "Line: 1\n" +
+                    "Reached: {\"key\"_\n" +
+                    "Expected: :", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("{\"key\"}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid Key:Value separator. Must use a colon(:).\n" +
+                    "Line: 1\n" +
+                    "Reached: {\"key\"_\n" +
+                    "Expected: :", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("{'key':1,}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Comma suggests more object elements, but object terminates.\n" +
+                    "Line: 1\n" +
+                    "Reached: {'key':1,_\n" +
+                    "Expected: { / [ / \" / <number> / <boolean> ", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("{'key':1]"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid object child delimiter.\n" +
+                    "Line: 1\n" +
+                    "Reached: {'key':1_\n" +
+                    "Expected: , / }", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("{'key'=1}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid Key:Value separator. Must use a colon(:).\n" +
+                    "Line: 1\n" +
+                    "Reached: {'key'_\n" +
+                    "Expected: :", e.getMessage());
+        }
+        try {
+            new JSObject(new JSONTape("{\"samekey\":1,2: 3}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid type for object key.\n" +
+                    "Line: 1\n" +
+                    "Reached: {\"samekey\":1,_\n" +
+                    "Expected: \"", e.getMessage());
+        }
     }
 
     @Test
@@ -74,7 +201,15 @@ public class JSObjectTest extends JSONTest {
 
     @Test
     public void duplicateKeysNotAllowed() {
-        assertThrows(JSONParseException.class, () -> new JSObject(new JSONTape("{\"samekey\":1,'samekey': 1}")));
+        try {
+            new JSObject(new JSONTape("{\"samekey\":1,'samekey': 1}"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Illegal Object key (Duplicate): samekey\n" +
+                    "Line: 1\n" +
+                    "Reached: {\"samekey\":1,'samekey'_\n" +
+                    "Expected: <Unique Key>", e.getMessage());
+        }
     }
 
     @Test
@@ -139,7 +274,12 @@ public class JSObjectTest extends JSONTest {
         keys3.add("1");
 
         assertFalse(object.containsAllKeys(keys1));
-        assertThrows(KeyDifferentTypeException.class, () -> object.containsAllKeys(keys2));
+        try {
+            object.containsAllKeys(keys2);
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("0 is not a valid accessor on element: <base element>", e.getMessage());
+        }
         assertFalse(object.containsAllKeys(keys3));
     }
 
@@ -195,31 +335,56 @@ public class JSObjectTest extends JSONTest {
     @Test
     @Override
     public void getArray() {
-        assertThrows(KeyDifferentTypeException.class, () -> object.getArray());
+        try {
+            object.getArray();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: ARRAY  ->  Received: OBJECT", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getBoolean() {
-        assertThrows(KeyDifferentTypeException.class, () -> object.getBoolean());
+        try {
+            object.getBoolean();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: BOOLEAN  ->  Received: OBJECT", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getDouble() {
-        assertThrows(KeyDifferentTypeException.class, () -> object.getDouble());
+        try {
+            object.getDouble();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: DOUBLE  ->  Received: OBJECT", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getLong() {
-        assertThrows(KeyDifferentTypeException.class, () -> object.getLong());
+        try {
+            object.getLong();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: LONG  ->  Received: OBJECT", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getString() {
-        assertThrows(KeyDifferentTypeException.class, () -> object.getString());
+        try {
+            object.getString();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: STRING  ->  Received: OBJECT", e.getMessage());
+        }
     }
 
     @Test
@@ -237,41 +402,71 @@ public class JSObjectTest extends JSONTest {
     @Test
     @Override
     public void getValueAt() {
-        assertThrows(KeyNotFoundException.class, () -> object.getValueAt("someKey"));
+        try {
+            object.getValueAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("someKey not found on element: <base element>", e.getMessage());
+        }
         assertTrue((boolean) object.getValueAt("boolean"));
     }
 
     @Test
     @Override
     public void getDataTypeOf() {
-        assertThrows(KeyNotFoundException.class, () -> object.getValueAt("someKey"));
+        try {
+            object.getDataTypeOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("someKey not found on element: <base element>", e.getMessage());
+        }
         assertEquals(JSType.LONG, object.getDataTypeOf("long"));
     }
 
     @Test
     @Override
     public void getKeysOf() {
-        assertThrows(KeyNotFoundException.class, () -> object.getKeysOf("someKey"));
+        try {
+            object.getKeysOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("someKey not found on element: <base element>", e.getMessage());
+        }
         assertEquals(new ArrayList<>(), object.getKeysOf("array"));
     }
 
     @Test
     @Override
     public void getValuesOf() {
-        assertThrows(KeyNotFoundException.class, () -> object.getValuesOf("someKey"));
+        try {
+            object.getValuesOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("someKey not found on element: <base element>", e.getMessage());
+        }
         assertEquals(new ArrayList<>(), object.getValuesOf("object"));
     }
 
     @Test
     @Override
     public void getJSONObjectAt() {
-        assertThrows(KeyNotFoundException.class, () -> object.getJSONObjectAt("someKey"));
+        try {
+            object.getJSONObjectAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("someKey not found on element: <base element>", e.getMessage());
+        }
         assertEquals(new JSObject(new JSONTape("{}")), object.getJSONObjectAt("object"));
     }
 
     @Test
     public void getJSONObjectAtMe() {
-        assertThrows(KeyNotFoundException.class, () -> object.getJSONObjectAt("someKey"));
+        try {
+            object.getJSONObjectAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("someKey not found on element: <base element>", e.getMessage());
+        }
         assertEquals(object, object.getJSONObjectAt(""));
     }
 
@@ -279,42 +474,72 @@ public class JSObjectTest extends JSONTest {
     @Test
     @Override
     public void getArrayAt() {
-        assertThrows(KeyNotFoundException.class, () -> object.getArrayAt("someKey"));
+        try {
+            object.getArrayAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("someKey not found on element: <base element>", e.getMessage());
+        }
         assertEquals(new JSArray(new JSONTape("[]")), object.getArrayAt("array"));
     }
 
     @Test
     @Override
     public void getBooleanAt() {
-        assertThrows(KeyNotFoundException.class, () -> object.getBooleanAt("someKey"));
+        try {
+            object.getBooleanAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("someKey not found on element: <base element>", e.getMessage());
+        }
         assertTrue(object.getBooleanAt("boolean"));
     }
 
     @Test
     @Override
     public void getDoubleAt() {
-        assertThrows(KeyNotFoundException.class, () -> object.getDoubleAt("someKey"));
+        try {
+            object.getDoubleAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("someKey not found on element: <base element>", e.getMessage());
+        }
         assertEquals(0.1, object.getDoubleAt("double"), 0);
     }
 
     @Test
     @Override
     public void getLongAt() {
-        assertThrows(KeyNotFoundException.class, () -> object.getLongAt("someKey"));
+        try {
+            object.getLongAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("someKey not found on element: <base element>", e.getMessage());
+        }
         assertEquals(0, object.getLongAt("long"), 0);
     }
 
     @Test
     @Override
     public void getStringAt() {
-        assertThrows(KeyNotFoundException.class, () -> object.getStringAt("someKey"));
+        try {
+            object.getStringAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("someKey not found on element: <base element>", e.getMessage());
+        }
         assertEquals("", object.getStringAt("string"));
     }
 
     @Test
     @Override
     public void getAnyAt() {
-        assertThrows(KeyNotFoundException.class, () -> object.getAnyAt("someKey"));
+        try {
+            object.getAnyAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("someKey not found on element: <base element>", e.getMessage());
+        }
         assertEquals("", object.getAnyAt("string").getString());
     }
 

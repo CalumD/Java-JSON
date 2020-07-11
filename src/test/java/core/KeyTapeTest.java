@@ -7,18 +7,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class KeyTapeTest {
 
     @Test
     public void disallowNullKey() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape(null));
+        try {
+            new KeyTape(null);
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("You cannot create something from nothing. Input was null.", e.getMessage());
+        }
     }
 
     @Test
     public void disallowEmptyKey() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape(""));
+        try {
+            new KeyTape("");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("You cannot create something from nothing. Input was empty.", e.getMessage());
+        }
     }
 
     @Test
@@ -69,12 +79,28 @@ class KeyTapeTest {
 
     @Test
     public void mustNotStartWithDotAccessor() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape(".key").parseNextElement());
+        try {
+            new KeyTape(".key").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Bad use of '.' separator in key\n" +
+                    "Line: 1\n" +
+                    "Reached: _\n" +
+                    "Expected: [ / <Object Key>", e.getMessage());
+        }
     }
 
     @Test
     public void mustNotEndWithDotAccessor() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("key.").parseNextElement());
+        try {
+            new KeyTape("key.").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Trailing dot separator in key suggests more elements, but end of string was found.\n" +
+                    "Line: 1\n" +
+                    "Reached: key_\n" +
+                    "Expected: <object ref> / <end of key>", e.getMessage());
+        }
     }
 
     @Test
@@ -109,12 +135,25 @@ class KeyTapeTest {
 
     @Test
     public void missingTerminatingDelimiterAdvancedObjectAccessorWrapper() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("[`key key`").parseNextElement());
+        try {
+            new KeyTape("[`key key`").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Reached end of input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
+        }
     }
 
     @Test
     public void missingTerminatingDelimiterAdvancedObjectAccessorName() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("[`key key]").parseNextElement());
+        try {
+            new KeyTape("[`key key]").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Reached end of key before resolving all parts. Are you missing a delimiter?\n" +
+                    "Line: 1\n" +
+                    "Reached: [`key key]_\n" +
+                    "Expected: <key reference>", e.getMessage());
+        }
     }
 
     @Test
@@ -142,7 +181,12 @@ class KeyTapeTest {
     public void tryToParseBeyondTheEndOfKey() {
         KeyTape keyTape = new KeyTape("key1");
         assertEquals("{key1", keyTape.parseNextElement());
-        assertThrows(KeyInvalidException.class, keyTape::parseNextElement);
+        try {
+            keyTape.parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Reached end of input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
+        }
     }
 
     @Test
@@ -177,17 +221,41 @@ class KeyTapeTest {
 
     @Test
     public void decimalArrayAccessNotOkay() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("[1.5]").parseNextElement());
+        try {
+            new KeyTape("[1.5]").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Failed to parse array accessor in key. Element was not a valid integer.\n" +
+                    "Line: 1\n" +
+                    "Reached: [_\n" +
+                    "Expected: <positive integer>", e.getMessage());
+        }
     }
 
     @Test
     public void negativeArrayAccessNotOkay() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("[-5]").parseNextElement());
+        try {
+            new KeyTape("[-5]").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Array accessor in key was negative integer. Must be positive.\n" +
+                    "Line: 1\n" +
+                    "Reached: [_\n" +
+                    "Expected: <positive integer>", e.getMessage());
+        }
     }
 
     @Test
     public void missingEndOfArrayAccessNotOkay() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("[5").parseNextElement());
+        try {
+            new KeyTape("[5").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Failed to parse array accessor in key. Reached end of key before delimiter ']' was found.\n" +
+                    "Line: 1\n" +
+                    "Reached: [_\n" +
+                    "Expected: <positive integer>", e.getMessage());
+        }
     }
 
     @Test
@@ -207,7 +275,15 @@ class KeyTapeTest {
     @Test
     public void missingDotOrAdvancedAccessorSyntaxNotOkay() {
         KeyTape keyTape = new KeyTape("[0]key");
-        assertThrows(KeyInvalidException.class, keyTape::parseNextElement);
+        try {
+            keyTape.parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Invalid continuation from array key\n" +
+                    "Line: 1\n" +
+                    "Reached: [0]_\n" +
+                    "Expected: [ / .", e.getMessage());
+        }
     }
 
     @Test
@@ -230,21 +306,50 @@ class KeyTapeTest {
 
     @Test
     public void parseAllElementsCanStillThrowoutExceptions() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("someinvalidkey['").parseAllElements());
+        try {
+            new KeyTape("someinvalidkey['").parseAllElements();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Reached end of input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
+        }
     }
 
     @Test
     public void parseAllElementsWithTrailingDot() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("somekey.otherkey.").parseAllElements());
+        try {
+            new KeyTape("somekey.otherkey.").parseAllElements();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Trailing dot separator in key suggests more elements, but end of string was found.\n" +
+                    "Line: 1\n" +
+                    "Reached: somekey.otherkey_\n" +
+                    "Expected: <object ref> / <end of key>", e.getMessage());
+        }
     }
 
     @Test
     public void advancedObjectAccessorMustNotBeEmpty() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("['']").parseNextElement());
+        try {
+            new KeyTape("['']").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("You cannot address a JSON object with an empty key.\n" +
+                    "Line: 1\n" +
+                    "Reached: ['']_\n" +
+                    "Expected: <Valid JSON Object Key>", e.getMessage());
+        }
     }
 
     @Test
     public void emptyArrayAccess() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("[]").parseNextElement());
+        try {
+            new KeyTape("[]").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Failed to parse array accessor in key. Element was not a valid integer.\n" +
+                    "Line: 1\n" +
+                    "Reached: [_\n" +
+                    "Expected: <positive integer>", e.getMessage());
+        }
     }
 }

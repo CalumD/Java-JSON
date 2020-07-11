@@ -4,7 +4,6 @@ import exceptions.JSONParseException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class JSONTapeTest {
@@ -43,13 +42,26 @@ class JSONTapeTest {
     @Test
     public void consumeSlashStarMustMatchExactlySlashStar() {
         assertEquals("{}", new JSONTape("{/*text*/}").parseNextElement().asString());
-        assertThrows(JSONParseException.class, () -> new JSONTape("{/ *text*/}").parseNextElement());
+        try {
+            new JSONTape("{/ *text*/}").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Unexpected symbol found while parsing.\n" +
+                    "Line: 1\n" +
+                    "Reached: {_\n" +
+                    "Expected: / or *", e.getMessage());
+        }
     }
 
     @Test
     public void consumeSlashStarMustMatchExactlyStarSlash() {
         assertEquals("{}", new JSONTape("{/*text*/}").parseNextElement().asString());
-        assertThrows(JSONParseException.class, () -> new JSONTape("{/*text* /}").parseNextElement());
+        try {
+            new JSONTape("{/*text* /}").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
+        }
     }
 
     @Test
@@ -64,7 +76,12 @@ class JSONTapeTest {
 
     @Test
     public void consumeDoubleSlashNoNewLine() {
-        assertThrows(JSONParseException.class, () -> new JSONTape("{//}").parseNextElement());
+        try {
+            new JSONTape("{//}").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
+        }
     }
 
     @Test
@@ -79,7 +96,15 @@ class JSONTapeTest {
 
     @Test
     public void consumeDoubleSlashDoesntWorkWithSpace() {
-        assertThrows(JSONParseException.class, () -> new JSONTape("{/ /Some comment text}").parseNextElement());
+        try {
+            new JSONTape("{/ /Some comment text}").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Unexpected symbol found while parsing.\n" +
+                    "Line: 1\n" +
+                    "Reached: {_\n" +
+                    "Expected: / or *", e.getMessage());
+        }
     }
 
     @Test
@@ -94,7 +119,12 @@ class JSONTapeTest {
 
     @Test
     public void consumeHashNoNewLine() {
-        assertThrows(JSONParseException.class, () -> new JSONTape("{#}").parseNextElement());
+        try {
+            new JSONTape("{#}").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
+        }
     }
 
     @Test
@@ -104,7 +134,12 @@ class JSONTapeTest {
 
     @Test
     public void consumeHashWorksWithSpace() {
-        assertThrows(JSONParseException.class, () -> new JSONTape("{# Will work with space since only a single character}").parseNextElement());
+        try {
+            new JSONTape("{# Will work with space since only a single character}").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
+        }
     }
 
     @Test
@@ -114,22 +149,48 @@ class JSONTapeTest {
 
     @Test
     public void invalidCommentIdentifiersAreNotAllowed() {
-        assertThrows(JSONParseException.class, () -> new JSONTape("/#").parseNextElement());
+        try {
+            new JSONTape("/#").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Unexpected symbol found while parsing.\n" +
+                    "Line: 1\n" +
+                    "Reached: _\n" +
+                    "Expected: / or *", e.getMessage());
+        }
     }
 
     @Test
     public void totallyInvalidUnexpectedCommentString() {
-        assertThrows(JSONParseException.class, () -> new JSONTape("--Comment\n{}").parseNextElement());
+        try {
+            new JSONTape("--Comment\n{}").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid number format: \"--\"\n" +
+                    "Line: 1\n" +
+                    "Reached: --_\n" +
+                    "Expected: <number>", e.getMessage());
+        }
     }
 
     @Test
     public void emptyInputNotValid() {
-        assertThrows(JSONParseException.class, () -> new JSONTape("").parseNextElement());
+        try {
+            new JSONTape("").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("You cannot create something from nothing. Input was empty.", e.getMessage());
+        }
     }
 
     @Test
     public void onlyCommentsShouldNotBeAllowed() {
-        assertThrows(JSONParseException.class, () -> new JSONTape("//Comment but no object\n").parseNextElement());
+        try {
+            new JSONTape("//Comment but no object\n").parseNextElement();
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
+        }
     }
 
     @Test
@@ -204,7 +265,15 @@ class JSONTapeTest {
 
         assertEquals("{}", tape.parseNextElement().asString());
         assertEquals("{\"key2\":2}", tape.parseNextElement().asString());
-        assertThrows(JSONParseException.class, () -> tape.parseNextElement().asString());
+        try {
+            tape.parseNextElement().asString();
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Unexpected symbol found while parsing.\n" +
+                    "Line: 1\n" +
+                    "Reached: {}{\"key2\":2}_\n" +
+                    "Expected: { / [ / \" / <number> / <boolean> ", e.getMessage());
+        }
     }
 
     @Test
@@ -213,7 +282,6 @@ class JSONTapeTest {
                 "breathing room for a nice error Message" +
                 "\nWhy dont we even split it over multiple " +
                 "\n lines to make the output more interesting. The error is trailing comma for end of object\", }";
-        assertThrows(JSONParseException.class, new JSONTape(jsonContent)::parseNextElement);
         try {
             new JSONTape(jsonContent).parseNextElement();
             fail("The previous line should have thrown an error");

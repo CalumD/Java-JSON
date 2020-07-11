@@ -4,7 +4,7 @@ import exceptions.KeyInvalidException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class BuilderKeyTapeTest extends KeyTapeTest {
 
@@ -29,19 +29,43 @@ class BuilderKeyTapeTest extends KeyTapeTest {
     @Override
     @Test
     public void decimalArrayAccessNotOkay() {
-        assertThrows(KeyInvalidException.class, () -> new JSONKey("[1.5]", true).getNextKey());
+        try {
+            new JSONKey("[1.5]", true).getNextKey();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Failed to parse array accessor in key. Element was not a valid integer.\n" +
+                    "Line: 1\n" +
+                    "Reached: [_\n" +
+                    "Expected: <positive integer>", e.getMessage());
+        }
     }
 
     @Override
     @Test
     public void negativeArrayAccessNotOkay() {
-        assertThrows(KeyInvalidException.class, () -> new JSONKey("[-5]", true).getNextKey());
+        try {
+            new JSONKey("[-5]", true).getNextKey();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Array accessor in key was negative integer. Must be positive.\n" +
+                    "Line: 1\n" +
+                    "Reached: [_\n" +
+                    "Expected: <positive integer>", e.getMessage());
+        }
     }
 
     @Override
     @Test
     public void missingEndOfArrayAccessNotOkay() {
-        assertThrows(KeyInvalidException.class, () -> new JSONKey("[5", true).getNextKey());
+        try {
+            new JSONKey("[5", true).getNextKey();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Failed to parse array accessor in key. Reached end of key before delimiter ']' was found.\n" +
+                    "Line: 1\n" +
+                    "Reached: [_\n" +
+                    "Expected: <positive integer>", e.getMessage());
+        }
     }
 
     @Override
@@ -63,7 +87,15 @@ class BuilderKeyTapeTest extends KeyTapeTest {
     @Override
     @Test
     public void missingDotOrAdvancedAccessorSyntaxNotOkay() {
-        assertThrows(KeyInvalidException.class, () -> new JSONKey("[0]key", true));
+        try {
+            new JSONKey("[0]key", true);
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Invalid continuation from array key\n" +
+                    "Line: 1\n" +
+                    "Reached: [0]_\n" +
+                    "Expected: [ / .", e.getMessage());
+        }
     }
 
     @Test

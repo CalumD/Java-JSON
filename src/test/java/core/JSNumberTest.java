@@ -33,17 +33,105 @@ public class JSNumberTest extends JSONTest {
 
     @Test
     public void testParseException() {
-        assertThrows(JSONParseException.class, () -> new JSNumber(new JSONTape("1.1.")));
-        assertThrows(JSONParseException.class, () -> new JSNumber(new JSONTape("1.1.1")));
-        assertThrows(JSONParseException.class, () -> new JSNumber(new JSONTape("123-1")));
-        assertThrows(JSONParseException.class, () -> new JSNumber(new JSONTape("99999999999999999999999999999")));
-        assertThrows(JSONParseException.class, () -> new JSNumber(new JSONTape("-9999999999999999999999999999")));
-        assertThrows(JSONParseException.class, () -> new JSNumber(new JSONTape("--1")));
-        assertThrows(JSONParseException.class, () -> new JSNumber(new JSONTape("++1")));
-        assertThrows(JSONParseException.class, () -> new JSNumber(new JSONTape("+-1")));
-        assertThrows(JSONParseException.class, () -> new JSNumber(new JSONTape("^1")));
-        assertThrows(JSONParseException.class, () -> new JSNumber(new JSONTape("e^1")));
-        assertThrows(JSONParseException.class, () -> new JSNumber(new JSONTape("1e-0.05")));
+        try {
+            new JSNumber(new JSONTape("1.1."));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("multiple points\n" +
+                    "Line: 1\n" +
+                    "Reached: 1.1._\n" +
+                    "Expected: <number>", e.getMessage());
+        }
+        try {
+            new JSNumber(new JSONTape("1.1.1"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("multiple points\n" +
+                    "Line: 1\n" +
+                    "Reached: 1.1.1_\n" +
+                    "Expected: <number>", e.getMessage());
+        }
+        try {
+            new JSNumber(new JSONTape("123-1"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid number format: \"123-1\"\n" +
+                    "Line: 1\n" +
+                    "Reached: 123-1_\n" +
+                    "Expected: <number>", e.getMessage());
+        }
+        try {
+            new JSNumber(new JSONTape("99999999999999999999999999999"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid number format: \"99999999999999999999999999999\"\n" +
+                    "Line: 1\n" +
+                    "Reached: 99999999999999999999999999999_\n" +
+                    "Expected: <number>", e.getMessage());
+        }
+        try {
+            new JSNumber(new JSONTape("-9999999999999999999999999999"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid number format: \"-9999999999999999999999999999\"\n" +
+                    "Line: 1\n" +
+                    "Reached: -9999999999999999999999999999_\n" +
+                    "Expected: <number>", e.getMessage());
+        }
+        try {
+            new JSNumber(new JSONTape("--1"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid number format: \"--1\"\n" +
+                    "Line: 1\n" +
+                    "Reached: --1_\n" +
+                    "Expected: <number>", e.getMessage());
+        }
+        try {
+            new JSNumber(new JSONTape("++1"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid number format: \"++1\"\n" +
+                    "Line: 1\n" +
+                    "Reached: ++1_\n" +
+                    "Expected: <number>", e.getMessage());
+        }
+        try {
+            new JSNumber(new JSONTape("+-1"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid number format: \"+-1\"\n" +
+                    "Line: 1\n" +
+                    "Reached: +-1_\n" +
+                    "Expected: <number>", e.getMessage());
+        }
+        try {
+            new JSNumber(new JSONTape("^1"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid number format: \"\"\n" +
+                    "Line: 1\n" +
+                    "Reached: _\n" +
+                    "Expected: <number>", e.getMessage());
+        }
+        try {
+            new JSNumber(new JSONTape("e^1"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid number format: \"e\"\n" +
+                    "Line: 1\n" +
+                    "Reached: e_\n" +
+                    "Expected: <number>", e.getMessage());
+        }
+        try {
+            new JSNumber(new JSONTape("1e-0.05"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid number format: \"1e-0.05\"\n" +
+                    "Line: 1\n" +
+                    "Reached: 1e-0.05_\n" +
+                    "Expected: <number>", e.getMessage());
+        }
     }
 
     @Test
@@ -136,39 +224,69 @@ public class JSNumberTest extends JSONTest {
     @Test
     @Override
     public void getArray() {
-        assertThrows(KeyDifferentTypeException.class, () -> numberLong.getArray());
+        try {
+            numberLong.getArray();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: ARRAY  ->  Received: LONG", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getBoolean() {
-        assertThrows(KeyDifferentTypeException.class, () -> numberLong.getBoolean());
+        try {
+            numberLong.getBoolean();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: BOOLEAN  ->  Received: LONG", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getDouble() {
-        assertThrows(KeyDifferentTypeException.class, () -> numberLong.getDouble());
+        try {
+            numberLong.getDouble();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("This number is a long, not a double.", e.getMessage());
+        }
         assertEquals(1.25, numberDouble.getDouble(), 0);
     }
 
     @Test
     @Override
     public void getLong() {
-        assertThrows(KeyDifferentTypeException.class, () -> numberDouble.getLong());
+        try {
+            numberDouble.getLong();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("This number is a double, not a long.", e.getMessage());
+        }
         assertEquals(321L, numberLong.getLong(), 0);
     }
 
     @Test
     @Override
     public void getString() {
-        assertThrows(KeyDifferentTypeException.class, () -> numberLong.getString());
+        try {
+            numberLong.getString();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: STRING  ->  Received: LONG", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getJSONObject() {
-        assertThrows(KeyDifferentTypeException.class, () -> numberLong.getJSONObject());
+        try {
+            numberLong.getJSONObject();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: OBJECT  ->  Received: LONG", e.getMessage());
+        }
     }
 
     @Test
@@ -181,49 +299,89 @@ public class JSNumberTest extends JSONTest {
     @Test
     @Override
     public void getValueAt() {
-        assertThrows(KeyNotFoundException.class, () -> numberLong.getValueAt("someKey"));
+        try {
+            numberLong.getValueAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a LONG", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getDataTypeOf() {
-        assertThrows(KeyNotFoundException.class, () -> numberLong.getDataTypeOf("someKey"));
+        try {
+            numberLong.getDataTypeOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a LONG", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getKeysOf() {
-        assertThrows(KeyNotFoundException.class, () -> numberLong.getKeysOf("someKey"));
+        try {
+            numberLong.getKeysOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a LONG", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getValuesOf() {
-        assertThrows(KeyNotFoundException.class, () -> numberLong.getValuesOf("someKey"));
+        try {
+            numberLong.getValuesOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a LONG", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getJSONObjectAt() {
-        assertThrows(KeyNotFoundException.class, () -> numberLong.getJSONObjectAt("someKey"));
+        try {
+            numberLong.getJSONObjectAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a LONG", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getArrayAt() {
-        assertThrows(KeyNotFoundException.class, () -> numberLong.getArrayAt("someKey"));
+        try {
+            numberLong.getArrayAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a LONG", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getBooleanAt() {
-        assertThrows(KeyNotFoundException.class, () -> numberLong.getBooleanAt("someKey"));
+        try {
+            numberLong.getBooleanAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a LONG", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getDoubleAt() {
-        assertThrows(KeyNotFoundException.class, () -> numberLong.getDoubleAt("someKey"));
+        try {
+            numberLong.getDoubleAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a LONG", e.getMessage());
+        }
     }
 
     @Test
@@ -234,7 +392,12 @@ public class JSNumberTest extends JSONTest {
     @Test
     @Override
     public void getLongAt() {
-        assertThrows(KeyNotFoundException.class, () -> numberLong.getLongAt("someKey"));
+        try {
+            numberLong.getLongAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a LONG", e.getMessage());
+        }
     }
 
     @Test
@@ -245,13 +408,23 @@ public class JSNumberTest extends JSONTest {
     @Test
     @Override
     public void getStringAt() {
-        assertThrows(KeyNotFoundException.class, () -> numberLong.getStringAt("someKey"));
+        try {
+            numberLong.getStringAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a LONG", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getAnyAt() {
-        assertThrows(KeyNotFoundException.class, () -> numberLong.getAnyAt("someKey"));
+        try {
+            numberLong.getAnyAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a LONG", e.getMessage());
+        }
     }
 
     @Test

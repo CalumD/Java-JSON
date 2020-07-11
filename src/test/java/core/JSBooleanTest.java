@@ -27,12 +27,28 @@ public class JSBooleanTest extends JSONTest {
 
     @Test
     public void testTrueRandom() {
-        assertThrows(JSONParseException.class, () -> new JSBoolean(new JSONTape("TrUe")));
+        try {
+            new JSBoolean(new JSONTape("TrUe"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Unexpected symbol found while parsing.\n" +
+                    "Line: 1\n" +
+                    "Reached: _\n" +
+                    "Expected: true / false", e.getMessage());
+        }
     }
 
     @Test
     public void testFalseRandom() {
-        assertThrows(JSONParseException.class, () -> new JSBoolean(new JSONTape("FaLsE")));
+        try {
+            new JSBoolean(new JSONTape("FaLsE"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Unexpected symbol found while parsing.\n" +
+                    "Line: 1\n" +
+                    "Reached: _\n" +
+                    "Expected: true / false", e.getMessage());
+        }
     }
 
     @Test
@@ -141,7 +157,12 @@ public class JSBooleanTest extends JSONTest {
     @Test
     @Override
     public void getArray() {
-        assertThrows(KeyDifferentTypeException.class, () -> boolTrue.getArray());
+        try {
+            boolTrue.getArray();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: ARRAY  ->  Received: BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
@@ -154,25 +175,45 @@ public class JSBooleanTest extends JSONTest {
     @Test
     @Override
     public void getDouble() {
-        assertThrows(KeyDifferentTypeException.class, () -> boolTrue.getDouble());
+        try {
+            boolTrue.getDouble();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: DOUBLE  ->  Received: BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getLong() {
-        assertThrows(KeyDifferentTypeException.class, () -> boolTrue.getLong());
+        try {
+            boolTrue.getLong();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: LONG  ->  Received: BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getString() {
-        assertThrows(KeyDifferentTypeException.class, () -> boolTrue.getString());
+        try {
+            boolTrue.getString();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: STRING  ->  Received: BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getJSONObject() {
-        assertThrows(KeyDifferentTypeException.class, () -> boolTrue.getJSONObject());
+        try {
+            boolTrue.getJSONObject();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: OBJECT  ->  Received: BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
@@ -185,37 +226,67 @@ public class JSBooleanTest extends JSONTest {
     @Test
     @Override
     public void getValueAt() {
-        assertThrows(KeyNotFoundException.class, () -> boolTrue.getValueAt("someKey"));
+        try {
+            boolTrue.getValueAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getDataTypeOf() {
-        assertThrows(KeyNotFoundException.class, () -> boolTrue.getDataTypeOf("someKey"));
+        try {
+            boolTrue.getDataTypeOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getKeysOf() {
-        assertThrows(KeyNotFoundException.class, () -> boolTrue.getKeysOf("someKey"));
+        try {
+            boolTrue.getKeysOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getValuesOf() {
-        assertThrows(KeyNotFoundException.class, () -> boolTrue.getValuesOf("someKey"));
+        try {
+            boolTrue.getValuesOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getJSONObjectAt() {
-        assertThrows(KeyNotFoundException.class, () -> boolTrue.getJSONObjectAt("someKey"));
+        try {
+            boolTrue.getJSONObjectAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getArrayAt() {
-        assertThrows(KeyNotFoundException.class, () -> boolTrue.getArrayAt("someKey"));
+        try {
+            boolTrue.getAnyAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
@@ -226,25 +297,45 @@ public class JSBooleanTest extends JSONTest {
     @Test
     @Override
     public void getBooleanAt() {
-        assertThrows(KeyNotFoundException.class, () -> boolTrue.getBooleanAt("someKey"));
+        try {
+            boolTrue.getBooleanAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getDoubleAt() {
-        assertThrows(KeyNotFoundException.class, () -> boolTrue.getDoubleAt("someKey"));
+        try {
+            boolTrue.getDoubleAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getLongAt() {
-        assertThrows(KeyNotFoundException.class, () -> boolTrue.getLongAt("someKey"));
+        try {
+            boolTrue.getLongAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getStringAt() {
-        assertThrows(KeyNotFoundException.class, () -> boolTrue.getStringAt("someKey"));
+        try {
+            boolTrue.getStringAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a BOOLEAN", e.getMessage());
+        }
     }
 
     @Test
@@ -255,7 +346,12 @@ public class JSBooleanTest extends JSONTest {
     @Test
     @Override
     public void getAnyAt() {
-        assertThrows(KeyNotFoundException.class, () -> boolTrue.getAnyAt("someKey"));
+        try {
+            boolTrue.getAnyAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyNotFoundException e) {
+            assertEquals("No child elements on a BOOLEAN", e.getMessage());
+        }
     }
 
     @Test

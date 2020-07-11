@@ -41,7 +41,7 @@ public class JSObject extends JSON {
             try {
                 key = ((JSString)parsingTape.parseNextElement()).getValue();
             } catch (ClassCastException e) {
-                throw parsingTape.createParseError("\"", "Invalid type for object key.");
+                throw parsingTape.createParseErrorFromOffset(-1, "\"", "Invalid type for object key.");
             }
             assert key != null;
             validateObjectKey(key, parsingTape);
@@ -49,7 +49,7 @@ public class JSObject extends JSON {
             // Validate Colon
             parsingTape.consumeWhiteSpace();
             if (parsingTape.consumeOne() != ':') {
-                throw parsingTape.createParseError(":", "Invalid Key:Value separator. Must use a colon(:).");
+                throw parsingTape.createParseErrorFromOffset(-1, ":", "Invalid Key:Value separator. Must use a colon(:).");
             }
 
             // Parse value

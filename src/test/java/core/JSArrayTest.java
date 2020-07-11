@@ -30,16 +30,81 @@ public class JSArrayTest extends JSONTest {
 
     @Test
     public void testParseException() {
-        assertThrows(JSONParseException.class, () -> new JSArray(new JSONTape("[")));
-        assertThrows(JSONParseException.class, () -> new JSArray(new JSONTape("]")));
-        assertThrows(JSONParseException.class, () -> new JSArray(new JSONTape("")));
-        assertThrows(JSONParseException.class, () -> new JSArray(new JSONTape("[,]")));
-        assertThrows(JSONParseException.class, () -> new JSArray(new JSONTape("[1,]")));
-        assertThrows(JSONParseException.class, () -> new JSArray(new JSONTape("[,1]")));
-        assertThrows(JSONParseException.class, () -> new JSArray(new JSONTape("[1, []")));
-        assertThrows(JSONParseException.class, () -> new JSArray(new JSONTape("[[[]]")));
-        assertThrows(JSONParseException.class, () -> new JSArray(new JSONTape("[{}[]]")));
-        assertThrows(JSONParseException.class, () -> new JSArray(new JSONTape("[1,,1]")));
+        try {
+            new JSArray(new JSONTape("["));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
+        }
+        try {
+            new JSArray(new JSONTape("]"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
+        }
+        try {
+            new JSArray(new JSONTape(""));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("You cannot create something from nothing. Input was empty.", e.getMessage());
+        }
+        try {
+            new JSArray(new JSONTape("[,]"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Missing Valid JSON at start of array.\n" +
+                    "Line: 1\n" +
+                    "Reached: [_\n" +
+                    "Expected: { / [ / \" / <number> / <boolean> ", e.getMessage());
+        }
+        try {
+            new JSArray(new JSONTape("[1,]"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Comma suggests more array elements, but array terminates.\n" +
+                    "Line: 1\n" +
+                    "Reached: [1,_\n" +
+                    "Expected: { / [ / \" / <number> / <boolean> ", e.getMessage());
+        }
+        try {
+            new JSArray(new JSONTape("[,1]"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Missing Valid JSON at start of array.\n" +
+                    "Line: 1\n" +
+                    "Reached: [_\n" +
+                    "Expected: { / [ / \" / <number> / <boolean> ", e.getMessage());
+        }
+        try {
+            new JSArray(new JSONTape("[1, []"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
+        }
+        try {
+            new JSArray(new JSONTape("[[[]]"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
+        }
+        try {
+            new JSArray(new JSONTape("[{}[]]"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Invalid array child delimiter.\n" +
+                    "Line: 1\n" +
+                    "Reached: [{}_\n" +
+                    "Expected: , / ]", e.getMessage());
+        }
+        try {
+            new JSArray(new JSONTape("[1,,1]"));
+            fail("The previous method call should have thrown an exception.");
+        } catch (JSONParseException e) {
+            assertEquals("Unexpected symbol found while parsing.\n" +
+                    "Line: 1\n" +
+                    "Reached: [1,_\n" +
+                    "Expected: { / [ / \" / <number> / <boolean> ", e.getMessage());
+        }
     }
 
     @Test
@@ -111,8 +176,21 @@ public class JSArrayTest extends JSONTest {
         keys3.add(""); // Known Good Key from test above
         keys3.add("[6]");// OOB
 
-        assertThrows(KeyDifferentTypeException.class, () -> array.containsAllKeys(keys1));
-        assertThrows(KeyInvalidException.class, () -> array.containsAllKeys(keys2));
+        try {
+            array.containsAllKeys(keys1);
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("someOtherKey is not a valid accessor on element: <base element>", e.getMessage());
+        }
+        try {
+            array.containsAllKeys(keys2);
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyInvalidException e) {
+            assertEquals("Array accessor in key was negative integer. Must be positive.\n" +
+                    "Line: 1\n" +
+                    "Reached: [_\n" +
+                    "Expected: <positive integer>", e.getMessage());
+        }
         assertFalse(array.containsAllKeys(keys3));
     }
 
@@ -188,31 +266,56 @@ public class JSArrayTest extends JSONTest {
     @Test
     @Override
     public void getBoolean() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getBoolean());
+        try {
+            array.getBoolean();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: BOOLEAN  ->  Received: ARRAY", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getDouble() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getDouble());
+        try {
+            array.getDouble();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: DOUBLE  ->  Received: ARRAY", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getLong() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getLong());
+        try {
+            array.getLong();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: LONG  ->  Received: ARRAY", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getString() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getString());
+        try {
+            array.getString();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: STRING  ->  Received: ARRAY", e.getMessage());
+        }
     }
 
     @Test
     @Override
     public void getJSONObject() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getJSONObject());
+        try {
+            array.getJSONObject();
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("The Type of Object found for key  was not expected. Expected: OBJECT  ->  Received: ARRAY", e.getMessage());
+        }
     }
 
     @Test
@@ -224,35 +327,60 @@ public class JSArrayTest extends JSONTest {
     @Test
     @Override
     public void getValueAt() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getValueAt("someKey"));
+        try {
+            array.getValueAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("someKey is not a valid accessor on element: <base element>", e.getMessage());
+        }
         assertTrue((boolean) array.getValueAt("[4]"));
     }
 
     @Test
     @Override
     public void getDataTypeOf() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getValueAt("someKey"));
+        try {
+            array.getDataTypeOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("someKey is not a valid accessor on element: <base element>", e.getMessage());
+        }
         assertEquals(JSType.LONG, array.getDataTypeOf("[1]"));
     }
 
     @Test
     @Override
     public void getKeysOf() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getKeysOf("someKey"));
+        try {
+            array.getKeysOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("someKey is not a valid accessor on element: <base element>", e.getMessage());
+        }
         assertEquals(new ArrayList<>(), array.getKeysOf("[0]"));
     }
 
     @Test
     @Override
     public void getValuesOf() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getValuesOf("someKey"));
+        try {
+            array.getValuesOf("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("someKey is not a valid accessor on element: <base element>", e.getMessage());
+        }
         assertEquals(new ArrayList<>(), array.getValuesOf("[0]"));
     }
 
     @Test
     @Override
     public void getJSONObjectAt() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getJSONObjectAt("someKey"));
+        try {
+            array.getJSONObjectAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("someKey is not a valid accessor on element: <base element>", e.getMessage());
+        }
         assertEquals(new JSObject(new JSONTape("{}")), array.getJSONObjectAt("[5]"));
     }
 
@@ -260,7 +388,12 @@ public class JSArrayTest extends JSONTest {
     @Test
     @Override
     public void getArrayAt() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getArrayAt("someKey"));
+        try {
+            array.getArrayAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("someKey is not a valid accessor on element: <base element>", e.getMessage());
+        }
         assertEquals(new JSArray(new JSONTape("[]")), array.getArrayAt("[0]"));
     }
 
@@ -280,35 +413,60 @@ public class JSArrayTest extends JSONTest {
     @Test
     @Override
     public void getBooleanAt() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getBooleanAt("someKey"));
+        try {
+            array.getBooleanAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("someKey is not a valid accessor on element: <base element>", e.getMessage());
+        }
         assertTrue(array.getBooleanAt("[4]"));
     }
 
     @Test
     @Override
     public void getDoubleAt() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getDoubleAt("someKey"));
+        try {
+            array.getDoubleAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("someKey is not a valid accessor on element: <base element>", e.getMessage());
+        }
         assertEquals(0.1, array.getDoubleAt("[2]"), 0);
     }
 
     @Test
     @Override
     public void getLongAt() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getLongAt("someKey"));
+        try {
+            array.getLongAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("someKey is not a valid accessor on element: <base element>", e.getMessage());
+        }
         assertEquals(0, array.getLongAt("[1]"), 0);
     }
 
     @Test
     @Override
     public void getStringAt() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getStringAt("someKey"));
+        try {
+            array.getStringAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("someKey is not a valid accessor on element: <base element>", e.getMessage());
+        }
         assertEquals("", array.getStringAt("[3]"));
     }
 
     @Test
     @Override
     public void getAnyAt() {
-        assertThrows(KeyDifferentTypeException.class, () -> array.getAnyAt("someKey"));
+        try {
+            array.getAnyAt("someKey");
+            fail("The previous method call should have thrown an exception.");
+        } catch (KeyDifferentTypeException e) {
+            assertEquals("someKey is not a valid accessor on element: <base element>", e.getMessage());
+        }
         assertEquals("", array.getAnyAt("[3]").getString());
     }
 

@@ -74,7 +74,7 @@ class KeyTape extends Tape<String, JSONKeyException> {
                 }
             case '.':
                 // In parsing, we should not start the key with a dot, despite it can follow other accessors.
-                throw createParseError(VALID_KEY_ACCESSOR, "Bad use of '.' separator in key.");
+                throw createParseError(VALID_KEY_ACCESSOR, "Bad use of '.' separator in key");
             default:
                 nextElement = parseObjectAccess(false);
                 break;

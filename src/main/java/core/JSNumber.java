@@ -54,7 +54,8 @@ public class JSNumber extends JSON {
                 jsType = JSType.LONG;
             }
         } catch (NumberFormatException e) {
-            throw parsingTape.createParseError("<number>", e.getMessage());
+            throw parsingTape.createParseError("<number>",
+                    e.getMessage().replaceFirst("For input string", "Invalid number format"));
         }
     }
 
@@ -70,7 +71,7 @@ public class JSNumber extends JSON {
     @Override
     public double getDouble() {
         if (jsType.equals(JSType.LONG)) {
-            throw new KeyDifferentTypeException("This number is a double, not a long.");
+            throw new KeyDifferentTypeException("This number is a long, not a double.");
         }
         return myDoubleValue;
     }
@@ -78,7 +79,7 @@ public class JSNumber extends JSON {
     @Override
     public long getLong() {
         if (jsType.equals(JSType.DOUBLE)) {
-            throw new KeyDifferentTypeException("This number is a long, not a double.");
+            throw new KeyDifferentTypeException("This number is a double, not a long.");
         }
         return myLongValue;
     }
