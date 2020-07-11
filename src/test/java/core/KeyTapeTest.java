@@ -33,10 +33,38 @@ class KeyTapeTest {
 
     @Test
     public void anyAdditionalKeysMustNotHaveSpaces() {
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("key.key 2.key3").parseAllElements());
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("key.'key 2'.key3").parseAllElements());
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("key.`key 2`.key3").parseAllElements());
-        assertThrows(KeyInvalidException.class, () -> new KeyTape("key.\"key 2\".key3").parseAllElements());
+        try {
+            new KeyTape("key.key 2 .key3").parseAllElements();
+        } catch (KeyInvalidException e) {
+            assertEquals("Spaces are invalid in dot separated keys. Use obj[\"key\"] notation if key contains spaces.\n" +
+                    "Line: 1\n" +
+                    "Reached: key.key 2 _\n" +
+                    "Expected: <valid key segment>", e.getMessage());
+        }
+        try {
+            new KeyTape("key.'key 2'.key3").parseAllElements();
+        } catch (KeyInvalidException e) {
+            assertEquals("Complex keys require square bracket delimiters in addition. (e.g. [`key`])\n" +
+                    "Line: 1\n" +
+                    "Reached: key._\n" +
+                    "Expected: <valid object key>", e.getMessage());
+        }
+        try {
+            new KeyTape("key.`key 2`.key3").parseAllElements();
+        } catch (KeyInvalidException e) {
+            assertEquals("Complex keys require square bracket delimiters in addition. (e.g. [`key`])\n" +
+                    "Line: 1\n" +
+                    "Reached: key._\n" +
+                    "Expected: <valid object key>", e.getMessage());
+        }
+        try {
+            new KeyTape("key.\"key 2\".key3").parseAllElements();
+        } catch (KeyInvalidException e) {
+            assertEquals("Complex keys require square bracket delimiters in addition. (e.g. [`key`])\n" +
+                    "Line: 1\n" +
+                    "Reached: key._\n" +
+                    "Expected: <valid object key>", e.getMessage());
+        }
     }
 
     @Test

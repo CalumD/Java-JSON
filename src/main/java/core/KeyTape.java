@@ -37,7 +37,7 @@ class KeyTape extends Tape<String, JSONKeyException> {
         // probably be lenient with the first key here.
         if (elementsParsed++ > 0 && elementsInKeyWithSpaces > 0) {
             // Otherwise no spaces allowed in regular object keys.
-            throw createParseError(
+            throw createParseErrorFromOffset(-1,
                     "<valid key segment>",
                     "Spaces are invalid in dot separated keys. " +
                             "Use obj[\"key\"] notation if key contains spaces."
@@ -223,7 +223,7 @@ class KeyTape extends Tape<String, JSONKeyException> {
                 break;
             default:
                 // If we haven't reached the end, and we are not followed by a . or [, then raise exception.
-                throw createParseError("[ / .", "Invalid continuation from array key.");
+                throw createParseError("[ / .", "Invalid continuation from array key");
         }
     }
 
