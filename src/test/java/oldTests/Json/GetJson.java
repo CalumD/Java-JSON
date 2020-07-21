@@ -9,7 +9,10 @@ import exceptions.KeyNotFoundException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GetJson {
 
@@ -30,317 +33,317 @@ public class GetJson {
 
     @Test
     public void get_elem_0() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "");
+        obj.getAnyAt("");
     }
 
     @Test
     public void get_elem_0_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getValue(obj, "");
+        obj.getValueAt("");
     }
 
     @Test
     public void get_elem_1() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "variables");
+        obj.getAnyAt("variables");
     }
 
     @Test
     public void get_elem_1_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getList(obj, "variables");
+        obj.getArrayAt("variables");
     }
 
     @Test
     public void get_elem_1_value() throws KeyDifferentTypeException, KeyNotFoundException {
-        assertEquals(3, JSONParser.getList(obj, "variables").size());
+        assertEquals(3, obj.getArrayAt("variables").size());
     }
 
 
     @Test
     public void get_elem_2() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "variables[0]");
+        obj.getAnyAt("variables[0]");
     }
 
     @Test
     public void get_elem_2_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getLong(obj, "variables[0]");
+        obj.getLongAt("variables[0]");
     }
 
     @Test
     public void get_elem_2_value() throws KeyDifferentTypeException, KeyNotFoundException {
-        assertEquals(10, JSONParser.getLong(obj, "variables[0]"));
+        assertEquals(10, obj.getLongAt("variables[0]"));
     }
 
     @Test
     public void get_elem_3() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "variables[1]");
+        obj.getAnyAt("variables[1]");
     }
 
     @Test
     public void get_elem_3_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getBoolean(obj, "variables[1]");
+        obj.getBooleanAt("variables[1]");
     }
 
     @Test
     public void get_elem_3_value() throws KeyDifferentTypeException, KeyNotFoundException {
-        assertTrue(JSONParser.getBoolean(obj, "variables[1]"));
+        assertTrue(obj.getBooleanAt("variables[1]"));
     }
 
     @Test
     public void get_elem_4() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "variables[2]");
+        obj.getAnyAt("variables[2]");
     }
 
     @Test
     public void get_elem_4_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getDouble(obj, "variables[2]");
+        obj.getDoubleAt("variables[2]");
     }
 
     @Test
     public void get_elem_4_value() throws KeyDifferentTypeException, KeyNotFoundException {
-        assertEquals(-3.14, JSONParser.getDouble(obj, "variables[2]"), 0);
+        assertEquals(-3.14, obj.getDoubleAt("variables[2]"), 0);
     }
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     @Test
     public void get_elem_5() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item");
+        obj.getAnyAt("item");
     }
 
     @Test
     public void get_elem_5_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getList(obj, "item");
+        obj.getArrayAt("item");
     }
 
     @Test
     public void get_elem_5_value() throws KeyDifferentTypeException, KeyNotFoundException {
-        assertEquals(1, JSONParser.getList(obj, "item").size());
+        assertEquals(1, obj.getArrayAt("item").size());
     }
 
 
     @Test
     public void get_elem_6() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0]");
+        obj.getAnyAt("item[0]");
     }
 
     @Test
     public void get_elem_6_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getValue(obj, "item[0]");
+        obj.getValueAt("item[0]");
     }
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     @Test
     public void get_elem_7() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0].item");
+        obj.getAnyAt("item[0].item");
     }
 
     @Test
     public void get_elem_7_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getList(obj, "item[0].item");
+        obj.getArrayAt("item[0].item");
     }
 
     @Test
     public void get_elem_7_value() throws KeyDifferentTypeException, KeyNotFoundException {
-        assertEquals(1, JSONParser.getList(obj, "item[0].item").size());
+        assertEquals(1, obj.getArrayAt("item[0].item").size());
     }
 
 
     @Test
     public void get_elem_8() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0].item[0]");
+        obj.getAnyAt("item[0].item[0]");
     }
 
     @Test
     public void get_elem_8_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getValue(obj, "item[0].item[0]");
+        obj.getValueAt("item[0].item[0]");
     }
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     @Test
     public void get_elem_9() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0].item[0].request");
+        obj.getAnyAt("item[0].item[0].request");
     }
 
     @Test
     public void get_elem_9_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getValue(obj, "item[0].item[0].request");
+        obj.getValueAt("item[0].item[0].request");
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     @Test
     public void get_elem_10() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0].item[0].request.method");
+        obj.getAnyAt("item[0].item[0].request.method");
     }
 
     @Test
     public void get_elem_10_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getString(obj, "item[0].item[0].request.method");
+        obj.getStringAt("item[0].item[0].request.method");
     }
 
     @Test
     public void get_elem_10_value() throws KeyDifferentTypeException, KeyNotFoundException {
-        assertEquals("POST", JSONParser.getString(obj, "item[0].item[0].request.method"));
+        assertEquals("POST", obj.getStringAt("item[0].item[0].request.method"));
     }
 
 
     @Test
     public void get_elem_11() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0].item[0].request.isValid");
+        obj.getAnyAt("item[0].item[0].request.isValid");
     }
 
     @Test
     public void get_elem_11_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getBoolean(obj, "item[0].item[0].request.isValid");
+        obj.getBooleanAt("item[0].item[0].request.isValid");
     }
 
     @Test
     public void get_elem_11_value() throws KeyDifferentTypeException, KeyNotFoundException {
-        assertTrue(JSONParser.getBoolean(obj, "item[0].item[0].request.isValid"));
+        assertTrue(obj.getBooleanAt("item[0].item[0].request.isValid"));
     }
 
 
     @Test
     public void get_elem_12() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0].item[0].request.header");
+        obj.getAnyAt("item[0].item[0].request.header");
     }
 
     @Test
     public void get_elem_12_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getList(obj, "item[0].item[0].request.header");
+        obj.getArrayAt("item[0].item[0].request.header");
     }
 
     @Test
     public void get_elem_12_value() throws KeyDifferentTypeException, KeyNotFoundException {
-        assertEquals(3, JSONParser.getList(obj, "item[0].item[0].request.header").size());
+        assertEquals(3, obj.getArrayAt("item[0].item[0].request.header").size());
     }
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     @Test
     public void get_elem_13() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0].item[0].request.header[0]");
+        obj.getAnyAt("item[0].item[0].request.header[0]");
     }
 
     @Test
     public void get_elem_13_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getBoolean(obj, "item[0].item[0].request.header[0]");
+        obj.getBooleanAt("item[0].item[0].request.header[0]");
     }
 
     @Test
     public void get_elem_13_value() throws KeyDifferentTypeException, KeyNotFoundException {
-        assertFalse(JSONParser.getBoolean(obj, "item[0].item[0].request.header[0]"));
+        assertFalse(obj.getBooleanAt("item[0].item[0].request.header[0]"));
     }
 
     @Test
     public void get_elem_14() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0].item[0].request.header[1]");
+        obj.getAnyAt("item[0].item[0].request.header[1]");
     }
 
     @Test
     public void get_elem_14_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getValue(obj, "item[0].item[0].request.header[1]");
+        obj.getValueAt("item[0].item[0].request.header[1]");
     }
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     @Test
     public void get_elem_15() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0].item[0].request.header[1].description");
+        obj.getAnyAt("item[0].item[0].request.header[1].description");
     }
 
     @Test
     public void get_elem_15_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getString(obj, "item[0].item[0].request.header[1].description");
+        obj.getStringAt("item[0].item[0].request.header[1].description");
     }
 
     @Test
     public void get_elem_15_Value() throws KeyDifferentTypeException, KeyNotFoundException {
         assertEquals("",
-                JSONParser.getString(obj, "item[0].item[0].request.header[1].description"));
+                obj.getStringAt("item[0].item[0].request.header[1].description"));
     }
 
     @Test
     public void get_elem_16() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0].item[0].request.header[1].value");
+        obj.getAnyAt("item[0].item[0].request.header[1].value");
     }
 
     @Test
     public void get_elem_16_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getString(obj, "item[0].item[0].request.header[1].value");
+        obj.getStringAt("item[0].item[0].request.header[1].value");
     }
 
     @Test
     public void get_elem_16_Value() throws KeyDifferentTypeException, KeyNotFoundException {
         assertEquals("application/json",
-                JSONParser.getString(obj, "item[0].item[0].request.header[1].value"));
+                obj.getStringAt("item[0].item[0].request.header[1].value"));
     }
 
     @Test
     public void get_elem_17() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0].item[0].request.header[1].key");
+        obj.getAnyAt("item[0].item[0].request.header[1].key");
     }
 
     @Test
     public void get_elem_17_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getString(obj, "item[0].item[0].request.header[1].key");
+        obj.getStringAt("item[0].item[0].request.header[1].key");
     }
 
     @Test
     public void get_elem_17_Value() throws KeyDifferentTypeException, KeyNotFoundException {
         assertEquals("Content-Type",
-                JSONParser.getString(obj, "item[0].item[0].request.header[1].key"));
+                obj.getStringAt("item[0].item[0].request.header[1].key"));
     }
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     @Test
     public void get_elem_18() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0].item[0].request.header[2].description");
+        obj.getAnyAt("item[0].item[0].request.header[2].description");
     }
 
     @Test
     public void get_elem_18_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getString(obj, "item[0].item[0].request.header[2].description");
+        obj.getStringAt("item[0].item[0].request.header[2].description");
     }
 
     @Test
     public void get_elem_18_Value() throws KeyDifferentTypeException, KeyNotFoundException {
         assertEquals("",
-                JSONParser.getString(obj, "item[0].item[0].request.header[2].description"));
+                obj.getStringAt("item[0].item[0].request.header[2].description"));
     }
 
     @Test
     public void get_elem_19() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0].item[0].request.header[2].value");
+        obj.getAnyAt("item[0].item[0].request.header[2].value");
     }
 
     @Test
     public void get_elem_19_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getString(obj, "item[0].item[0].request.header[2].value");
+        obj.getStringAt("item[0].item[0].request.header[2].value");
     }
 
     @Test
     public void get_elem_19_Value() throws KeyDifferentTypeException, KeyNotFoundException {
         assertEquals("Bearer {{access_token}}",
-                JSONParser.getString(obj, "item[0].item[0].request.header[2].value"));
+                obj.getStringAt("item[0].item[0].request.header[2].value"));
     }
 
 
     @Test
     public void get_elem_20() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(obj, "item[0].item[0].request.header[2].key");
+        obj.getAnyAt("item[0].item[0].request.header[2].key");
     }
 
     @Test
     public void get_elem_20_type() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getString(obj, "item[0].item[0].request.header[2].key");
+        obj.getStringAt("item[0].item[0].request.header[2].key");
     }
 
     @Test
     public void get_elem_20_Value() throws KeyDifferentTypeException, KeyNotFoundException {
         assertEquals("Authorization",
-                JSONParser.getString(obj, "item[0].item[0].request.header[2].key"));
+                obj.getStringAt("item[0].item[0].request.header[2].key"));
     }
 
 
@@ -350,28 +353,28 @@ public class GetJson {
     @Test
     public void boolean_type_mismatch_0() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getBoolean(obj, "variables")
+                obj.getBooleanAt("variables")
         );
     }
 
     @Test
     public void boolean_type_mismatch_1() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getBoolean(obj, "variables[0]")
+                obj.getBooleanAt("variables[0]")
         );
     }
 
     @Test
     public void boolean_type_mismatch_2() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getBoolean(obj, "variables[2]")
+                obj.getBooleanAt("variables[2]")
         );
     }
 
     @Test
     public void boolean_type_mismatch_3() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getBoolean(obj, "")
+                obj.getBooleanAt("")
         );
 
     }
@@ -379,7 +382,7 @@ public class GetJson {
     @Test
     public void boolean_type_mismatch_4() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getBoolean(obj, "item[0].item[0].request.method")
+                obj.getBooleanAt("item[0].item[0].request.method")
         );
 
     }
@@ -388,7 +391,7 @@ public class GetJson {
     @Test
     public void array_type_mismatch_0() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getList(obj, "variables[0]")
+                obj.getArrayAt("variables[0]")
         );
 
     }
@@ -396,7 +399,7 @@ public class GetJson {
     @Test
     public void array_type_mismatch_1() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getList(obj, "variables[1]")
+                obj.getArrayAt("variables[1]")
         );
 
     }
@@ -404,7 +407,7 @@ public class GetJson {
     @Test
     public void array_type_mismatch_2() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getList(obj, "variables[2]")
+                obj.getArrayAt("variables[2]")
         );
 
     }
@@ -412,7 +415,7 @@ public class GetJson {
     @Test
     public void array_type_mismatch_3() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getList(obj, "")
+                obj.getArrayAt("")
         );
 
     }
@@ -420,7 +423,7 @@ public class GetJson {
     @Test
     public void array_type_mismatch_4() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getList(obj, "item[0].item[0].request.method")
+                obj.getArrayAt("item[0].item[0].request.method")
         );
 
     }
@@ -429,7 +432,7 @@ public class GetJson {
     @Test
     public void long_type_mismatch_0() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getLong(obj, "variables")
+                obj.getLongAt("variables")
         );
 
     }
@@ -437,7 +440,7 @@ public class GetJson {
     @Test
     public void long_type_mismatch_1() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getLong(obj, "variables[1]")
+                obj.getLongAt("variables[1]")
         );
 
     }
@@ -445,7 +448,7 @@ public class GetJson {
     @Test
     public void long_type_mismatch_2() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getLong(obj, "variables[2]")
+                obj.getLongAt("variables[2]")
         );
 
     }
@@ -453,7 +456,7 @@ public class GetJson {
     @Test
     public void long_type_mismatch_3() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getLong(obj, "")
+                obj.getLongAt("")
         );
 
     }
@@ -461,7 +464,7 @@ public class GetJson {
     @Test
     public void long_type_mismatch_4() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getLong(obj, "item[0].item[0].request.method")
+                obj.getLongAt("item[0].item[0].request.method")
         );
 
     }
@@ -470,7 +473,7 @@ public class GetJson {
     @Test
     public void double_type_mismatch_0() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getDouble(obj, "variables")
+                obj.getDoubleAt("variables")
         );
 
     }
@@ -478,7 +481,7 @@ public class GetJson {
     @Test
     public void double_type_mismatch_1() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getDouble(obj, "variables[1]")
+                obj.getDoubleAt("variables[1]")
         );
 
     }
@@ -486,7 +489,7 @@ public class GetJson {
     @Test
     public void double_type_mismatch_2() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getDouble(obj, "variables[0]")
+                obj.getDoubleAt("variables[0]")
         );
 
     }
@@ -494,7 +497,7 @@ public class GetJson {
     @Test
     public void double_type_mismatch_3() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getDouble(obj, "")
+                obj.getDoubleAt("")
         );
 
     }
@@ -502,7 +505,7 @@ public class GetJson {
     @Test
     public void double_type_mismatch_4() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getDouble(obj, "item[0].item[0].request.method")
+                obj.getDoubleAt("item[0].item[0].request.method")
         );
 
     }
@@ -511,7 +514,7 @@ public class GetJson {
     @Test
     public void object_type_mismatch_0() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getJSONObject(obj, "variables")
+                obj.getJSONObjectAt("variables")
         );
 
     }
@@ -519,7 +522,7 @@ public class GetJson {
     @Test
     public void object_type_mismatch_1() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getJSONObject(obj, "variables[1]")
+                obj.getJSONObjectAt("variables[1]")
         );
 
     }
@@ -527,7 +530,7 @@ public class GetJson {
     @Test
     public void object_type_mismatch_2() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getJSONObject(obj, "variables[0]")
+                obj.getJSONObjectAt("variables[0]")
         );
 
     }
@@ -535,7 +538,7 @@ public class GetJson {
     @Test
     public void object_type_mismatch_3() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getJSONObject(obj, "item[0].item[0].request.method")
+                obj.getJSONObjectAt("item[0].item[0].request.method")
         );
 
     }
@@ -543,7 +546,7 @@ public class GetJson {
     @Test
     public void object_type_mismatch_4() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getJSONObject(obj, "variables[2]")
+                obj.getJSONObjectAt("variables[2]")
         );
 
     }
@@ -552,7 +555,7 @@ public class GetJson {
     @Test
     public void string_type_mismatch_0() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getString(obj, "variables")
+                obj.getStringAt("variables")
         );
 
     }
@@ -560,7 +563,7 @@ public class GetJson {
     @Test
     public void string_type_mismatch_1() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getString(obj, "variables[1]")
+                obj.getStringAt("variables[1]")
         );
 
     }
@@ -568,7 +571,7 @@ public class GetJson {
     @Test
     public void string_type_mismatch_2() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getString(obj, "variables[0]")
+                obj.getStringAt("variables[0]")
         );
 
     }
@@ -576,7 +579,7 @@ public class GetJson {
     @Test
     public void string_type_mismatch_3() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getString(obj, "")
+                obj.getStringAt("")
         );
 
     }
@@ -584,7 +587,7 @@ public class GetJson {
     @Test
     public void string_type_mismatch_4() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getString(obj, "variables[2]")
+                obj.getStringAt("variables[2]")
         );
 
     }
@@ -595,217 +598,217 @@ public class GetJson {
     @Test
     public void malformed_key_0() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0].request.header[2].ke")
+                obj.getAnyAt("item[0].item[0].request.header[2].ke")
         );
     }
 
     @Test
     public void malformed_key_1() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0].request.heade[2].key")
+                obj.getAnyAt("item[0].item[0].request.heade[2].key")
         );
     }
 
     @Test
     public void malformed_key_2() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0].reques.header[2].key")
+                obj.getAnyAt("item[0].item[0].reques.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_3() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "item[0].ite[0].request.header[2].key")
+                obj.getAnyAt("item[0].ite[0].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_4() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "ite[0].item[0].request.header[2].key")
+                obj.getAnyAt("ite[0].item[0].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_5() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "item0].item[0].request.header[2].key")
+                obj.getAnyAt("item0].item[0].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_6() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(obj, "item[0.item[0].request.header[2].key")
+                obj.getAnyAt("item[0.item[0].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_7() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(obj, "item[].item[0].request.header[2].key")
+                obj.getAnyAt("item[].item[0].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_8() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "item[0].item0].request.header[2].key")
+                obj.getAnyAt("item[0].item0].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_9() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[].request.header[2].key")
+                obj.getAnyAt("item[0].item[].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_10() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0.request.header[2].key")
+                obj.getAnyAt("item[0].item[0.request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_11() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0].request.header2].key")
+                obj.getAnyAt("item[0].item[0].request.header2].key")
         );
     }
 
     @Test
     public void malformed_key_12() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0].request.header[.key")
+                obj.getAnyAt("item[0].item[0].request.header[.key")
         );
     }
 
     @Test
     public void malformed_key_13() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0].request.header[2]key")
+                obj.getAnyAt("item[0].item[0].request.header[2]key")
         );
     }
 
     @Test
     public void malformed_key_14() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0].requestheader[2].key")
+                obj.getAnyAt("item[0].item[0].requestheader[2].key")
         );
     }
 
     @Test
     public void malformed_key_15() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0]request.header[2].key")
+                obj.getAnyAt("item[0].item[0]request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_16() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(obj, "item[0]item[0].request.header[2].key")
+                obj.getAnyAt("item[0]item[0].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_17() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "item[1].item[0].request.header[2].key")
+                obj.getAnyAt("item[1].item[0].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_18() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(obj, "item[-12].item[0].request.header[2].key")
+                obj.getAnyAt("item[-12].item[0].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_19() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "item[0].nope.item[0].request.header[2].key")
+                obj.getAnyAt("item[0].nope.item[0].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_20() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "nope")
+                obj.getAnyAt("nope")
         );
     }
 
     @Test
     public void malformed_key_21() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0].request.12.header[2].key")
+                obj.getAnyAt("item[0].item[0].request.12.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_22() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0][0].request.header[2].key")
+                obj.getAnyAt("item[0].item[0][0].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_23() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "item[0].item{0}.request.header[2].key")
+                obj.getAnyAt("item[0].item{0}.request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_24() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0].request.header[a].key")
+                obj.getAnyAt("item[0].item[0].request.header[a].key")
         );
     }
 
     @Test
     public void malformed_key_25() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getAny(obj, "[0]")
+                obj.getAnyAt("[0]")
         );
     }
 
     @Test
     public void malformed_key_26() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(obj, "{}")
+                obj.getAnyAt("{}")
         );
     }
 
     @Test
     public void malformed_key_27() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(obj, "item[0]].item[0].request.header[2].key")
+                obj.getAnyAt("item[0]].item[0].request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_28() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0]..request.header[2].key")
+                obj.getAnyAt("item[0].item[0]..request.header[2].key")
         );
     }
 
     @Test
     public void malformed_key_29() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0].request.header[2].key.")
+                obj.getAnyAt("item[0].item[0].request.header[2].key.")
         );
     }
 
     @Test
     public void malformed_key_30() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(obj, "item[0].item[0].requ est.header[2].key")
+                obj.getAnyAt("item[0].item[0].requ est.header[2].key")
         );
     }
 
@@ -816,43 +819,43 @@ public class GetJson {
     //Success////////////////////////////////////////////////////////////////////////////////////////////////
     @Test
     public void deep_nest_key_1() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(deepNesting, "variables[0][1]");
+        deepNesting.getAnyAt("variables[0][1]");
     }
 
     @Test
     public void deep_nest_key_2() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(deepNesting, "variables[0][1][2]");
+        deepNesting.getAnyAt("variables[0][1][2]");
     }
 
     @Test
     public void deep_nest_key_3() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(deepNesting, "variables[0][1][2].nested1?");
+        deepNesting.getAnyAt("variables[0][1][2].nested1?");
     }
 
     @Test
     public void deep_nest_key_4() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(deepNesting, "variables[0][1][2].nested1?[1]");
+        deepNesting.getAnyAt("variables[0][1][2].nested1?[1]");
     }
 
     @Test
     public void deep_nest_key_5() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getAny(deepNesting, "variables[0][1][2].nested1?[1][3].final");
+        deepNesting.getAnyAt("variables[0][1][2].nested1?[1][3].final");
     }
 
     @Test
     public void deep_nest_key_6() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getList(deepNesting, "variables[0][1][2].nested1?[1]");
+        deepNesting.getArrayAt("variables[0][1][2].nested1?[1]");
     }
 
     @Test
     public void deep_nest_key_7() throws KeyDifferentTypeException, KeyNotFoundException {
-        JSONParser.getString(deepNesting, "variables[0][1][2].nested1?[1][3].final");
+        deepNesting.getStringAt("variables[0][1][2].nested1?[1][3].final");
     }
 
     @Test
     public void deep_nest_key_8() throws KeyDifferentTypeException, KeyNotFoundException {
         assertEquals("Congrats It Works",
-                JSONParser.getString(deepNesting, "variables[0][1][2].nested1?[1][3].final"));
+                deepNesting.getStringAt("variables[0][1][2].nested1?[1][3].final"));
     }
 
 
@@ -893,77 +896,77 @@ public class GetJson {
     @Test
     public void deep_nest_key_9() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(deepNesting, "variables[0][1][2].nested1?[1][3].fial")
+                deepNesting.getAnyAt("variables[0][1][2].nested1?[1][3].fial")
         );
     }
 
     @Test
     public void deep_nest_key_10() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(deepNesting, "variables[0][1]..[2].nested1?[1][3].final")
+                deepNesting.getAnyAt("variables[0][1]..[2].nested1?[1][3].final")
         );
     }
 
     @Test
     public void deep_nest_key_11() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(deepNesting, "variables[0][1][3].nested1?[1][3].final")
+                deepNesting.getAnyAt("variables[0][1][3].nested1?[1][3].final")
         );
     }
 
     @Test
     public void deep_nest_key_12() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(deepNesting, "variables[0][1][2].nested1?[1][-1].final")
+                deepNesting.getAnyAt("variables[0][1][2].nested1?[1][-1].final")
         );
     }
 
     @Test
     public void deep_nest_key_13() {
         assertThrows(KeyNotFoundException.class, () ->
-                JSONParser.getAny(deepNesting, "variables[0][1][2].nested1[1][3].final")
+                deepNesting.getAnyAt("variables[0][1][2].nested1[1][3].final")
         );
     }
 
     @Test
     public void deep_nest_key_14() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getJSONObject(deepNesting, "variables[0][1][2].nested1?[1]")
+                deepNesting.getJSONObjectAt("variables[0][1][2].nested1?[1]")
         );
     }
 
     @Test
     public void deep_nest_key_15() {
         assertThrows(KeyDifferentTypeException.class, () ->
-                JSONParser.getLong(deepNesting, "variables[0][1][2].nested1?[1][3].final")
+                deepNesting.getLongAt("variables[0][1][2].nested1?[1][3].final")
         );
     }
 
     @Test
     public void deep_nest_key_16() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(deepNesting, "variables[0][")
+                deepNesting.getAnyAt("variables[0][")
         );
     }
 
     @Test
     public void deep_nest_key_17() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(deepNesting, "variables[0][1")
+                deepNesting.getAnyAt("variables[0][1")
         );
     }
 
     @Test
     public void deep_nest_key_18() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(deepNesting, "variables[0][1][2")
+                deepNesting.getAnyAt("variables[0][1][2")
         );
     }
 
     @Test
     public void deep_nest_key_19() {
         assertThrows(KeyInvalidException.class, () ->
-                JSONParser.getAny(deepNesting, "variables[]")
+                deepNesting.getAnyAt("variables[]")
         );
     }
 }

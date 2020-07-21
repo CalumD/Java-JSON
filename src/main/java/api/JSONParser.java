@@ -1,33 +1,35 @@
 package api;
 
 import core.JSONTape;
-import exceptions.JSONParseException;
+import exceptions.JSONException;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class JSONParser {
 
-    public static IJson parse(String jsonAsString) throws JSONParseException {
+    private JSONParser() {
+    }
 
-        if (jsonAsString.length() == 0) {
-            throw new JSONParseException("Empty JSON String, cannot parse");
-        }
-
+    public static IJson parse(String jsonAsString) throws JSONException {
         return new JSONTape(jsonAsString).parseNextElement();
     }
 
-    public static IJson parse(List<String> jsonAsStringList) throws JSONParseException {
+    public static IJson parse(Collection<String> jsonAsStringCollection) throws JSONException {
 
         StringBuilder whole = new StringBuilder();
 
-        for (String s : jsonAsStringList) {
+        for (String s : jsonAsStringCollection) {
             whole.append(s);
         }
 
         return parse(whole.toString());
     }
 
-    public static IJson parse(String[] jsonAsStringArray) throws JSONParseException {
+    public static IJson parse(String[] jsonAsStringArray) throws JSONException {
 
         StringBuilder whole = new StringBuilder();
 
@@ -38,51 +40,39 @@ public final class JSONParser {
         return parse(whole.toString());
     }
 
-    public static IJson parse(IJSONAble jsonable) throws JSONParseException {
+    public static IJson parse(IJSONAble jsonable) throws JSONException {
         return jsonable.convertToJSON();
     }
 
-    public static Object getValue(IJson fromObject, String key) {
-        return fromObject.getValueAt(key);
+    public static List<IJson> parseMultipleStrings(Collection<String> multipleJsonAsStrings) throws JSONException {
+        List<IJson> jsons = new ArrayList<>(multipleJsonAsStrings.size());
+        for (String s : multipleJsonAsStrings) {
+            jsons.add(parse(s));
+        }
+        return jsons;
     }
 
-    public static List<String> getKeys(IJson fromObject) {
-        return fromObject.getKeys();
+    public static List<IJson> parseMultipleJSONables(Collection<IJSONAble> multipleJsonAsStrings) throws JSONException {
+        List<IJson> jsons = new ArrayList<>(multipleJsonAsStrings.size());
+        for (IJSONAble s : multipleJsonAsStrings) {
+            jsons.add(s.convertToJSON());
+        }
+        return jsons;
     }
 
-    public static List<String> getKeys(IJson fromObject, String key) {
-        return fromObject.getKeysOf(key);
+    public static Set<IJson> parseMultipleStringsForDistinct(Collection<String> multipleJsonAsStrings) throws JSONException {
+        Set<IJson> jsons = new HashSet<>(multipleJsonAsStrings.size());
+        for (String s : multipleJsonAsStrings) {
+            jsons.add(parse(s));
+        }
+        return jsons;
     }
 
-    public static List<IJson> getList(IJson fromObject, String key) {
-        return fromObject.getArrayAt(key);
-    }
-
-    public static IJson getJSONObject(IJson fromObject, String key) {
-        return fromObject.getJSONObjectAt(key);
-    }
-
-    public static boolean getBoolean(IJson fromObject, String key) {
-        return fromObject.getBooleanAt(key);
-    }
-
-    public static double getDouble(IJson fromObject, String key) {
-        return fromObject.getDoubleAt(key);
-    }
-
-    public static long getLong(IJson fromObject, String key) {
-        return fromObject.getLongAt(key);
-    }
-
-    public static String getString(IJson fromObject, String key) {
-        return fromObject.getStringAt(key);
-    }
-
-    public static IJson getAny(IJson fromObject, String key) {
-        return fromObject.getAnyAt(key);
-    }
-
-    public static boolean equals(IJson object1, IJson object2) {
-        return object1.equals(object2);
+    public static Set<IJson> parseMultipleJSONablesForDistinct(Collection<IJSONAble> multipleJsonAsStrings) throws JSONException {
+        Set<IJson> jsons = new HashSet<>(multipleJsonAsStrings.size());
+        for (IJSONAble s : multipleJsonAsStrings) {
+            jsons.add(s.convertToJSON());
+        }
+        return jsons;
     }
 }

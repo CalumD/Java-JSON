@@ -1,12 +1,14 @@
 package api;
 
-import core.*;
-import exceptions.JSONParseException;
+import core.JSArray;
+import core.JSBoolean;
+import core.JSNumber;
+import core.JSObject;
+import core.JSString;
 import exceptions.KeyDifferentTypeException;
 import exceptions.KeyNotFoundException;
 import exceptions.SchemaException;
 
-import java.io.IOException;
 import java.util.HashSet;
 
 /**
@@ -16,82 +18,27 @@ import java.util.HashSet;
 public class JSONSchemaEnforcer {
 
     /**
-     * This is used to validate some arbitrary JSON object against a custom-defined json schema on
-     * disk
-     *
-     * @param objectToValidate The object to validate against the schema
-     * @param pathToSchema The entire path to the schema file to check the object against.
-     * @return True if the object adheres to the schema, false if not.
-     * @throws IOException    Thrown if there was a problem accessing the schema.
-     * @throws JSONParseException Thrown if there was an issue parsing the schema.
-     */
-    public static boolean validateGlobal(IJson objectToValidate, String pathToSchema)
-        throws IOException, JSONParseException {
-
-        String fileAsString = FileManager.getFileAsString(pathToSchema);
-        IJson schema = JSONParser.parse(fileAsString);
-
-        return validate(objectToValidate, schema);
-    }
-
-    /**
-     * This is used to validate some arbitrary JSON object against a pre-defined and locally shipped
-     * schema.
-     *
-     * @param objectToValidate The object to validate against the schema
-     * @param resourceName The path of the internal schema to validate against.
-     * @return True if the object adheres to the schema, false if not.
-     * @throws IOException    Thrown if there was a problem accessing the schema.
-     * @throws JSONParseException Thrown if there was an issue parsing the schema.
-     */
-    public static boolean validateInternal(IJson objectToValidate, String resourceName)
-        throws IOException, JSONParseException {
-
-        String fileAsString = FileManager.getLocalResourceAsString(resourceName);
-        IJson schema = JSONParser.parse(fileAsString);
-
-        return validate(objectToValidate, schema);
-    }
-
-    /**
      * Used as a pass through of the parsed schema to check the object with.
      *
      * @param objectToValidate The object to check the validity of.
-     * @param schema The schema to enforce on the object (As a JSON object itself)
+     * @param schema           The schema to enforce on the object (As a JSON object itself)
      * @return True if the object satisfies the schema
      * @throws SchemaException Thrown if the object does not conform to the schema.
      */
-    private static boolean validate(IJson objectToValidate, IJson schema)
-        throws SchemaException {
+    public static boolean validate(IJson objectToValidate, IJson schema) throws SchemaException {
         validateByType(objectToValidate, schema, "");
         return true;
     }
 
     /**
-     * A Cover method for the system specification, since the path to the internal resource is
-     * known.
-     *
-     * @param config The JSON object to check is a valid system specification.
-     * @throws IOException    Thrown if there was some error accessing the Schema (Should never be
-     *                        thrown for this method)
-     * @throws JSONParseException Thrown if there was some error parsing the Schema (Should never be
-     *                        thrown for this method)
-     */
-    public static void validateSystem(IJson config) throws IOException, JSONParseException {
-        validateInternal(config, "/SystemSpecification.schema.json");
-    }
-
-
-    /**
      * Used to send the sub-object to the correct checker method.
      *
      * @param toValidate The JSON object to send to the checker method.
-     * @param schema The whole schema checking against.
-     * @param pathSoFar The path inside the schema we have reached so far.
+     * @param schema     The whole schema checking against.
+     * @param pathSoFar  The path inside the schema we have reached so far.
      * @throws SchemaException Thrown if the object does not satisfy the schema.
      */
-    private static void validateByType(IJson toValidate, IJson schema, String pathSoFar)
-        throws SchemaException {
+    private static void validateByType(IJson toValidate, IJson schema, String pathSoFar) throws SchemaException {
 
         IJson localSchema = getSchema(schema, pathSoFar);
 
