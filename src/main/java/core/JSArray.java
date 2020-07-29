@@ -7,7 +7,7 @@ import exceptions.KeyNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JSArray extends JSON {
+public final class JSArray extends JSON {
 
     private final List<IJson> myValue;
 

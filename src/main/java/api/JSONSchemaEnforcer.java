@@ -3,7 +3,7 @@ package api;
 import core.JSType;
 import exceptions.SchemaException;
 
-public class JSONSchemaEnforcer {
+public final class JSONSchemaEnforcer implements IJSONSchemaEnforcer {
 
     private class JSONSchemaEnforcerPart {
         private final String schemaKeySoFar;
@@ -16,15 +16,15 @@ public class JSONSchemaEnforcer {
     private JSONSchemaEnforcer() {
     }
 
-    public static boolean validateStrict(IJson objectToValidate, IJson schema) {
-        try {
-            return validate(objectToValidate, schema);
-        } catch (SchemaException e) {
-            return false;
-        }
+    public static boolean validateWithoutReasoning(IJson objectToValidate, IJson schema) {
+        return new JSONSchemaEnforcer().validateStrict(objectToValidate, schema);
     }
 
-    public static boolean validate(IJson objectToValidate, IJson schema) throws SchemaException {
+    public static boolean validateWithReasoning(IJson objectToValidate, IJson schema) {
+        return new JSONSchemaEnforcer().validate(objectToValidate, schema);
+    }
+
+    public boolean validate(IJson objectToValidate, IJson schema) throws SchemaException {
         return new JSONSchemaEnforcer().instanceValidate(objectToValidate, schema);
     }
 

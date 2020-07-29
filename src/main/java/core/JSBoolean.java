@@ -2,7 +2,7 @@ package core;
 
 import exceptions.JSONParseException;
 
-public class JSBoolean extends JSON {
+public final class JSBoolean extends JSON {
 
     private boolean myValue;
 

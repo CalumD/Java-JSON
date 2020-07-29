@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class JSObject extends JSON {
+public final class JSObject extends JSON {
 
     private final HashMap<String, IJson> json;
 

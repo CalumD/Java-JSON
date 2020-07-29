@@ -3,7 +3,7 @@ package core;
 import api.IJson;
 import exceptions.JSONParseException;
 
-public class JSONTape extends Tape<IJson, JSONParseException> {
+public final class JSONTape extends Tape<IJson, JSONParseException> {
 
     static final String VALID_JSON = "{ / [ / \" / <number> / <boolean> ";
 

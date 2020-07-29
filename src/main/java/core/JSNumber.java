@@ -3,7 +3,7 @@ package core;
 import exceptions.JSONParseException;
 import exceptions.KeyDifferentTypeException;
 
-public class JSNumber extends JSON {
+public final class JSNumber extends JSON {
 
     private Long myLongValue;
     private Double myDoubleValue;

@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class JSONKey {
+final class JSONKey {
 
     private final List<String> callChain;
     private int currentCallChainIndex = 0;

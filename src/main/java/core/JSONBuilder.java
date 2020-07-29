@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class JSONBuilder implements IJsonBuilder, IJSONAble {
+public final class JSONBuilder implements IJsonBuilder, IJSONAble {
 
     private class NewValueIdentifier {
         final JSONKey keyChain;

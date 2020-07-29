@@ -18,5 +18,5 @@ public interface IJsonBuilder extends IJSONAble {
 
     IJsonBuilder convertFromJSON(IJson json);
 
-    IJson build(); // change to .build()?
+    IJson build();
 }
