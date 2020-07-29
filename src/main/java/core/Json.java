@@ -1,9 +1,9 @@
 package core;
 
-import api.IJSONAble;
 import api.IJson;
-import exceptions.JSONException;
-import exceptions.JSONParseException;
+import api.IJsonAble;
+import exceptions.JsonException;
+import exceptions.JsonParseException;
 import exceptions.KeyDifferentTypeException;
 import exceptions.KeyNotFoundException;
 
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class JSON implements IJson {
+public abstract class Json implements IJson {
 
     public static final int DEFAULT_PRETTY_JSON_INDENT_WIDTH = 2;
 
@@ -20,22 +20,22 @@ public abstract class JSON implements IJson {
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
-    JSON(JSONTape parsingTape) throws JSONParseException {
+    Json(JsonTape parsingTape) throws JsonParseException {
         // This is only used to enforce each extending class has this matching constructor to execute the parse.
     }
 
     @Override
-    public IJson createFromString(String jsonFragment) throws JSONParseException {
+    public IJson createFromString(String jsonFragment) throws JsonParseException {
         return parseSelf(jsonFragment);
     }
 
     @Override
-    public IJson createFromMultilineString(List<String> jsonFragment) throws JSONParseException {
+    public IJson createFromMultilineString(List<String> jsonFragment) throws JsonParseException {
         return parseSelf(jsonFragment);
     }
 
     @Override
-    public IJson convertToJSON(IJSONAble jsonable) throws JSONParseException {
+    public IJson convertToJSON(IJsonAble jsonable) throws JsonParseException {
         return jsonable.convertToJSON();
     }
 
@@ -45,7 +45,7 @@ public abstract class JSON implements IJson {
     }
 
     private IJson parseSelf(String jsonFragment) {
-        return new JSONTape(jsonFragment).parseNextElement();
+        return new JsonTape(jsonFragment).parseNextElement();
     }
 
     private IJson parseSelf(List<String> jsonFragment) {
@@ -129,57 +129,57 @@ public abstract class JSON implements IJson {
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
-    public Object getValueAt(String key) throws JSONException {
+    public Object getValueAt(String key) throws JsonException {
         return getMatching(key).getValue();
     }
 
     @Override
-    public JSType getDataTypeOf(String key) throws JSONException {
+    public JSType getDataTypeOf(String key) throws JsonException {
         return getMatching(key).getDataType();
     }
 
     @Override
-    public List<String> getKeysOf(String key) throws JSONException {
+    public List<String> getKeysOf(String key) throws JsonException {
         return getMatching(key).getKeys();
     }
 
     @Override
-    public List<IJson> getValuesOf(String key) throws JSONException {
+    public List<IJson> getValuesOf(String key) throws JsonException {
         return getMatching(key).getValues();
     }
 
     @Override
-    public IJson getJSONObjectAt(String key) throws JSONException {
+    public IJson getJSONObjectAt(String key) throws JsonException {
         return ((JSObject) getMatching(key, JSType.OBJECT)).getValue();
     }
 
     @Override
-    public List<IJson> getArrayAt(String key) throws JSONException {
+    public List<IJson> getArrayAt(String key) throws JsonException {
         return ((JSArray) getMatching(key, JSType.ARRAY)).getValue();
     }
 
     @Override
-    public boolean getBooleanAt(String key) throws JSONException {
+    public boolean getBooleanAt(String key) throws JsonException {
         return ((JSBoolean) getMatching(key, JSType.BOOLEAN)).getValue();
     }
 
     @Override
-    public double getDoubleAt(String key) throws JSONException {
+    public double getDoubleAt(String key) throws JsonException {
         return getMatching(key, JSType.DOUBLE).getDouble();
     }
 
     @Override
-    public long getLongAt(String key) throws JSONException {
+    public long getLongAt(String key) throws JsonException {
         return getMatching(key, JSType.LONG).getLong();
     }
 
     @Override
-    public String getStringAt(String key) throws JSONException {
+    public String getStringAt(String key) throws JsonException {
         return ((JSString) getMatching(key, JSType.STRING)).getValue();
     }
 
     @Override
-    public IJson getAnyAt(String key) throws JSONException {
+    public IJson getAnyAt(String key) throws JsonException {
         return getMatching(key);
     }
 
@@ -215,10 +215,10 @@ public abstract class JSON implements IJson {
         }
 
         // Attempt deeper retrieval of object from structure.
-        return getInternal(new JSONKey(key, false));
+        return getInternal(new JsonKey(key, false));
     }
 
-    protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
+    protected IJson getInternal(JsonKey keySequence) throws KeyNotFoundException {
         if (keySequence.getNextKey().equals("")) {
             return this;
         }

@@ -8,7 +8,7 @@ public class BuildExceptionTest {
 
     @Test
     public void basicPOJO() {
-        JSONException exception = new BuildException("Some error text");
+        JsonException exception = new BuildException("Some error text");
         assertEquals("Some error text", exception.getMessage());
     }
 }

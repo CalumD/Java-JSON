@@ -8,7 +8,7 @@ class KeyInvalidExceptionTest {
 
     @Test
     public void basicPOJO() {
-        JSONException exception = new KeyInvalidException("Some error text");
+        JsonException exception = new KeyInvalidException("Some error text");
         assertEquals("Some error text", exception.getMessage());
     }
 }

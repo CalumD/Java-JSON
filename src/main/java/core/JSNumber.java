@@ -1,14 +1,14 @@
 package core;
 
-import exceptions.JSONParseException;
+import exceptions.JsonParseException;
 import exceptions.KeyDifferentTypeException;
 
-public final class JSNumber extends JSON {
+public final class JSNumber extends Json {
 
     private Long myLongValue;
     private Double myDoubleValue;
 
-    JSNumber(JSONTape parsingTape) throws JSONParseException {
+    JSNumber(JsonTape parsingTape) throws JsonParseException {
         super(parsingTape);
         int numberStartIndex = parsingTape.getCurrentIndex();
 

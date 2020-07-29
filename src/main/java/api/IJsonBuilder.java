@@ -2,7 +2,7 @@ package api;
 
 import exceptions.BuildException;
 
-public interface IJsonBuilder extends IJSONAble {
+public interface IJsonBuilder extends IJsonAble {
 
     IJsonBuilder addBoolean(String path, boolean value) throws BuildException;
 

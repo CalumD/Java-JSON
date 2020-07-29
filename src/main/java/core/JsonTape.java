@@ -1,13 +1,13 @@
 package core;
 
 import api.IJson;
-import exceptions.JSONParseException;
+import exceptions.JsonParseException;
 
-public final class JSONTape extends Tape<IJson, JSONParseException> {
+public final class JsonTape extends Tape<IJson, JsonParseException> {
 
     static final String VALID_JSON = "{ / [ / \" / <number> / <boolean> ";
 
-    public JSONTape(String fullInput) {
+    public JsonTape(String fullInput) {
         super(fullInput);
     }
 
@@ -17,7 +17,7 @@ public final class JSONTape extends Tape<IJson, JSONParseException> {
         consumeWhiteSpace();
 
         // Figure out the next JSON type
-        JSON nextElement = null;
+        Json nextElement = null;
         switch (checkCurrentChar()) {
             case 't':
             case 'T':
@@ -56,8 +56,8 @@ public final class JSONTape extends Tape<IJson, JSONParseException> {
     }
 
     @Override
-    protected JSONParseException newTypedException(String message) {
-        return new JSONParseException(message);
+    protected JsonParseException newTypedException(String message) {
+        return new JsonParseException(message);
     }
 
     @Override
@@ -80,7 +80,7 @@ public final class JSONTape extends Tape<IJson, JSONParseException> {
                 }
             }
         } catch (IndexOutOfBoundsException e) {
-            throw new JSONParseException(
+            throw new JsonParseException(
                     "Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?"
             );
         }

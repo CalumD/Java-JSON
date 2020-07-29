@@ -1,6 +1,6 @@
 package exceptions;
 
-public class BuildException extends JSONException {
+public class BuildException extends JsonException {
 
     public BuildException(String reasonForInvalidity) {
         super(reasonForInvalidity);

@@ -8,7 +8,7 @@ class SchemaExceptionTest {
 
     @Test
     public void basicPOJO() {
-        JSONException exception = new SchemaException("Some error text");
+        JsonException exception = new SchemaException("Some error text");
         assertEquals("Some error text", exception.getMessage());
     }
 }

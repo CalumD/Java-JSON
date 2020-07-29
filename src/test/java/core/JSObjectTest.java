@@ -1,8 +1,8 @@
 package core;
 
-import api.IJSONAble;
 import api.IJson;
-import exceptions.JSONParseException;
+import api.IJsonAble;
+import exceptions.JsonParseException;
 import exceptions.KeyDifferentTypeException;
 import exceptions.KeyNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,13 +14,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class JSObjectTest extends JSONTest {
+public class JSObjectTest extends JsonTest {
 
     private JSObject object;
 
     @BeforeEach
     void setUp() {
-        object = new JSObject(new JSONTape("{\"array\":[], \"long\":0, \"double\": 0.1, \"string\":'', \"boolean\":true, \"object\":{}}"));
+        object = new JSObject(new JsonTape("{\"array\":[], \"long\":0, \"double\": 0.1, \"string\":'', \"boolean\":true, \"object\":{}}"));
     }
 
     @Test
@@ -32,144 +32,144 @@ public class JSObjectTest extends JSONTest {
     @Test
     public void testParseException() {
         try {
-            new JSObject(new JSONTape("{"));
+            new JSObject(new JsonTape("{"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("}"));
+            new JSObject(new JsonTape("}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape(""));
+            new JSObject(new JsonTape(""));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("You cannot create something from nothing. Input was empty.", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("{{}}"));
+            new JSObject(new JsonTape("{{}}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Missing Key at start of Object.\n" +
                     "Line: 1\n" +
                     "Reached: {_\n" +
                     "Expected: \"", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("{[]}"));
+            new JSObject(new JsonTape("{[]}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Missing Key at start of Object.\n" +
                     "Line: 1\n" +
                     "Reached: {_\n" +
                     "Expected: \"", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("{1,}"));
+            new JSObject(new JsonTape("{1,}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Missing Key at start of Object.\n" +
                     "Line: 1\n" +
                     "Reached: {_\n" +
                     "Expected: \"", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("{,1}"));
+            new JSObject(new JsonTape("{,1}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Missing Key at start of Object.\n" +
                     "Line: 1\n" +
                     "Reached: {_\n" +
                     "Expected: \"", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("{1, [}"));
+            new JSObject(new JsonTape("{1, [}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Missing Key at start of Object.\n" +
                     "Line: 1\n" +
                     "Reached: {_\n" +
                     "Expected: \"", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("{\"\":1}"));
+            new JSObject(new JsonTape("{\"\":1}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Illegal Object Key (Empty).\n" +
                     "Line: 1\n" +
                     "Reached: {\"\"_\n" +
                     "Expected: <Valid Key>", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("{\"key:1}"));
+            new JSObject(new JsonTape("{\"key:1}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Didn't find matching \", before end of string.\n" +
                     "Line: 1\n" +
                     "Reached: {\"key:1}_\n" +
                     "Expected: \"", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("{key\":1}"));
+            new JSObject(new JsonTape("{key\":1}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Missing Key at start of Object.\n" +
                     "Line: 1\n" +
                     "Reached: {_\n" +
                     "Expected: \"", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("{\"key\"1}"));
+            new JSObject(new JsonTape("{\"key\"1}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid Key:Value separator. Must use a colon(:).\n" +
                     "Line: 1\n" +
                     "Reached: {\"key\"_\n" +
                     "Expected: :", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("{\"key\"}"));
+            new JSObject(new JsonTape("{\"key\"}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid Key:Value separator. Must use a colon(:).\n" +
                     "Line: 1\n" +
                     "Reached: {\"key\"_\n" +
                     "Expected: :", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("{'key':1,}"));
+            new JSObject(new JsonTape("{'key':1,}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Comma suggests more object elements, but object terminates.\n" +
                     "Line: 1\n" +
                     "Reached: {'key':1,_\n" +
                     "Expected: { / [ / \" / <number> / <boolean> ", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("{'key':1]"));
+            new JSObject(new JsonTape("{'key':1]"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid object child delimiter.\n" +
                     "Line: 1\n" +
                     "Reached: {'key':1_\n" +
                     "Expected: , / }", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("{'key'=1}"));
+            new JSObject(new JsonTape("{'key'=1}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid Key:Value separator. Must use a colon(:).\n" +
                     "Line: 1\n" +
                     "Reached: {'key'_\n" +
                     "Expected: :", e.getMessage());
         }
         try {
-            new JSObject(new JSONTape("{\"samekey\":1,2: 3}"));
+            new JSObject(new JsonTape("{\"samekey\":1,2: 3}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid type for object key.\n" +
                     "Line: 1\n" +
                     "Reached: {\"samekey\":1,_\n" +
@@ -184,7 +184,7 @@ public class JSObjectTest extends JSONTest {
             object.createFromString("{}");
             object.createFromString("{'easy': \"value\"}");
             object.createFromString("{\"easy\": 'value'}");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             fail("Create from string should not throw an exception for valid input.", e);
         }
     }
@@ -194,7 +194,7 @@ public class JSObjectTest extends JSONTest {
         try {
             IJson obj = object.createFromString("{\"I have spaces\": 1}");
             assertEquals(1, obj.getLongAt("['I have spaces']"));
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             fail("Create from string should not throw an exception for valid input.", e);
         }
     }
@@ -202,9 +202,9 @@ public class JSObjectTest extends JSONTest {
     @Test
     public void duplicateKeysNotAllowed() {
         try {
-            new JSObject(new JSONTape("{\"samekey\":1,'samekey': 1}"));
+            new JSObject(new JsonTape("{\"samekey\":1,'samekey': 1}"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Illegal Object key (Duplicate): samekey\n" +
                     "Line: 1\n" +
                     "Reached: {\"samekey\":1,'samekey'_\n" +
@@ -214,7 +214,7 @@ public class JSObjectTest extends JSONTest {
 
     @Test
     public void keysAreCaseSensitive() {
-        assertEquals("{\"Samekey\":1,\"samekey\":1}", new JSObject(new JSONTape("{\"samekey\":1,'Samekey': 1}")).asString());
+        assertEquals("{\"Samekey\":1,\"samekey\":1}", new JSObject(new JsonTape("{\"samekey\":1,'Samekey': 1}")).asString());
     }
 
     @Test
@@ -228,7 +228,7 @@ public class JSObjectTest extends JSONTest {
         multiline.add("}");
         try {
             object.createFromMultilineString(multiline);
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             fail("Create from string should not throw an exception for valid input.", e);
         }
     }
@@ -308,12 +308,12 @@ public class JSObjectTest extends JSONTest {
     @Override
     public void getValues() {
         List<IJson> values = new ArrayList<>(3);
-        values.add(new JSArray(new JSONTape("[]")));
-        values.add(new JSNumber(new JSONTape("0")));
-        values.add(new JSNumber(new JSONTape("0.1")));
-        values.add(new JSString(new JSONTape("''")));
-        values.add(new JSBoolean(new JSONTape("true")));
-        values.add(new JSObject(new JSONTape("{}")));
+        values.add(new JSArray(new JsonTape("[]")));
+        values.add(new JSNumber(new JsonTape("0")));
+        values.add(new JSNumber(new JsonTape("0.1")));
+        values.add(new JSString(new JsonTape("''")));
+        values.add(new JSBoolean(new JsonTape("true")));
+        values.add(new JSObject(new JsonTape("{}")));
 
         assertTrue(values.containsAll(object.getValues()));
         assertEquals(values.size(), object.getValues().size(), 0);
@@ -322,12 +322,12 @@ public class JSObjectTest extends JSONTest {
     @Test
     public void getValuesNotEqual() {
         List<IJson> values = new ArrayList<>(3);
-        values.add(new JSArray(new JSONTape("[]")));
-        values.add(new JSNumber(new JSONTape("0")));
-        values.add(new JSNumber(new JSONTape("0.1")));
-        values.add(new JSString(new JSONTape("'THE STRING IS DIFFERENT'")));
-        values.add(new JSBoolean(new JSONTape("true")));
-        values.add(new JSObject(new JSONTape("{}")));
+        values.add(new JSArray(new JsonTape("[]")));
+        values.add(new JSNumber(new JsonTape("0")));
+        values.add(new JSNumber(new JsonTape("0.1")));
+        values.add(new JSString(new JsonTape("'THE STRING IS DIFFERENT'")));
+        values.add(new JSBoolean(new JsonTape("true")));
+        values.add(new JSObject(new JsonTape("{}")));
 
         assertNotEquals(values, object.getValue());
     }
@@ -456,7 +456,7 @@ public class JSObjectTest extends JSONTest {
         } catch (KeyNotFoundException e) {
             assertEquals("someKey not found on element: <base element>", e.getMessage());
         }
-        assertEquals(new JSObject(new JSONTape("{}")), object.getJSONObjectAt("object"));
+        assertEquals(new JSObject(new JsonTape("{}")), object.getJSONObjectAt("object"));
     }
 
     @Test
@@ -480,7 +480,7 @@ public class JSObjectTest extends JSONTest {
         } catch (KeyNotFoundException e) {
             assertEquals("someKey not found on element: <base element>", e.getMessage());
         }
-        assertEquals(new JSArray(new JSONTape("[]")), object.getArrayAt("array"));
+        assertEquals(new JSArray(new JsonTape("[]")), object.getArrayAt("array"));
     }
 
     @Test
@@ -545,7 +545,7 @@ public class JSObjectTest extends JSONTest {
 
     @Test
     public void getVeryNestedValue() {
-        assertTrue(new JSObject(new JSONTape("{'first':[[{\"nest\": [{'furtherNest': true}]}]]}")).getBooleanAt("first[0][0].nest[0]['furtherNest']"));
+        assertTrue(new JSObject(new JsonTape("{'first':[[{\"nest\": [{'furtherNest': true}]}]]}")).getBooleanAt("first[0][0].nest[0]['furtherNest']"));
     }
 
     @Test
@@ -581,14 +581,14 @@ public class JSObjectTest extends JSONTest {
     @Override
     public void asPrettyStringWithDepth() {
         assertEquals("{\n  \"boolean\": true,\n  \"string\": \"\",\n  \"array\": [],\n  \"double\": 0.1,\n  \"long\": 0,\n  \"object\": {} \n}", object.asPrettyString(5));
-        assertEquals("{\n  \"top\": {\n    <middle,top,bottom>\n  } \n}", new JSObject(new JSONTape("{'top':{'top':[],'middle':{},'bottom':[]}}")).asPrettyString(1));
+        assertEquals("{\n  \"top\": {\n    <middle,top,bottom>\n  } \n}", new JSObject(new JsonTape("{'top':{'top':[],'middle':{},'bottom':[]}}")).asPrettyString(1));
     }
 
     @Test
     @Override
     public void asPrettyStringWithDepthAndIndent() {
         assertEquals("{\n      \"boolean\": true,\n      \"string\": \"\",\n      \"array\": [],\n      \"double\": 0.1,\n      \"long\": 0,\n      \"object\": {} \n}", object.asPrettyString(5, 6));
-        assertEquals("{\n      \"first\": [\n            [\n                  {\n                        <nest>\n                  } \n            ] \n      ] \n}", new JSObject(new JSONTape("{'first':[[{\"nest\": [{'furtherNest': true}]}]]}")).asPrettyString(3, 6));
+        assertEquals("{\n      \"first\": [\n            [\n                  {\n                        <nest>\n                  } \n            ] \n      ] \n}", new JSObject(new JsonTape("{'first':[[{\"nest\": [{'furtherNest': true}]}]]}")).asPrettyString(3, 6));
     }
 
     @SuppressWarnings({"SimplifiableJUnitAssertion", "ConstantConditions"})
@@ -599,35 +599,35 @@ public class JSObjectTest extends JSONTest {
 
     @Test
     public void checkDifferentSizeObjectEqual() {
-        assertNotEquals(new JSObject(new JSONTape("{'same': 1, 'different': 2}")), new JSObject(new JSONTape("{'same': 1}")));
+        assertNotEquals(new JSObject(new JsonTape("{'same': 1, 'different': 2}")), new JSObject(new JsonTape("{'same': 1}")));
     }
 
     @Test
     public void checkSameSizeObjectDoestEqualWtihDifferentKeys() {
-        assertNotEquals(new JSObject(new JSONTape("{'same': 1}")), new JSObject(new JSONTape("{'different': 1}")));
+        assertNotEquals(new JSObject(new JsonTape("{'same': 1}")), new JSObject(new JsonTape("{'different': 1}")));
     }
 
     @Test
     public void checkOtherJSObjectDoesNotEqual() {
-        assertNotEquals(object, new JSObject(new JSONTape("{\"array\":[], \"long\":0, \"double\": 0.1, \"string\":'I AM DIFFERENT', \"boolean\":true, \"object\":{}}")));
+        assertNotEquals(object, new JSObject(new JsonTape("{\"array\":[], \"long\":0, \"double\": 0.1, \"string\":'I AM DIFFERENT', \"boolean\":true, \"object\":{}}")));
     }
 
     @Test
     @Override
     public void testEquals() {
-        assertEquals(new JSObject(new JSONTape("{'same': 1}")), new JSObject(new JSONTape("{'same': 1}")));
+        assertEquals(new JSObject(new JsonTape("{'same': 1}")), new JSObject(new JsonTape("{'same': 1}")));
     }
 
     @Test
     @Override
     public void getHashCode() {
         HashMap<String, IJson> check = new HashMap<>();
-        check.put("array", new JSArray(new JSONTape("[]")));
-        check.put("long", new JSNumber(new JSONTape("0")));
-        check.put("double", new JSNumber(new JSONTape("0.1")));
-        check.put("string", new JSString(new JSONTape("''")));
-        check.put("boolean", new JSBoolean(new JSONTape("true")));
-        check.put("object", new JSObject(new JSONTape("{}")));
+        check.put("array", new JSArray(new JsonTape("[]")));
+        check.put("long", new JSNumber(new JsonTape("0")));
+        check.put("double", new JSNumber(new JsonTape("0.1")));
+        check.put("string", new JSString(new JsonTape("''")));
+        check.put("boolean", new JSBoolean(new JsonTape("true")));
+        check.put("object", new JSObject(new JsonTape("{}")));
 
         assertEquals(check.hashCode(), object.hashCode(), 0);
     }
@@ -635,7 +635,7 @@ public class JSObjectTest extends JSONTest {
     @Test
     @Override
     public void jsonIsConvertible() {
-        IJSONAble builder = JSONBuilder.builder().addString("key", "value");
+        IJsonAble builder = JsonBuilder.builder().addString("key", "value");
         assertEquals(builder.convertToJSON(), object.convertToJSON(builder));
     }
 }

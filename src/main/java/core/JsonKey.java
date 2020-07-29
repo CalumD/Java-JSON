@@ -10,12 +10,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-final class JSONKey {
+final class JsonKey {
 
     private final List<String> callChain;
     private int currentCallChainIndex = 0;
 
-    JSONKey(String key, boolean useBuilderKeyTape) throws KeyInvalidException {
+    JsonKey(String key, boolean useBuilderKeyTape) throws KeyInvalidException {
         // Sanity Check
         if (key == null) {
             throw new KeyInvalidException("Key cannot be null");

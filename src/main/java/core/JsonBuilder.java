@@ -1,9 +1,9 @@
 package core;
 
-import api.IJSONAble;
 import api.IJson;
+import api.IJsonAble;
 import api.IJsonBuilder;
-import api.JSONParser;
+import api.JsonParser;
 import exceptions.BuildException;
 import exceptions.KeyDifferentTypeException;
 import exceptions.KeyInvalidException;
@@ -13,16 +13,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public final class JSONBuilder implements IJsonBuilder, IJSONAble {
+public final class JsonBuilder implements IJsonBuilder, IJsonAble {
 
     private class NewValueIdentifier {
-        final JSONKey keyChain;
+        final JsonKey keyChain;
         final String finalKey;
         final Object value;
 
         NewValueIdentifier(String path, Object value) {
             try {
-                keyChain = new JSONKey(path, true);
+                keyChain = new JsonKey(path, true);
             } catch (KeyInvalidException exception) {
                 throw new BuildException("Cannot add new value with invalid key.", exception);
             }
@@ -35,21 +35,21 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
     private final HashMap<String, String> strings = new HashMap<>();
     private final HashMap<String, Double> doubles = new HashMap<>();
     private final HashMap<String, Long> longs = new HashMap<>();
-    private final HashMap<String, JSONBuilder> objects = new HashMap<>();
+    private final HashMap<String, JsonBuilder> objects = new HashMap<>();
     private final ArrayList<Object> array = new ArrayList<>();
 
     private JSType type = JSType.OBJECT;
 
 
-    public JSONBuilder() {
+    public JsonBuilder() {
     }
 
-    private JSONBuilder(JSType objectType) {
+    private JsonBuilder(JSType objectType) {
         type = objectType;
     }
 
-    public static JSONBuilder builder() {
-        return new JSONBuilder();
+    public static JsonBuilder builder() {
+        return new JsonBuilder();
     }
 
     @Override
@@ -59,13 +59,13 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
 
     @Override
     public IJson convertToJSON() throws BuildException {
-        return JSONParser.parse(this.toString());
+        return JsonParser.parse(this.toString());
     }
 
     @Override
     public IJsonBuilder addBoolean(String path, boolean value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
-        JSONBuilder finalObjectInKeyChain = findObject(valueIdentifier);
+        JsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
             finalObjectInKeyChain.booleans.put(valueIdentifier.finalKey.substring(1), value);
         }
@@ -75,7 +75,7 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
     @Override
     public IJsonBuilder addLong(String path, long value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
-        JSONBuilder finalObjectInKeyChain = findObject(valueIdentifier);
+        JsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
             finalObjectInKeyChain.longs.put(valueIdentifier.finalKey.substring(1), value);
         }
@@ -85,7 +85,7 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
     @Override
     public IJsonBuilder addDouble(String path, double value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
-        JSONBuilder finalObjectInKeyChain = findObject(valueIdentifier);
+        JsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
             finalObjectInKeyChain.doubles.put(valueIdentifier.finalKey.substring(1), value);
         }
@@ -95,7 +95,7 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
     @Override
     public IJsonBuilder addString(String path, String value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
-        JSONBuilder finalObjectInKeyChain = findObject(valueIdentifier);
+        JsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
             finalObjectInKeyChain.strings.put(valueIdentifier.finalKey.substring(1), value);
         }
@@ -104,13 +104,13 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
 
     @Override
     public IJsonBuilder addBuilderBlock(String path, IJsonBuilder value) throws BuildException {
-        if (!(value instanceof JSONBuilder)) {
+        if (!(value instanceof JsonBuilder)) {
             throw new BuildException("This implementation of an IJSONBuilder only accepts JSONBuilder as a builder block value.");
         }
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
-        JSONBuilder finalObjectInKeyChain = findObject(valueIdentifier);
+        JsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
-            finalObjectInKeyChain.objects.put(valueIdentifier.finalKey.substring(1), (JSONBuilder) value);
+            finalObjectInKeyChain.objects.put(valueIdentifier.finalKey.substring(1), (JsonBuilder) value);
         }
         return this;
     }
@@ -120,7 +120,7 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
         return addBuilderBlock(path, convertFromJSON(value));
     }
 
-    private String identifyFinalKey(JSONKey keyChain) {
+    private String identifyFinalKey(JsonKey keyChain) {
         List<String> chainAsListOfKeys = keyChain.getAllKeys();
         if (chainAsListOfKeys.size() == 1) {
             KeyInvalidException invalidException = new KeyInvalidException("The minimum wrapper for this IJsonBuilder is a JSON object, " +
@@ -134,10 +134,10 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
                 : lastActionableKey;
     }
 
-    private JSONBuilder findObject(NewValueIdentifier valueIdentifier) {
+    private JsonBuilder findObject(NewValueIdentifier valueIdentifier) {
 
         // Start from the current object, since this is what the method was called on
-        JSONBuilder objectStepInKey = this;
+        JsonBuilder objectStepInKey = this;
         List<String> allKeys = valueIdentifier.keyChain.getAllKeys();
 
         // Loop through the whole key chain, getting, or creating new objects as required
@@ -171,7 +171,7 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
         return objectStepInKey;
     }
 
-    private JSONBuilder getOrCreateIfNotExists(JSONBuilder currentObject, String currentKey, String nextKey) {
+    private JsonBuilder getOrCreateIfNotExists(JsonBuilder currentObject, String currentKey, String nextKey) {
 
         boolean keyIsForArray = (currentKey.charAt(0) == '[');
         currentKey = currentKey.substring(1);
@@ -183,7 +183,7 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
             if (currentKey.equals("append") || (Integer.parseInt(currentKey) == currentObject.array.size())) {
                 // If we are not at the end of the keychain, add new typed child object we need to create.
                 if (!nextKey.equals("")) {
-                    JSONBuilder nextBuilder = new JSONBuilder(determineNewChildType(nextKey));
+                    JsonBuilder nextBuilder = new JsonBuilder(determineNewChildType(nextKey));
                     currentObject.array.add(nextBuilder);
                     currentObject = nextBuilder;
                 }
@@ -194,8 +194,8 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
                     throw new KeyNotFoundException("");
                 }
                 Object arrayElement = currentObject.array.get(index);
-                if (arrayElement instanceof JSONBuilder) {
-                    currentObject = (JSONBuilder) arrayElement;
+                if (arrayElement instanceof JsonBuilder) {
+                    currentObject = (JsonBuilder) arrayElement;
                 } else {
                     throw new KeyDifferentTypeException("");
                 }
@@ -204,7 +204,7 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
             if (currentObject.objects.containsKey(currentKey)) {
                 currentObject = currentObject.objects.get(currentKey);
             } else {
-                JSONBuilder nextBuilder = new JSONBuilder(determineNewChildType(nextKey));
+                JsonBuilder nextBuilder = new JsonBuilder(determineNewChildType(nextKey));
                 currentObject.objects.put(currentKey, nextBuilder);
                 currentObject = nextBuilder;
             }
@@ -221,17 +221,17 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
     public IJsonBuilder convertFromJSON(IJson json) {
         switch (json.getDataType()) {
             case BOOLEAN:
-                return new JSONBuilder().addBoolean("value", json.getBoolean());
+                return new JsonBuilder().addBoolean("value", json.getBoolean());
             case DOUBLE:
-                return new JSONBuilder().addDouble("value", json.getDouble());
+                return new JsonBuilder().addDouble("value", json.getDouble());
             case LONG:
-                return new JSONBuilder().addLong("value", json.getLong());
+                return new JsonBuilder().addLong("value", json.getLong());
             case STRING:
-                return new JSONBuilder().addString("value", json.getString());
+                return new JsonBuilder().addString("value", json.getString());
             case ARRAY:
-                return JSONBuilder.builder().addBuilderBlock("value", (JSONBuilder) convertNonPrimitive(json));
+                return JsonBuilder.builder().addBuilderBlock("value", (JsonBuilder) convertNonPrimitive(json));
             default:
-                JSONBuilder returnObject = new JSONBuilder(JSType.OBJECT);
+                JsonBuilder returnObject = new JsonBuilder(JSType.OBJECT);
                 for (String key : json.getKeys()) {
                     Object child = convertNonPrimitive(json.getAnyAt(key));
                     if (child instanceof Boolean) {
@@ -242,8 +242,8 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
                         returnObject.addLong(key, (long) child);
                     } else if (child instanceof String) {
                         returnObject.addString(key, (String) child);
-                    } else if (child instanceof JSONBuilder) {
-                        returnObject.objects.put(key, (JSONBuilder) child);
+                    } else if (child instanceof JsonBuilder) {
+                        returnObject.objects.put(key, (JsonBuilder) child);
                     }
                 }
                 return returnObject;
@@ -261,7 +261,7 @@ public final class JSONBuilder implements IJsonBuilder, IJSONAble {
             case STRING:
                 return json.getString();
             case ARRAY:
-                JSONBuilder values = new JSONBuilder(JSType.ARRAY);
+                JsonBuilder values = new JsonBuilder(JSType.ARRAY);
                 for (IJson element : json.getValues()) {
                     values.array.add(convertNonPrimitive(element));
                 }

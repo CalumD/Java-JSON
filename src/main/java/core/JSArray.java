@@ -1,17 +1,17 @@
 package core;
 
 import api.IJson;
-import exceptions.JSONParseException;
+import exceptions.JsonParseException;
 import exceptions.KeyNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class JSArray extends JSON {
+public final class JSArray extends Json {
 
     private final List<IJson> myValue;
 
-    JSArray(JSONTape parsingTape) throws JSONParseException {
+    JSArray(JsonTape parsingTape) throws JsonParseException {
         super(parsingTape);
         jsType = JSType.ARRAY;
         char checkingChar;
@@ -24,7 +24,7 @@ public final class JSArray extends JSON {
         // Initial Array parsing Checks
         if (checkingChar == ',') {
             throw parsingTape.createParseError(
-                    JSONTape.VALID_JSON,
+                    JsonTape.VALID_JSON,
                     "Missing Valid JSON at start of array."
             );
         }
@@ -49,7 +49,7 @@ public final class JSArray extends JSON {
                     // Validate if we see a comma, there are more children to come
                     parsingTape.consumeWhiteSpace();
                     if (parsingTape.checkCurrentChar() == ']') {
-                        throw parsingTape.createParseError(JSONTape.VALID_JSON,
+                        throw parsingTape.createParseError(JsonTape.VALID_JSON,
                                 "Comma suggests more array elements, but array terminates.");
                     }
                     break;
@@ -77,7 +77,7 @@ public final class JSArray extends JSON {
     }
 
     @Override
-    protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
+    protected IJson getInternal(JsonKey keySequence) throws KeyNotFoundException {
         String nextKey = keySequence.getNextKey();
         if (nextKey.equals("")) {
             return this;
@@ -85,9 +85,9 @@ public final class JSArray extends JSON {
         if (!nextKey.startsWith("[")) {
             throw keySequence.createKeyDifferentTypeException();
         }
-        JSON childElement;
+        Json childElement;
         try {
-            childElement = (JSON) myValue.get(Integer.parseInt(nextKey.substring(1)));
+            childElement = (Json) myValue.get(Integer.parseInt(nextKey.substring(1)));
         } catch (IndexOutOfBoundsException e) {
             throw keySequence.createKeyNotFoundException();
         }
@@ -146,7 +146,7 @@ public final class JSArray extends JSON {
             result.append("<").append(myValue.size()).append(">");
         } else {
             myValue.forEach(value -> {
-                ((JSON) value).asPrettyString(indent, tabSize, result, depth - 1);
+                ((Json) value).asPrettyString(indent, tabSize, result, depth - 1);
                 result.append(",\n").append(indent);
             });
             result.delete(result.length() - 2 - indent.length(), result.length() - 1);

@@ -1,12 +1,12 @@
 package core;
 
-import exceptions.JSONParseException;
+import exceptions.JsonParseException;
 
-public final class JSString extends JSON {
+public final class JSString extends Json {
 
     private final String myValue;
 
-    JSString(JSONTape parsingTape) throws JSONParseException {
+    JSString(JsonTape parsingTape) throws JsonParseException {
         super(parsingTape);
 
         // Setup tracking variables;

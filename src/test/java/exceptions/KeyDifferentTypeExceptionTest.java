@@ -8,7 +8,7 @@ class KeyDifferentTypeExceptionTest {
 
     @Test
     public void basicPOJO() {
-        JSONException exception = new KeyDifferentTypeException("Some error text");
+        JsonException exception = new KeyDifferentTypeException("Some error text");
         assertEquals("Some error text", exception.getMessage());
     }
 }

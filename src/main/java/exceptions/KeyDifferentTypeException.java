@@ -1,6 +1,6 @@
 package exceptions;
 
-public class KeyDifferentTypeException extends JSONKeyException {
+public class KeyDifferentTypeException extends JsonKeyException {
 
     public KeyDifferentTypeException(String reasonForInvalidity) {
         super(reasonForInvalidity);

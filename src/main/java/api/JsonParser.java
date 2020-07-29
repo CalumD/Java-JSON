@@ -1,7 +1,7 @@
 package api;
 
-import core.JSONTape;
-import exceptions.JSONException;
+import core.JsonTape;
+import exceptions.JsonException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,16 +9,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public final class JSONParser {
+public final class JsonParser {
 
-    private JSONParser() {
+    private JsonParser() {
     }
 
-    public static IJson parse(String jsonAsString) throws JSONException {
-        return new JSONTape(jsonAsString).parseNextElement();
+    public static IJson parse(String jsonAsString) throws JsonException {
+        return new JsonTape(jsonAsString).parseNextElement();
     }
 
-    public static IJson parse(Collection<String> jsonAsStringCollection) throws JSONException {
+    public static IJson parse(Collection<String> jsonAsStringCollection) throws JsonException {
 
         StringBuilder whole = new StringBuilder();
 
@@ -29,7 +29,7 @@ public final class JSONParser {
         return parse(whole.toString());
     }
 
-    public static IJson parse(String[] jsonAsStringArray) throws JSONException {
+    public static IJson parse(String[] jsonAsStringArray) throws JsonException {
 
         StringBuilder whole = new StringBuilder();
 
@@ -40,11 +40,11 @@ public final class JSONParser {
         return parse(whole.toString());
     }
 
-    public static IJson parse(IJSONAble jsonable) throws JSONException {
+    public static IJson parse(IJsonAble jsonable) throws JsonException {
         return jsonable.convertToJSON();
     }
 
-    public static List<IJson> parseMultipleStrings(Collection<String> multipleJsonAsStrings) throws JSONException {
+    public static List<IJson> parseMultipleStrings(Collection<String> multipleJsonAsStrings) throws JsonException {
         List<IJson> jsons = new ArrayList<>(multipleJsonAsStrings.size());
         for (String s : multipleJsonAsStrings) {
             jsons.add(parse(s));
@@ -52,15 +52,15 @@ public final class JSONParser {
         return jsons;
     }
 
-    public static List<IJson> parseMultipleJSONables(Collection<IJSONAble> multipleJsonAsStrings) throws JSONException {
+    public static List<IJson> parseMultipleJSONables(Collection<IJsonAble> multipleJsonAsStrings) throws JsonException {
         List<IJson> jsons = new ArrayList<>(multipleJsonAsStrings.size());
-        for (IJSONAble s : multipleJsonAsStrings) {
+        for (IJsonAble s : multipleJsonAsStrings) {
             jsons.add(s.convertToJSON());
         }
         return jsons;
     }
 
-    public static Set<IJson> parseMultipleStringsForDistinct(Collection<String> multipleJsonAsStrings) throws JSONException {
+    public static Set<IJson> parseMultipleStringsForDistinct(Collection<String> multipleJsonAsStrings) throws JsonException {
         Set<IJson> jsons = new HashSet<>(multipleJsonAsStrings.size());
         for (String s : multipleJsonAsStrings) {
             jsons.add(parse(s));
@@ -68,9 +68,9 @@ public final class JSONParser {
         return jsons;
     }
 
-    public static Set<IJson> parseMultipleJSONablesForDistinct(Collection<IJSONAble> multipleJsonAsStrings) throws JSONException {
+    public static Set<IJson> parseMultipleJSONablesForDistinct(Collection<IJsonAble> multipleJsonAsStrings) throws JsonException {
         Set<IJson> jsons = new HashSet<>(multipleJsonAsStrings.size());
-        for (IJSONAble s : multipleJsonAsStrings) {
+        for (IJsonAble s : multipleJsonAsStrings) {
             jsons.add(s.convertToJSON());
         }
         return jsons;

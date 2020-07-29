@@ -1,8 +1,8 @@
 package oldTests.Json;
 
 import api.IJson;
-import api.JSONParser;
-import exceptions.JSONParseException;
+import api.JsonParser;
+import exceptions.JsonParseException;
 import exceptions.KeyDifferentTypeException;
 import exceptions.KeyInvalidException;
 import exceptions.KeyNotFoundException;
@@ -20,13 +20,13 @@ public class GetJson {
 
 
     @BeforeAll
-    public static void setupQueryObject() throws JSONParseException {
-        obj = JSONParser.parse(
+    public static void setupQueryObject() throws JsonParseException {
+        obj = JsonParser.parse(
                 "{\"variables\":[10, true, -3.14],\"item\":[{\"item\":[{\"request\":{\"method\":" +
                         "\"POST\",\"isValid\":true,\"header\":[false, {\"description\":\"\",\"value\":\"application/json\",\"key\":"
                         +
                         "\"Content-Type\"},{\"description\":\"\",\"value\":\"Bearer {{access_token}}\",\"key\":\"Authorization\"}]}}]}]}");
-        deepNesting = JSONParser
+        deepNesting = JsonParser
                 .parse("{\"variables\":[[123,[123456789,2,{\"nested1?\":[123,[0,1,2,{\"final\":\"Co" +
                         "ngrats It Works\"}]]}]],{}]}");
     }
@@ -861,8 +861,8 @@ public class GetJson {
 
     @Test
     public void getAllFromArray()
-            throws KeyDifferentTypeException, KeyNotFoundException, JSONParseException {
-        IJson obj = JSONParser
+            throws KeyDifferentTypeException, KeyNotFoundException, JsonParseException {
+        IJson obj = JsonParser
                 .parse("{\"friends\":[{\"name\":\"Shanna Garrett\",\"id\":0},{\"name\":\"" +
                         "Peggy Brown\",\"id\":1},{\"name\":\"Roach Mcguire\",\"id\":2}]}");
 
@@ -877,8 +877,8 @@ public class GetJson {
 
     @Test
     public void getAllFromObject()
-            throws KeyDifferentTypeException, KeyNotFoundException, JSONParseException {
-        IJson obj = JSONParser
+            throws KeyDifferentTypeException, KeyNotFoundException, JsonParseException {
+        IJson obj = JsonParser
                 .parse("{\"friends\":{\"friend1\":{\"name\":\"Shanna Garrett\",\"id\":0}," +
                         "\"friend2\":{\"name\":\"Peggy Brown\",\"id\":1},\"friend3\":{\"name\":\"Roach Mcguire\",\"id\":2}}}");
 

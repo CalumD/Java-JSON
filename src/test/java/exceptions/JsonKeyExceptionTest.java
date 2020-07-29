@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class JSONParseExceptionTest {
+class JsonKeyExceptionTest {
 
     @Test
     public void basicPOJO() {
-        JSONException exception = new JSONParseException("Some error text");
+        JsonException exception = new JsonKeyException("Some error text");
         assertEquals("Some error text", exception.getMessage());
     }
 }

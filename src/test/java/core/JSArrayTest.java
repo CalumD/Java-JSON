@@ -1,8 +1,8 @@
 package core;
 
-import api.IJSONAble;
 import api.IJson;
-import exceptions.JSONParseException;
+import api.IJsonAble;
+import exceptions.JsonParseException;
 import exceptions.KeyDifferentTypeException;
 import exceptions.KeyInvalidException;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,13 +13,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class JSArrayTest extends JSONTest {
+public class JSArrayTest extends JsonTest {
 
     private JSArray array;
 
     @BeforeEach
     void setUp() {
-        array = new JSArray(new JSONTape("[[], 0, 0.1, '', true, {}]"));
+        array = new JSArray(new JsonTape("[[], 0, 0.1, '', true, {}]"));
     }
 
     @Test
@@ -31,75 +31,75 @@ public class JSArrayTest extends JSONTest {
     @Test
     public void testParseException() {
         try {
-            new JSArray(new JSONTape("["));
+            new JSArray(new JsonTape("["));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
         }
         try {
-            new JSArray(new JSONTape("]"));
+            new JSArray(new JsonTape("]"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
         }
         try {
-            new JSArray(new JSONTape(""));
+            new JSArray(new JsonTape(""));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("You cannot create something from nothing. Input was empty.", e.getMessage());
         }
         try {
-            new JSArray(new JSONTape("[,]"));
+            new JSArray(new JsonTape("[,]"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Missing Valid JSON at start of array.\n" +
                     "Line: 1\n" +
                     "Reached: [_\n" +
                     "Expected: { / [ / \" / <number> / <boolean> ", e.getMessage());
         }
         try {
-            new JSArray(new JSONTape("[1,]"));
+            new JSArray(new JsonTape("[1,]"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Comma suggests more array elements, but array terminates.\n" +
                     "Line: 1\n" +
                     "Reached: [1,_\n" +
                     "Expected: { / [ / \" / <number> / <boolean> ", e.getMessage());
         }
         try {
-            new JSArray(new JSONTape("[,1]"));
+            new JSArray(new JsonTape("[,1]"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Missing Valid JSON at start of array.\n" +
                     "Line: 1\n" +
                     "Reached: [_\n" +
                     "Expected: { / [ / \" / <number> / <boolean> ", e.getMessage());
         }
         try {
-            new JSArray(new JSONTape("[1, []"));
+            new JSArray(new JsonTape("[1, []"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
         }
         try {
-            new JSArray(new JSONTape("[[[]]"));
+            new JSArray(new JsonTape("[[[]]"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Reached the end of the JSON input before parsing was complete. Are you missing a terminating delimiter?", e.getMessage());
         }
         try {
-            new JSArray(new JSONTape("[{}[]]"));
+            new JSArray(new JsonTape("[{}[]]"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid array child delimiter.\n" +
                     "Line: 1\n" +
                     "Reached: [{}_\n" +
                     "Expected: , / ]", e.getMessage());
         }
         try {
-            new JSArray(new JSONTape("[1,,1]"));
+            new JSArray(new JsonTape("[1,,1]"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Unexpected symbol found while parsing.\n" +
                     "Line: 1\n" +
                     "Reached: [1,_\n" +
@@ -113,7 +113,7 @@ public class JSArrayTest extends JSONTest {
         try {
             array.createFromString("[]");
             array.createFromString("[[[[[[]]]]]]");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             fail("Create from string should not throw an exception for valid input.", e);
         }
     }
@@ -131,7 +131,7 @@ public class JSArrayTest extends JSONTest {
         multiline.add("]");
         try {
             array.createFromMultilineString(multiline);
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             fail("Create from string should not throw an exception for valid input.", e);
         }
     }
@@ -212,12 +212,12 @@ public class JSArrayTest extends JSONTest {
     @Override
     public void getValue() {
         List<IJson> values = new ArrayList<>(3);
-        values.add(new JSArray(new JSONTape("[]")));
-        values.add(new JSNumber(new JSONTape("0")));
-        values.add(new JSNumber(new JSONTape("0.1")));
-        values.add(new JSString(new JSONTape("''")));
-        values.add(new JSBoolean(new JSONTape("true")));
-        values.add(new JSObject(new JSONTape("{}")));
+        values.add(new JSArray(new JsonTape("[]")));
+        values.add(new JSNumber(new JsonTape("0")));
+        values.add(new JSNumber(new JsonTape("0.1")));
+        values.add(new JSString(new JsonTape("''")));
+        values.add(new JSBoolean(new JsonTape("true")));
+        values.add(new JSObject(new JsonTape("{}")));
 
         assertEquals(values, array.getValue());
     }
@@ -226,12 +226,12 @@ public class JSArrayTest extends JSONTest {
     @Override
     public void getValues() {
         List<IJson> values = new ArrayList<>(3);
-        values.add(new JSArray(new JSONTape("[]")));
-        values.add(new JSNumber(new JSONTape("0")));
-        values.add(new JSNumber(new JSONTape("0.1")));
-        values.add(new JSString(new JSONTape("''")));
-        values.add(new JSBoolean(new JSONTape("true")));
-        values.add(new JSObject(new JSONTape("{}")));
+        values.add(new JSArray(new JsonTape("[]")));
+        values.add(new JSNumber(new JsonTape("0")));
+        values.add(new JSNumber(new JsonTape("0.1")));
+        values.add(new JSString(new JsonTape("''")));
+        values.add(new JSBoolean(new JsonTape("true")));
+        values.add(new JSObject(new JsonTape("{}")));
 
         assertEquals(values, array.getValues());
     }
@@ -239,12 +239,12 @@ public class JSArrayTest extends JSONTest {
     @Test
     public void getValuesNotEqual() {
         List<IJson> values = new ArrayList<>(3);
-        values.add(new JSArray(new JSONTape("[]")));
-        values.add(new JSNumber(new JSONTape("0")));
-        values.add(new JSNumber(new JSONTape("0.1")));
-        values.add(new JSString(new JSONTape("'THE STRING IS DIFFERENT'")));
-        values.add(new JSBoolean(new JSONTape("true")));
-        values.add(new JSObject(new JSONTape("{}")));
+        values.add(new JSArray(new JsonTape("[]")));
+        values.add(new JSNumber(new JsonTape("0")));
+        values.add(new JSNumber(new JsonTape("0.1")));
+        values.add(new JSString(new JsonTape("'THE STRING IS DIFFERENT'")));
+        values.add(new JSBoolean(new JsonTape("true")));
+        values.add(new JSObject(new JsonTape("{}")));
 
         assertNotEquals(values, array.getValue());
     }
@@ -253,12 +253,12 @@ public class JSArrayTest extends JSONTest {
     @Override
     public void getArray() {
         List<IJson> values = new ArrayList<>(3);
-        values.add(new JSArray(new JSONTape("[]")));
-        values.add(new JSNumber(new JSONTape("0")));
-        values.add(new JSNumber(new JSONTape("0.1")));
-        values.add(new JSString(new JSONTape("''")));
-        values.add(new JSBoolean(new JSONTape("true")));
-        values.add(new JSObject(new JSONTape("{}")));
+        values.add(new JSArray(new JsonTape("[]")));
+        values.add(new JSNumber(new JsonTape("0")));
+        values.add(new JSNumber(new JsonTape("0.1")));
+        values.add(new JSString(new JsonTape("''")));
+        values.add(new JSBoolean(new JsonTape("true")));
+        values.add(new JSObject(new JsonTape("{}")));
 
         assertEquals(values, array.getArray());
     }
@@ -381,7 +381,7 @@ public class JSArrayTest extends JSONTest {
         } catch (KeyDifferentTypeException e) {
             assertEquals("someKey is not a valid accessor on element: <base element>", e.getMessage());
         }
-        assertEquals(new JSObject(new JSONTape("{}")), array.getJSONObjectAt("[5]"));
+        assertEquals(new JSObject(new JsonTape("{}")), array.getJSONObjectAt("[5]"));
     }
 
     @SuppressWarnings({"AssertEqualsBetweenInconvertibleTypes"})
@@ -394,18 +394,18 @@ public class JSArrayTest extends JSONTest {
         } catch (KeyDifferentTypeException e) {
             assertEquals("someKey is not a valid accessor on element: <base element>", e.getMessage());
         }
-        assertEquals(new JSArray(new JSONTape("[]")), array.getArrayAt("[0]"));
+        assertEquals(new JSArray(new JsonTape("[]")), array.getArrayAt("[0]"));
     }
 
     @Test
     public void getArrayAtMe() {
         List<IJson> values = new ArrayList<>(3);
-        values.add(new JSArray(new JSONTape("[]")));
-        values.add(new JSNumber(new JSONTape("0")));
-        values.add(new JSNumber(new JSONTape("0.1")));
-        values.add(new JSString(new JSONTape("''")));
-        values.add(new JSBoolean(new JSONTape("true")));
-        values.add(new JSObject(new JSONTape("{}")));
+        values.add(new JSArray(new JsonTape("[]")));
+        values.add(new JSNumber(new JsonTape("0")));
+        values.add(new JSNumber(new JsonTape("0.1")));
+        values.add(new JSString(new JsonTape("''")));
+        values.add(new JSBoolean(new JsonTape("true")));
+        values.add(new JSObject(new JsonTape("{}")));
 
         assertEquals(values, array.getArrayAt(""));
     }
@@ -472,7 +472,7 @@ public class JSArrayTest extends JSONTest {
 
     @Test
     public void getVeryNestedValue() {
-        assertTrue(new JSArray(new JSONTape("[[[[{'nest':[{'furtherNest':true}]}]]]]")).getBooleanAt("[0][0][0][0].nest[0]['furtherNest']"));
+        assertTrue(new JSArray(new JsonTape("[[[[{'nest':[{'furtherNest':true}]}]]]]")).getBooleanAt("[0][0][0][0].nest[0]['furtherNest']"));
     }
 
     @Test
@@ -508,14 +508,14 @@ public class JSArrayTest extends JSONTest {
     @Override
     public void asPrettyStringWithDepth() {
         assertEquals("[\n  [],\n  0,\n  0.1,\n  \"\",\n  true,\n  {} \n]", array.asPrettyString(5));
-        assertEquals("[\n  [\n    [\n      <1>\n    ] \n  ] \n]", new JSArray(new JSONTape("[[[[1]]]]")).asPrettyString(2));
+        assertEquals("[\n  [\n    [\n      <1>\n    ] \n  ] \n]", new JSArray(new JsonTape("[[[[1]]]]")).asPrettyString(2));
     }
 
     @Test
     @Override
     public void asPrettyStringWithDepthAndIndent() {
         assertEquals("[\n      [],\n      0,\n      0.1,\n      \"\",\n      true,\n      {} \n]", array.asPrettyString(5, 6));
-        assertEquals("[\n      [\n            [\n                  <1>\n            ] \n      ] \n]", new JSArray(new JSONTape("[[[[1]]]]")).asPrettyString(2, 6));
+        assertEquals("[\n      [\n            [\n                  <1>\n            ] \n      ] \n]", new JSArray(new JsonTape("[[[[1]]]]")).asPrettyString(2, 6));
     }
 
     @SuppressWarnings({"SimplifiableJUnitAssertion", "ConstantConditions"})
@@ -526,12 +526,12 @@ public class JSArrayTest extends JSONTest {
 
     @Test
     public void checkDifferentPhysicalArraysEqual() {
-        assertEquals(new JSArray(new JSONTape("[1]")), new JSArray(new JSONTape("[1]")));
+        assertEquals(new JSArray(new JsonTape("[1]")), new JSArray(new JsonTape("[1]")));
     }
 
     @Test
     public void checkDifferentSizeArraysEqual() {
-        assertNotEquals(new JSArray(new JSONTape("[1, 2]")), new JSArray(new JSONTape("[1]")));
+        assertNotEquals(new JSArray(new JsonTape("[1, 2]")), new JSArray(new JsonTape("[1]")));
     }
 
     @SuppressWarnings({"SimplifiableJUnitAssertion", "EqualsBetweenInconvertibleTypes"})
@@ -539,7 +539,7 @@ public class JSArrayTest extends JSONTest {
     public void checkLenientEquals() {
         ArrayList<Long> list = new ArrayList<>();
         list.add(1L);
-        assertTrue(new JSArray(new JSONTape("[1]")).equals(list));
+        assertTrue(new JSArray(new JsonTape("[1]")).equals(list));
     }
 
     @SuppressWarnings({"SimplifiableJUnitAssertion", "EqualsBetweenInconvertibleTypes"})
@@ -547,7 +547,7 @@ public class JSArrayTest extends JSONTest {
     public void checkLenientNotEquals() {
         ArrayList<Long> list = new ArrayList<>();
         list.add(2L);
-        assertFalse(new JSArray(new JSONTape("[1]")).equals(list));
+        assertFalse(new JSArray(new JsonTape("[1]")).equals(list));
     }
 
     @SuppressWarnings({"SimplifiableJUnitAssertion", "EqualsBetweenInconvertibleTypes"})
@@ -556,31 +556,31 @@ public class JSArrayTest extends JSONTest {
         ArrayList<Long> list = new ArrayList<>();
         list.add(1L);
         list.add(2L);
-        assertFalse(new JSArray(new JSONTape("[1]")).equals(list));
+        assertFalse(new JSArray(new JsonTape("[1]")).equals(list));
     }
 
     @Test
     public void checkOtherJSArrayDoesNotEqual() {
-        assertNotEquals(array, new JSArray(new JSONTape("[[], 0, 0.1, 'I AM DIFFERENT', true, {}]")));
+        assertNotEquals(array, new JSArray(new JsonTape("[[], 0, 0.1, 'I AM DIFFERENT', true, {}]")));
     }
 
     @SuppressWarnings({"SimplifiableJUnitAssertion", "EqualsBetweenInconvertibleTypes"})
     @Test
     @Override
     public void testEquals() {
-        assertTrue(new JSArray(new JSONTape("[]")).equals(new ArrayList<>()));
+        assertTrue(new JSArray(new JsonTape("[]")).equals(new ArrayList<>()));
     }
 
     @Test
     @Override
     public void getHashCode() {
         ArrayList<IJson> check = new ArrayList<>();
-        check.add(new JSArray(new JSONTape("[]")));
-        check.add(new JSNumber(new JSONTape("0")));
-        check.add(new JSNumber(new JSONTape("0.1")));
-        check.add(new JSString(new JSONTape("''")));
-        check.add(new JSBoolean(new JSONTape("true")));
-        check.add(new JSObject(new JSONTape("{}")));
+        check.add(new JSArray(new JsonTape("[]")));
+        check.add(new JSNumber(new JsonTape("0")));
+        check.add(new JSNumber(new JsonTape("0.1")));
+        check.add(new JSString(new JsonTape("''")));
+        check.add(new JSBoolean(new JsonTape("true")));
+        check.add(new JSObject(new JsonTape("{}")));
 
         assertEquals(check.hashCode(), array.hashCode(), 0);
     }
@@ -588,7 +588,7 @@ public class JSArrayTest extends JSONTest {
     @Test
     @Override
     public void jsonIsConvertible() {
-        IJSONAble builder = JSONBuilder.builder().addString("key", "value");
+        IJsonAble builder = JsonBuilder.builder().addString("key", "value");
         assertEquals(builder.convertToJSON(), array.convertToJSON(builder));
     }
 }

@@ -1,12 +1,12 @@
 package core;
 
-import exceptions.JSONParseException;
+import exceptions.JsonParseException;
 
-public final class JSBoolean extends JSON {
+public final class JSBoolean extends Json {
 
     private boolean myValue;
 
-    JSBoolean(JSONTape parsingTape) throws JSONParseException {
+    JSBoolean(JsonTape parsingTape) throws JsonParseException {
         super(parsingTape);
         jsType = JSType.BOOLEAN;
 

@@ -12,20 +12,20 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-class JSONKeyTest {
+class JsonKeyTest {
 
-    private JSONKey key;
+    private JsonKey key;
     private static final String ALL_VARIATION_KEY = "complicated.key[4][5][6].n3sted.objects['thes\\\"e  K\"e'ys']['too'][0].\uD83C\uDF54.last";
 
     @BeforeEach
     public void setup() {
-        key = new JSONKey(ALL_VARIATION_KEY, false);
+        key = new JsonKey(ALL_VARIATION_KEY, false);
     }
 
     @Test
     public void callingForRegularKeyShouldNotAllowUsAnonArrayKeys() {
         try {
-            new JSONKey("key[][][][]", false);
+            new JsonKey("key[][][][]", false);
             fail("The previous method call should have thrown an exception.");
         } catch (Exception e) {
             assertEquals("Failed to parse array accessor in key. Element was not a valid integer.\n" +
@@ -38,7 +38,7 @@ class JSONKeyTest {
     @Test
     public void callingForBuilderKeyAllowsUsAnonArrayKeys() {
         try {
-            new JSONKey("key[][][][]", true);
+            new JsonKey("key[][][][]", true);
         } catch (Exception e) {
             fail("The try should not have caused an exception in this instance.", e);
         }
@@ -47,10 +47,10 @@ class JSONKeyTest {
     @Test
     public void canCopeWithLeadingSpaces() {
         try {
-            new JSONKey("              key", false);
-            new JSONKey("\t\t\t\t\tkey", false);
-            new JSONKey("\n\n\n\n\nkey", false);
-            new JSONKey("\r\r\r\r\rkey", false);
+            new JsonKey("              key", false);
+            new JsonKey("\t\t\t\t\tkey", false);
+            new JsonKey("\n\n\n\n\nkey", false);
+            new JsonKey("\r\r\r\r\rkey", false);
         } catch (Exception e) {
             fail("The try should not have caused an exception in this instance.", e);
         }
@@ -59,10 +59,10 @@ class JSONKeyTest {
     @Test
     public void canCopeWithTrailingSpaces() {
         try {
-            new JSONKey("key              ", false);
-            new JSONKey("key\t\t\t\t\t\t", false);
-            new JSONKey("key\n\n\n\n\n\n", false);
-            new JSONKey("key\r\r\r\r\r\r", false);
+            new JsonKey("key              ", false);
+            new JsonKey("key\t\t\t\t\t\t", false);
+            new JsonKey("key\n\n\n\n\n\n", false);
+            new JsonKey("key\r\r\r\r\r\r", false);
         } catch (Exception e) {
             fail("The try should not have caused an exception in this instance.", e);
         }
@@ -71,7 +71,7 @@ class JSONKeyTest {
     @Test
     public void shouldDenyDoubleDotting() {
         try {
-            new JSONKey("key1..key2", false);
+            new JsonKey("key1..key2", false);
         } catch (Exception e) {
             assertEquals("Bad use of '.' separator in key\n" +
                     "Line: 1\n" +
@@ -83,7 +83,7 @@ class JSONKeyTest {
     @Test
     public void shouldNotAcceptANull() {
         try {
-            new JSONKey(null, false);
+            new JsonKey(null, false);
         } catch (KeyInvalidException e) {
             assertEquals(e.getMessage(), "Key cannot be null");
         } catch (Exception e) {
@@ -94,7 +94,7 @@ class JSONKeyTest {
     @Test
     public void shouldNotAcceptEmptyKey() {
         try {
-            new JSONKey("", false);
+            new JsonKey("", false);
         } catch (Exception e) {
             fail("The try should not have caused an exception in this instance.", e);
         }
@@ -571,7 +571,7 @@ class JSONKeyTest {
 
     @Test
     public void shouldNotBeAllowedToAnonArrayReferenceIfItsTheFirstPartOfKey() {
-        JSONKey anonKey = new JSONKey("[]", true);
+        JsonKey anonKey = new JsonKey("[]", true);
         anonKey.getNextKey();
         assertEquals("[] is not a valid accessor on element: <base element>",
                 anonKey.createKeyDifferentTypeException().getMessage());

@@ -11,26 +11,26 @@ class BuilderKeyTapeTest extends KeyTapeTest {
     @Override
     @Test
     public void emptyArrayAccess() {
-        assertEquals("[append", new JSONKey("[]", true).getNextKey());
+        assertEquals("[append", new JsonKey("[]", true).getNextKey());
     }
 
     @Override
     @Test
     public void regularArrayAccessOkay() {
-        assertEquals("[0", new JSONKey("[0]", true).getNextKey());
+        assertEquals("[0", new JsonKey("[0]", true).getNextKey());
     }
 
     @Override
     @Test
     public void maxIntArrayAccessOkay() {
-        assertEquals("[" + Integer.MAX_VALUE, new JSONKey("[" + Integer.MAX_VALUE + "]", true).getNextKey());
+        assertEquals("[" + Integer.MAX_VALUE, new JsonKey("[" + Integer.MAX_VALUE + "]", true).getNextKey());
     }
 
     @Override
     @Test
     public void decimalArrayAccessNotOkay() {
         try {
-            new JSONKey("[1.5]", true).getNextKey();
+            new JsonKey("[1.5]", true).getNextKey();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyInvalidException e) {
             assertEquals("Failed to parse array accessor in key. Element was not a valid integer.\n" +
@@ -44,7 +44,7 @@ class BuilderKeyTapeTest extends KeyTapeTest {
     @Test
     public void negativeArrayAccessNotOkay() {
         try {
-            new JSONKey("[-5]", true).getNextKey();
+            new JsonKey("[-5]", true).getNextKey();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyInvalidException e) {
             assertEquals("Array accessor in key was negative integer. Must be positive.\n" +
@@ -58,7 +58,7 @@ class BuilderKeyTapeTest extends KeyTapeTest {
     @Test
     public void missingEndOfArrayAccessNotOkay() {
         try {
-            new JSONKey("[5", true).getNextKey();
+            new JsonKey("[5", true).getNextKey();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyInvalidException e) {
             assertEquals("Failed to parse array accessor in key. Reached end of key before delimiter ']' was found.\n" +
@@ -71,7 +71,7 @@ class BuilderKeyTapeTest extends KeyTapeTest {
     @Override
     @Test
     public void arrayDotObjectIsOkay() {
-        JSONKey BuilderKeyTape = new JSONKey("[0].key", true);
+        JsonKey BuilderKeyTape = new JsonKey("[0].key", true);
         assertEquals("[0", BuilderKeyTape.getNextKey());
         assertEquals("{key", BuilderKeyTape.getNextKey());
     }
@@ -79,7 +79,7 @@ class BuilderKeyTapeTest extends KeyTapeTest {
     @Override
     @Test
     public void arrayAdvancedObjectAccessorIsOkay() {
-        JSONKey BuilderKeyTape = new JSONKey("[0]['key']", true);
+        JsonKey BuilderKeyTape = new JsonKey("[0]['key']", true);
         assertEquals("[0", BuilderKeyTape.getNextKey());
         assertEquals("<key", BuilderKeyTape.getNextKey());
     }
@@ -88,7 +88,7 @@ class BuilderKeyTapeTest extends KeyTapeTest {
     @Test
     public void missingDotOrAdvancedAccessorSyntaxNotOkay() {
         try {
-            new JSONKey("[0]key", true);
+            new JsonKey("[0]key", true);
             fail("The previous method call should have thrown an exception.");
         } catch (KeyInvalidException e) {
             assertEquals("Invalid continuation from array key\n" +
@@ -100,7 +100,7 @@ class BuilderKeyTapeTest extends KeyTapeTest {
 
     @Test
     public void ensureCorrectKeyChainOnAppendingArrays() {
-        JSONKey builderKeyTape = new JSONKey("what.does[3][].this['mean']", true);
+        JsonKey builderKeyTape = new JsonKey("what.does[3][].this['mean']", true);
 
         assertEquals("{what", builderKeyTape.getNextKey());
         assertEquals("{does", builderKeyTape.getNextKey());

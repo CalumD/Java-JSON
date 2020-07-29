@@ -1,8 +1,8 @@
 package core;
 
-import api.IJSONAble;
 import api.IJson;
-import exceptions.JSONParseException;
+import api.IJsonAble;
+import exceptions.JsonParseException;
 import exceptions.KeyDifferentTypeException;
 import exceptions.KeyNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,15 +13,15 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class JSNumberTest extends JSONTest {
+public class JSNumberTest extends JsonTest {
 
     private JSNumber numberDouble;
     private JSNumber numberLong;
 
     @BeforeEach
     void setUp() {
-        numberDouble = new JSNumber(new JSONTape("1.25"));
-        numberLong = new JSNumber(new JSONTape("321"));
+        numberDouble = new JSNumber(new JsonTape("1.25"));
+        numberLong = new JSNumber(new JsonTape("321"));
     }
 
     @Test
@@ -34,99 +34,99 @@ public class JSNumberTest extends JSONTest {
     @Test
     public void testParseException() {
         try {
-            new JSNumber(new JSONTape("1.1."));
+            new JSNumber(new JsonTape("1.1."));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("multiple points\n" +
                     "Line: 1\n" +
                     "Reached: 1.1._\n" +
                     "Expected: <number>", e.getMessage());
         }
         try {
-            new JSNumber(new JSONTape("1.1.1"));
+            new JSNumber(new JsonTape("1.1.1"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("multiple points\n" +
                     "Line: 1\n" +
                     "Reached: 1.1.1_\n" +
                     "Expected: <number>", e.getMessage());
         }
         try {
-            new JSNumber(new JSONTape("123-1"));
+            new JSNumber(new JsonTape("123-1"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid number format: \"123-1\"\n" +
                     "Line: 1\n" +
                     "Reached: 123-1_\n" +
                     "Expected: <number>", e.getMessage());
         }
         try {
-            new JSNumber(new JSONTape("99999999999999999999999999999"));
+            new JSNumber(new JsonTape("99999999999999999999999999999"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid number format: \"99999999999999999999999999999\"\n" +
                     "Line: 1\n" +
                     "Reached: 99999999999999999999999999999_\n" +
                     "Expected: <number>", e.getMessage());
         }
         try {
-            new JSNumber(new JSONTape("-9999999999999999999999999999"));
+            new JSNumber(new JsonTape("-9999999999999999999999999999"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid number format: \"-9999999999999999999999999999\"\n" +
                     "Line: 1\n" +
                     "Reached: -9999999999999999999999999999_\n" +
                     "Expected: <number>", e.getMessage());
         }
         try {
-            new JSNumber(new JSONTape("--1"));
+            new JSNumber(new JsonTape("--1"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid number format: \"--1\"\n" +
                     "Line: 1\n" +
                     "Reached: --1_\n" +
                     "Expected: <number>", e.getMessage());
         }
         try {
-            new JSNumber(new JSONTape("++1"));
+            new JSNumber(new JsonTape("++1"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid number format: \"++1\"\n" +
                     "Line: 1\n" +
                     "Reached: ++1_\n" +
                     "Expected: <number>", e.getMessage());
         }
         try {
-            new JSNumber(new JSONTape("+-1"));
+            new JSNumber(new JsonTape("+-1"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid number format: \"+-1\"\n" +
                     "Line: 1\n" +
                     "Reached: +-1_\n" +
                     "Expected: <number>", e.getMessage());
         }
         try {
-            new JSNumber(new JSONTape("^1"));
+            new JSNumber(new JsonTape("^1"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid number format: \"\"\n" +
                     "Line: 1\n" +
                     "Reached: _\n" +
                     "Expected: <number>", e.getMessage());
         }
         try {
-            new JSNumber(new JSONTape("e^1"));
+            new JSNumber(new JsonTape("e^1"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid number format: \"e\"\n" +
                     "Line: 1\n" +
                     "Reached: e_\n" +
                     "Expected: <number>", e.getMessage());
         }
         try {
-            new JSNumber(new JSONTape("1e-0.05"));
+            new JSNumber(new JsonTape("1e-0.05"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Invalid number format: \"1e-0.05\"\n" +
                     "Line: 1\n" +
                     "Reached: 1e-0.05_\n" +
@@ -139,9 +139,9 @@ public class JSNumberTest extends JSONTest {
     public void simpleCreateFromString() {
         try {
             numberLong.createFromString("12345");
-            new JSNumber(new JSONTape("1e-005"));
-            new JSNumber(new JSONTape("-4.3e10"));
-        } catch (JSONParseException e) {
+            new JSNumber(new JsonTape("1e-005"));
+            new JSNumber(new JsonTape("-4.3e10"));
+        } catch (JsonParseException e) {
             fail("Create from string should not throw an exception for valid input.", e);
         }
     }
@@ -155,7 +155,7 @@ public class JSNumberTest extends JSONTest {
         multiline.add("]");
         try {
             numberLong.createFromMultilineString(multiline);
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             fail("Create from string should not throw an exception for valid input.", e);
         }
     }
@@ -495,8 +495,8 @@ public class JSNumberTest extends JSONTest {
 
     @Test
     public void checkDoesEqualAgainstSimilarJSNumber() {
-        assertEquals(numberLong, new JSNumber(new JSONTape("321")));
-        assertEquals(numberDouble, new JSNumber(new JSONTape("1.25")));
+        assertEquals(numberLong, new JSNumber(new JsonTape("321")));
+        assertEquals(numberDouble, new JSNumber(new JsonTape("1.25")));
     }
 
     @SuppressWarnings({"SimplifiableJUnitAssertion", "EqualsBetweenInconvertibleTypes"})
@@ -533,7 +533,7 @@ public class JSNumberTest extends JSONTest {
     @Test
     @Override
     public void jsonIsConvertible() {
-        IJSONAble builder = JSONBuilder.builder().addString("key", "value");
+        IJsonAble builder = JsonBuilder.builder().addString("key", "value");
         assertEquals(builder.convertToJSON(), numberDouble.convertToJSON(builder));
         assertEquals(builder.convertToJSON(), numberLong.convertToJSON(builder));
     }

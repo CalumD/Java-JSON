@@ -2,7 +2,7 @@ package api;
 
 import exceptions.SchemaException;
 
-public interface IJSONSchemaEnforcer {
+public interface IJsonSchemaEnforcer {
 
     /**
      * Validate but never throw exceptions

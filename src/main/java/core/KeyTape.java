@@ -1,12 +1,12 @@
 package core;
 
-import exceptions.JSONKeyException;
+import exceptions.JsonKeyException;
 import exceptions.KeyInvalidException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-class KeyTape extends Tape<String, JSONKeyException> {
+class KeyTape extends Tape<String, JsonKeyException> {
 
     private static final String VALID_KEY_ACCESSOR = "[ / <Object Key>";
     private int elementsInKeyWithSpaces = 0, elementsParsed = 0;
@@ -15,7 +15,7 @@ class KeyTape extends Tape<String, JSONKeyException> {
         super(fullInput);
     }
 
-    public List<String> parseAllElements() throws JSONKeyException {
+    public List<String> parseAllElements() throws JsonKeyException {
         if (fullInput.endsWith(".")) {
             throw createParseErrorFromOffset(
                     fullInput.length() - 1,
@@ -83,7 +83,7 @@ class KeyTape extends Tape<String, JSONKeyException> {
     }
 
     @Override
-    protected JSONKeyException newTypedException(String message) {
+    protected JsonKeyException newTypedException(String message) {
         return new KeyInvalidException(message);
     }
 

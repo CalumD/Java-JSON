@@ -2,7 +2,7 @@ package core;
 
 import org.junit.jupiter.api.Test;
 
-public abstract class JSONTest {
+public abstract class JsonTest {
 
     @Test
     public abstract void testDataType();

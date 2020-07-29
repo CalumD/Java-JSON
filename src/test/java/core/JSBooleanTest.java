@@ -1,8 +1,8 @@
 package core;
 
-import api.IJSONAble;
 import api.IJson;
-import exceptions.JSONParseException;
+import api.IJsonAble;
+import exceptions.JsonParseException;
 import exceptions.KeyDifferentTypeException;
 import exceptions.KeyNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,24 +13,24 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class JSBooleanTest extends JSONTest {
+public class JSBooleanTest extends JsonTest {
 
     private JSBoolean boolTrue;
     private JSBoolean boolFalse;
 
     @BeforeEach
     public void setup() {
-        boolTrue = new JSBoolean(new JSONTape("true"));
-        boolFalse = new JSBoolean(new JSONTape("false"));
+        boolTrue = new JSBoolean(new JsonTape("true"));
+        boolFalse = new JSBoolean(new JsonTape("false"));
     }
 
 
     @Test
     public void testTrueRandom() {
         try {
-            new JSBoolean(new JSONTape("TrUe"));
+            new JSBoolean(new JsonTape("TrUe"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Unexpected symbol found while parsing.\n" +
                     "Line: 1\n" +
                     "Reached: _\n" +
@@ -41,9 +41,9 @@ public class JSBooleanTest extends JSONTest {
     @Test
     public void testFalseRandom() {
         try {
-            new JSBoolean(new JSONTape("FaLsE"));
+            new JSBoolean(new JsonTape("FaLsE"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Unexpected symbol found while parsing.\n" +
                     "Line: 1\n" +
                     "Reached: _\n" +
@@ -63,7 +63,7 @@ public class JSBooleanTest extends JSONTest {
     public void simpleCreateFromString() {
         try {
             boolTrue.createFromString("true");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             fail("Create from string should not throw an exception for valid input.", e);
         }
     }
@@ -77,7 +77,7 @@ public class JSBooleanTest extends JSONTest {
         multiline.add("]");
         try {
             boolTrue.createFromMultilineString(multiline);
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             fail("Create from string should not throw an exception for valid input.", e);
         }
     }
@@ -128,22 +128,22 @@ public class JSBooleanTest extends JSONTest {
 
     @Override
     public void getValue() {
-        assertTrue(new JSBoolean(new JSONTape("TRUE")).getValue());
+        assertTrue(new JSBoolean(new JsonTape("TRUE")).getValue());
     }
 
     @Test
     public void testTrueAlternative() {
-        assertTrue(new JSBoolean(new JSONTape("True")).getValue());
+        assertTrue(new JSBoolean(new JsonTape("True")).getValue());
     }
 
     @Test
     public void testFALSEAlternative() {
-        assertFalse(new JSBoolean(new JSONTape("FALSE")).getValue());
+        assertFalse(new JSBoolean(new JsonTape("FALSE")).getValue());
     }
 
     @Test
     public void testFalseAlternative() {
-        assertFalse(new JSBoolean(new JSONTape("False")).getValue());
+        assertFalse(new JSBoolean(new JsonTape("False")).getValue());
     }
 
     @Test
@@ -419,7 +419,7 @@ public class JSBooleanTest extends JSONTest {
 
     @Test
     public void checkDoesEqualAgainstSimilarJSBoolean() {
-        assertEquals(boolTrue, new JSBoolean(new JSONTape("TRUE")));
+        assertEquals(boolTrue, new JSBoolean(new JsonTape("TRUE")));
     }
 
     @SuppressWarnings({"SimplifiableJUnitAssertion", "EqualsBetweenInconvertibleTypes"})
@@ -463,7 +463,7 @@ public class JSBooleanTest extends JSONTest {
     @Test
     @Override
     public void jsonIsConvertible() {
-        IJSONAble builder = JSONBuilder.builder().addString("key", "value");
+        IJsonAble builder = JsonBuilder.builder().addString("key", "value");
         assertEquals(builder.convertToJSON(), boolTrue.convertToJSON(builder));
         assertEquals(builder.convertToJSON(), boolFalse.convertToJSON(builder));
     }

@@ -1,7 +1,7 @@
 package oldTests.Json;
 
-import api.JSONParser;
-import exceptions.JSONParseException;
+import api.JsonParser;
+import exceptions.JsonParseException;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ public class ParseJson {
     //Array methods compact into string, so only need basic tests
     @Test
     public void array_parse_1() {
-        assertThrows(JSONParseException.class, () -> {
+        assertThrows(JsonParseException.class, () -> {
 
             String[] test = new String[]{
                     "{",
@@ -23,12 +23,12 @@ public class ParseJson {
                     "1234567890",
                     "}"
             };
-            JSONParser.parse(test);
+            JsonParser.parse(test);
         });
     }
 
     @Test
-    public void array_parse_2() throws JSONParseException {
+    public void array_parse_2() throws JsonParseException {
         String[] test = new String[]{
                 "{",
                 "                    ",
@@ -36,13 +36,13 @@ public class ParseJson {
                 "1234567890",
                 "}"
         };
-        JSONParser.parse(test);
+        JsonParser.parse(test);
     }
 
 
     @Test
     public void array_parse_3() {
-        assertThrows(JSONParseException.class, () -> {
+        assertThrows(JsonParseException.class, () -> {
             ArrayList<String> test = new ArrayList<>();
             test.add("{");
             test.add("                    ");
@@ -50,12 +50,12 @@ public class ParseJson {
             test.add("1234567890");
             test.add("}");
 
-            JSONParser.parse(test);
+            JsonParser.parse(test);
         });
     }
 
     @Test
-    public void array_parse_4() throws JSONParseException {
+    public void array_parse_4() throws JsonParseException {
         ArrayList<String> test = new ArrayList<>();
         test.add("{");
         test.add("                    ");
@@ -63,29 +63,29 @@ public class ParseJson {
         test.add("1234567890");
         test.add("}");
 
-        JSONParser.parse(test);
+        JsonParser.parse(test);
     }
 
 
     //EMPTY
     @Test
     public void empty_parse_1() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("")
         );
     }
 
     @Test
     public void empty_parse_2() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{")
         );
     }
 
     @Test
     public void empty_parse_3() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("}")
         );
     }
 
@@ -93,616 +93,616 @@ public class ParseJson {
     /////////////////////////////BASIC PARSE PASS  ------- FAILS ---------/////////////////////////////////////////////
     @Test
     public void basic_parse_1_1() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{[}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{[}")
         );
     }
 
     @Test
     public void basic_parse_1_2() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{]}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{]}")
         );
     }
 
     @Test
     public void basic_parse_1_3() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":}")
         );
     }
 
     @Test
     public void basic_parse_1_4() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\"1}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\"1}")
         );
     }
 
     @Test
     public void basic_parse_1_5() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a:1}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a:1}")
         );
     }
 
     @Test
     public void basic_parse_1_6() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"\":1}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"\":1}")
         );
     }
 
     @Test
     public void basic_parse_1_7() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{a\":1}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{a\":1}")
         );
     }
 
     @Test
     public void basic_parse_1_8() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":[}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":[}")
         );
     }
 
     @Test
     public void basic_parse_1_9() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":]}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":]}")
         );
     }
 
     @Test
     public void basic_parse_1_10() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":{}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":{}")
         );
     }
 
     @Test
     public void basic_parse_1_11() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":}}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":}}")
         );
     }
 
     @Test
     public void basic_parse_1_12() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":\"b\":{}}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":\"b\":{}}")
         );
     }
 
     @Test
     public void basic_parse_1_13() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":tRUE}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":tRUE}")
         );
     }
 
     @Test
     public void basic_parse_1_14() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":TruE}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":TruE}")
         );
     }
 
     @Test
     public void basic_parse_1_15() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":Tree}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":Tree}")
         );
     }
 
     @Test
     public void basic_parse_1_16() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":completelyDifferent}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":completelyDifferent}")
         );
     }
 
     @Test
     public void basic_parse_1_17() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":fALSE}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":fALSE}")
         );
     }
 
     @Test
     public void basic_parse_1_18() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":FalsE}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":FalsE}")
         );
     }
 
     @Test
     public void basic_parse_1_19() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":Fals}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":Fals}")
         );
     }
 
     @Test
     public void basic_parse_1_20() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":[,]}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":[,]}")
         );
     }
 
     @Test
     public void basic_parse_1_21() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":[1,]}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":[1,]}")
         );
     }
 
     @Test
     public void basic_parse_1_22() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":[,1]}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":[,1]}")
         );
     }
 
     @Test
     public void basic_parse_1_23() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":[:{},1]}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":[:{},1]}")
         );
     }
 
     @Test
     public void basic_parse_1_24() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"a\":&}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"a\":&}")
         );
     }
 
     @Test
     public void basic_parse_1_25() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{{}}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{{}}")
         );
     }
 
     @Test
     public void basic_parse_1_26() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{[]}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{[]}")
         );
     }
 
     @Test
     public void basic_parse_1_27() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{1}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{1}")
         );
     }
 
     @Test
     public void basic_parse_1_28() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"blah\"}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"blah\"}")
         );
     }
 
     @Test
     public void basic_parse_1_29() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{true}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{true}")
         );
     }
 
     /////////////////////////////BASIC PARSE PASS  ------- PASSES ---------////////////////////////////////////////////
     @Test
-    public void basic_parse_2_1() throws JSONParseException {
-        JSONParser.parse("{}");
+    public void basic_parse_2_1() throws JsonParseException {
+        JsonParser.parse("{}");
     }
 
     @Test
-    public void basic_parse_2_2() throws JSONParseException {
-        JSONParser.parse("{\"a\":1}");
+    public void basic_parse_2_2() throws JsonParseException {
+        JsonParser.parse("{\"a\":1}");
     }
 
     @Test
-    public void basic_parse_2_3() throws JSONParseException {
-        JSONParser.parse("{\"a\":[]}");
+    public void basic_parse_2_3() throws JsonParseException {
+        JsonParser.parse("{\"a\":[]}");
     }
 
     @Test
-    public void basic_parse_2_4() throws JSONParseException {
-        JSONParser.parse("{\"a\":\"\"}");
+    public void basic_parse_2_4() throws JsonParseException {
+        JsonParser.parse("{\"a\":\"\"}");
     }
 
     @Test
-    public void basic_parse_2_5() throws JSONParseException {
-        JSONParser.parse("{\"a\":\"a\"}");
+    public void basic_parse_2_5() throws JsonParseException {
+        JsonParser.parse("{\"a\":\"a\"}");
     }
 
     @Test
-    public void basic_parse_2_6() throws JSONParseException {
-        JSONParser.parse("{\"a\":true}");
+    public void basic_parse_2_6() throws JsonParseException {
+        JsonParser.parse("{\"a\":true}");
     }
 
     @Test
-    public void basic_parse_2_7() throws JSONParseException {
-        JSONParser.parse("{\"a\":True}");
+    public void basic_parse_2_7() throws JsonParseException {
+        JsonParser.parse("{\"a\":True}");
     }
 
     @Test
-    public void basic_parse_2_8() throws JSONParseException {
-        JSONParser.parse("{\"a\":TRUE}");
+    public void basic_parse_2_8() throws JsonParseException {
+        JsonParser.parse("{\"a\":TRUE}");
     }
 
     @Test
-    public void basic_parse_2_9() throws JSONParseException {
-        JSONParser.parse("{\"a\":false}");
+    public void basic_parse_2_9() throws JsonParseException {
+        JsonParser.parse("{\"a\":false}");
     }
 
     @Test
-    public void basic_parse_2_10() throws JSONParseException {
-        JSONParser.parse("{\"a\":False}");
+    public void basic_parse_2_10() throws JsonParseException {
+        JsonParser.parse("{\"a\":False}");
     }
 
     @Test
-    public void basic_parse_2_11() throws JSONParseException {
-        JSONParser.parse("{\"a\":FALSE}");
+    public void basic_parse_2_11() throws JsonParseException {
+        JsonParser.parse("{\"a\":FALSE}");
     }
 
     @Test
-    public void basic_parse_2_12() throws JSONParseException {
-        JSONParser.parse("{\"SPACES -> \"  :  FALSE }");
+    public void basic_parse_2_12() throws JsonParseException {
+        JsonParser.parse("{\"SPACES -> \"  :  FALSE }");
     }
 
     @Test
-    public void basic_parse_2_13() throws JSONParseException {
-        JSONParser.parse("{\"double\": 0.0}");
+    public void basic_parse_2_13() throws JsonParseException {
+        JsonParser.parse("{\"double\": 0.0}");
     }
 
     @Test
-    public void basic_parse_2_14() throws JSONParseException {
-        JSONParser.parse("{\"double\": 3.1415}");
+    public void basic_parse_2_14() throws JsonParseException {
+        JsonParser.parse("{\"double\": 3.1415}");
     }
 
     @Test
-    public void basic_parse_2_15() throws JSONParseException {
-        JSONParser.parse("{\"Negative double\": -3.0}");
+    public void basic_parse_2_15() throws JsonParseException {
+        JsonParser.parse("{\"Negative double\": -3.0}");
     }
 
     @Test
-    public void basic_parse_2_16() throws JSONParseException {
-        JSONParser.parse("{\"max double\": " + Double.MAX_VALUE + "}");
+    public void basic_parse_2_16() throws JsonParseException {
+        JsonParser.parse("{\"max double\": " + Double.MAX_VALUE + "}");
     }
 
     @Test
-    public void basic_parse_2_17() throws JSONParseException {
-        JSONParser.parse("{\"min double\": " + Double.MIN_VALUE + "}");
+    public void basic_parse_2_17() throws JsonParseException {
+        JsonParser.parse("{\"min double\": " + Double.MIN_VALUE + "}");
     }
 
     @Test
-    public void basic_parse_2_18() throws JSONParseException {
-        JSONParser.parse("{\"long\": 5}");
+    public void basic_parse_2_18() throws JsonParseException {
+        JsonParser.parse("{\"long\": 5}");
     }
 
     @Test
-    public void basic_parse_2_19() throws JSONParseException {
-        JSONParser.parse("{\"long\": -99}");
+    public void basic_parse_2_19() throws JsonParseException {
+        JsonParser.parse("{\"long\": -99}");
     }
 
     @Test
-    public void basic_parse_2_20() throws JSONParseException {
-        JSONParser.parse("{\"long\": 0}");
+    public void basic_parse_2_20() throws JsonParseException {
+        JsonParser.parse("{\"long\": 0}");
     }
 
     @Test
-    public void basic_parse_2_21() throws JSONParseException {
-        JSONParser.parse("{\"min long\": " + Long.MIN_VALUE + "}");
+    public void basic_parse_2_21() throws JsonParseException {
+        JsonParser.parse("{\"min long\": " + Long.MIN_VALUE + "}");
     }
 
     @Test
-    public void basic_parse_2_22() throws JSONParseException {
-        JSONParser.parse("{\"max long\": " + Long.MAX_VALUE + "}");
+    public void basic_parse_2_22() throws JsonParseException {
+        JsonParser.parse("{\"max long\": " + Long.MAX_VALUE + "}");
     }
 
     @Test
-    public void basic_parse_2_23() throws JSONParseException {
-        JSONParser.parse("{\"a\":{\"b\":1}}");
+    public void basic_parse_2_23() throws JsonParseException {
+        JsonParser.parse("{\"a\":{\"b\":1}}");
     }
 
     @Test
-    public void basic_parse_2_24() throws JSONParseException {
-        JSONParser.parse("{\"a{b\":0}");
+    public void basic_parse_2_24() throws JsonParseException {
+        JsonParser.parse("{\"a{b\":0}");
     }
 
     @Test
-    public void basic_parse_2_25() throws JSONParseException {
-        JSONParser.parse("{\"a}b\":0}");
+    public void basic_parse_2_25() throws JsonParseException {
+        JsonParser.parse("{\"a}b\":0}");
     }
 
     @Test
     public void basic_parse_2_26() {
-        JSONParser.parse("{\"a.b\":0}");
+        JsonParser.parse("{\"a.b\":0}");
     }
 
     @Test
     public void basic_parse_2_27() {
-        JSONParser.parse("{\"a[b\":0}");
+        JsonParser.parse("{\"a[b\":0}");
     }
 
     @Test
     public void basic_parse_2_28() {
-        JSONParser.parse("{\"a]b\":0}");
+        JsonParser.parse("{\"a]b\":0}");
     }
 
 
     /////////////////////////////ADVANCED PARSE PASS  ------- FAILS ---------//////////////////////////////////////////
     @Test
     public void advanced_parse_1_1() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id:1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_2() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_3() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":1,2],\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_4() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2,\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_5() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\"\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_6() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_7() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_8() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_9() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_10() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\"\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_11() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}")
         );
     }
 
     @Test
     public void advanced_parse_1_12() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_13() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[1\"\"]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_14() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,,2],\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_15() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[],]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_16() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2]\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_17() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser
+        assertThrows(JsonParseException.class, () ->
+                JsonParser
                         .parse("{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_18() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_19() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,[1a1]],\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_20() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"\"oops\"\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_21() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_22() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":#}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_23() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}")
         );
     }
 
     @Test
     public void advanced_parse_1_24() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse("{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":\"final\":[[]]}}")
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse("{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":\"final\":[[]]}}")
         );
     }
 
     @Test
     public void advanced_parse_1_25() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}")
         );
     }
 
     @Test
     public void advanced_parse_1_26() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"bools\":Nope,\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_27() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"bools\":FaLse,\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_28() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"bools\":FALSe,\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_29() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"bools\":t,\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_30() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"bools\":f,\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_31() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":3.1.1,\"name\":\"Bob\",\"bools\":f,\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_32() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":3.19_,\"name\":\"Bob\",\"bools\":f,\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_1_33() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":3.19 ,\"name\":\"Bob\",\"bools\":f,\"inner\":{\"final\":[[]]}}}")
         );
     }
 
     @Test
     public void advanced_parse_2_34() {
-        assertThrows(JSONParseException.class, () ->
-                JSONParser.parse(
+        assertThrows(JsonParseException.class, () ->
+                JsonParser.parse(
                         "{\"obj\":{\"id\":123-123,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}")
         );
     }
@@ -710,140 +710,140 @@ public class ParseJson {
 
     /////////////////////////////ADVANCED PARSE PASS  ------- PASSES ---------/////////////////////////////////////////
     @Test
-    public void advanced_parse_2_1() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_1() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_2() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_2() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":\"asString\",\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_3() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_3() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_4() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_4() throws JsonParseException {
+        JsonParser.parse(
                 "{\"CAPS\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_5() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_5() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":1234,\"name\":\"Bob space is fine\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_6() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_6() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2,\"\"],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_7() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_7() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":{\"moreNest\":1}}}}");
     }
 
     @Test
-    public void advanced_parse_2_8() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_8() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"bool\":True,\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_9() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_9() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"bool\":False,\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_10() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_10() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"bool\":false,\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_11() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_11() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":1234,\"name\":\"Bob\",\"bool\":true,\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_12() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_12() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":[[[[[[]]]]]],\"name\":\"Bob\",\"guid\":[1,2,\"\"],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_13() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_13() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":[[[[[[1,[],[2]]]]]]],\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_14() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_14() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":3.1415,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_15() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_15() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":   3.1415  ,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_16() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_16() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":1234,\"value1\":true,\"value2\":false,\"value3\":TRUE,\"value4\":FALSE,\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_17() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_17() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":-3.1415,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_18() throws JSONParseException {
-        JSONParser.parse(
+    public void advanced_parse_2_18() throws JsonParseException {
+        JsonParser.parse(
                 "{\"obj\":{\"id\":-3023749823749,\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_19() throws JSONParseException {
-        JSONParser.parse("{\"obj\":{\"id\":" + Long.MAX_VALUE
+    public void advanced_parse_2_19() throws JsonParseException {
+        JsonParser.parse("{\"obj\":{\"id\":" + Long.MAX_VALUE
                 + ",\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_20() throws JSONParseException {
-        JSONParser.parse("{\"obj\":{\"id\":" + Long.MIN_VALUE
+    public void advanced_parse_2_20() throws JsonParseException {
+        JsonParser.parse("{\"obj\":{\"id\":" + Long.MIN_VALUE
                 + ",\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_21() throws JSONParseException {
-        JSONParser.parse("{\"obj\":{\"id\":" + Double.MAX_VALUE
+    public void advanced_parse_2_21() throws JsonParseException {
+        JsonParser.parse("{\"obj\":{\"id\":" + Double.MAX_VALUE
                 + ",\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void advanced_parse_2_22() throws JSONParseException {
-        JSONParser.parse("{\"obj\":{\"id\":" + Double.MIN_VALUE
+    public void advanced_parse_2_22() throws JsonParseException {
+        JsonParser.parse("{\"obj\":{\"id\":" + Double.MIN_VALUE
                 + ",\"name\":\"Bob\",\"guid\":[1,2],\"inner\":{\"final\":[[]]}}}");
     }
 
     @Test
-    public void ADVANCED_FINAL_parse() throws JSONParseException {
-        JSONParser.parse(
+    public void ADVANCED_FINAL_parse() throws JsonParseException {
+        JsonParser.parse(
                 "{\"advancedFull\":[{\"_id\":\"5be0320c9c7399358a2aac32\",\"index\":0,\"guid\":\"" +
                         "b3b156c9-3c62-40b7-b7f4-4428b9a962cb\",\"isActive\":true,\"balance\":\"$2,804.03\",\"picture\":\"http"
                         +

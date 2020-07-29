@@ -1,8 +1,8 @@
 package core;
 
-import api.IJSONAble;
 import api.IJson;
-import exceptions.JSONParseException;
+import api.IJsonAble;
+import exceptions.JsonParseException;
 import exceptions.KeyDifferentTypeException;
 import exceptions.KeyNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,13 +13,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class JSStringTest extends JSONTest {
+public class JSStringTest extends JsonTest {
 
     private JSString string;
 
     @BeforeEach
     void setUp() {
-        string = new JSString(new JSONTape("\"Hello World\""));
+        string = new JSString(new JsonTape("\"Hello World\""));
     }
 
     @Test
@@ -31,45 +31,45 @@ public class JSStringTest extends JSONTest {
     @Test
     public void testParseException() {
         try {
-            new JSString(new JSONTape("This String Doesnt Have Delimiters"));
+            new JSString(new JsonTape("This String Doesnt Have Delimiters"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("T is not a valid string delimiter.\n" +
                     "Line: 1\n" +
                     "Reached: _\n" +
                     "Expected: \" / ' / `", e.getMessage());
         }
         try {
-            new JSString(new JSONTape("'No Terminating Delimiter"));
+            new JSString(new JsonTape("'No Terminating Delimiter"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Didn't find matching ', before end of string.\n" +
                     "Line: 1\n" +
                     "Reached: 'No Terminating Delimiter_\n" +
                     "Expected: '", e.getMessage());
         }
         try {
-            new JSString(new JSONTape("`No Terminating Delimiter"));
+            new JSString(new JsonTape("`No Terminating Delimiter"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Didn't find matching `, before end of string.\n" +
                     "Line: 1\n" +
                     "Reached: `No Terminating Delimiter_\n" +
                     "Expected: `", e.getMessage());
         }
         try {
-            new JSString(new JSONTape("\"No Terminating Delimiter"));
+            new JSString(new JsonTape("\"No Terminating Delimiter"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("Didn't find matching \", before end of string.\n" +
                     "Line: 1\n" +
                     "Reached: \"No Terminating Delimiter_\n" +
                     "Expected: \"", e.getMessage());
         }
         try {
-            new JSString(new JSONTape("No Initial Delimiter'"));
+            new JSString(new JsonTape("No Initial Delimiter'"));
             fail("The previous method call should have thrown an exception.");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             assertEquals("N is not a valid string delimiter.\n" +
                     "Line: 1\n" +
                     "Reached: _\n" +
@@ -81,8 +81,8 @@ public class JSStringTest extends JSONTest {
     @Test
     public void testSpecialCharactersSuccess() {
         try {
-            assertEquals("\uD83D\uDC4D", new JSString(new JSONTape("'\uD83D\uDC4D'")).getValue());
-            assertEquals(" !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~", new JSString(new JSONTape("' !\"#$%&\\'()*+,-./:;<=>?@[\\\\]^_`{|}~'")).getValue());
+            assertEquals("\uD83D\uDC4D", new JSString(new JsonTape("'\uD83D\uDC4D'")).getValue());
+            assertEquals(" !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~", new JSString(new JsonTape("' !\"#$%&\\'()*+,-./:;<=>?@[\\\\]^_`{|}~'")).getValue());
         } catch (Exception e) {
             fail("The previous String creation should be supported with UTF as well as ascii", e);
         }
@@ -93,7 +93,7 @@ public class JSStringTest extends JSONTest {
     public void simpleCreateFromString() {
         try {
             string.createFromString("\"Should Create From String\"");
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             fail("Create from string should not throw an exception for valid input.", e);
         }
     }
@@ -107,7 +107,7 @@ public class JSStringTest extends JSONTest {
         multiline.add("\"");
         try {
             string.createFromMultilineString(multiline);
-        } catch (JSONParseException e) {
+        } catch (JsonParseException e) {
             fail("Create from string should not throw an exception for valid input.", e);
         }
     }
@@ -165,7 +165,7 @@ public class JSStringTest extends JSONTest {
     @Test
     public void getValuesNotEqual() {
         List<IJson> toEqual = new ArrayList<>();
-        toEqual.add(new JSString(new JSONTape("\"Goodbye World\"")));
+        toEqual.add(new JSString(new JsonTape("\"Goodbye World\"")));
         assertNotEquals(toEqual, string.getValues());
     }
 
@@ -411,17 +411,17 @@ public class JSStringTest extends JSONTest {
 
     @Test
     public void checkDoesEqualAgainstSimilarJSString() {
-        assertEquals(string, new JSString(new JSONTape("\"Hello World\"")));
+        assertEquals(string, new JSString(new JsonTape("\"Hello World\"")));
     }
 
     @Test
     public void checkDifferentDelimitersDontMakeADifference() {
-        assertEquals(new JSString(new JSONTape("'Hej'")), new JSString(new JSONTape("\"Hej\"")));
+        assertEquals(new JSString(new JsonTape("'Hej'")), new JSString(new JsonTape("\"Hej\"")));
     }
 
     @Test
     public void checkOtherJSStringDoesNotEqual() {
-        assertNotEquals(string, new JSString(new JSONTape("\"I am Different\"")));
+        assertNotEquals(string, new JSString(new JsonTape("\"I am Different\"")));
     }
 
     @SuppressWarnings({"SimplifiableJUnitAssertion", "EqualsBetweenInconvertibleTypes"})
@@ -446,7 +446,7 @@ public class JSStringTest extends JSONTest {
     @Test
     @Override
     public void jsonIsConvertible() {
-        IJSONAble builder = JSONBuilder.builder().addString("key", "value");
+        IJsonAble builder = JsonBuilder.builder().addString("key", "value");
         assertEquals(builder.convertToJSON(), string.convertToJSON(builder));
     }
 }

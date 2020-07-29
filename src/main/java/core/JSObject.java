@@ -1,18 +1,18 @@
 package core;
 
 import api.IJson;
-import exceptions.JSONParseException;
+import exceptions.JsonParseException;
 import exceptions.KeyNotFoundException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public final class JSObject extends JSON {
+public final class JSObject extends Json {
 
     private final HashMap<String, IJson> json;
 
-    JSObject(JSONTape parsingTape) throws JSONParseException {
+    JSObject(JsonTape parsingTape) throws JsonParseException {
         super(parsingTape);
         jsType = JSType.OBJECT;
         char checkingChar;
@@ -67,7 +67,7 @@ public final class JSObject extends JSON {
                     // Validate if we see a comma, there are more children to come
                     parsingTape.consumeWhiteSpace();
                     if (parsingTape.checkCurrentChar() == '}') {
-                        throw parsingTape.createParseError(JSONTape.VALID_JSON,
+                        throw parsingTape.createParseError(JsonTape.VALID_JSON,
                                 "Comma suggests more object elements, but object terminates.");
                     }
                     break;
@@ -81,7 +81,7 @@ public final class JSObject extends JSON {
         }
     }
 
-    private void validateObjectKey(String key, JSONTape parsingTape) {
+    private void validateObjectKey(String key, JsonTape parsingTape) {
         if (key.equals("")) {
             throw parsingTape.createParseError("<Valid Key>", "Illegal Object Key (Empty).");
         }
@@ -106,7 +106,7 @@ public final class JSObject extends JSON {
     }
 
     @Override
-    protected IJson getInternal(JSONKey keySequence) throws KeyNotFoundException {
+    protected IJson getInternal(JsonKey keySequence) throws KeyNotFoundException {
         String nextKey = keySequence.getNextKey();
         if (nextKey.equals("")) {
             return this;
@@ -114,7 +114,7 @@ public final class JSObject extends JSON {
         if (!nextKey.startsWith("{") && !nextKey.startsWith("<")) {
             throw keySequence.createKeyDifferentTypeException();
         }
-        JSON childElement = (JSON) json.get(nextKey.substring(1));
+        Json childElement = (Json) json.get(nextKey.substring(1));
         if (childElement == null) {
             throw keySequence.createKeyNotFoundException();
         }
@@ -183,7 +183,7 @@ public final class JSObject extends JSON {
         } else {
             json.forEach((key, value) -> {
                 result.append('"').append(key).append("\": ");
-                ((JSON) value).asPrettyString(indent, tabSize, result, depth - 1);
+                ((Json) value).asPrettyString(indent, tabSize, result, depth - 1);
                 result.append(",\n").append(indent);
             });
             result.delete(result.length() - 2 - indent.length(), result.length() - 1);

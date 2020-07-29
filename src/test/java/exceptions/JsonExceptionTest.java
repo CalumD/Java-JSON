@@ -4,18 +4,18 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class JSONExceptionTest {
+class JsonExceptionTest {
 
     @Test
     public void basicPOJO() {
-        JSONException exception = new JSONException("Some error text");
+        JsonException exception = new JsonException("Some error text");
         assertEquals("Some error text", exception.getMessage());
     }
 
     @Test
     public void basicPOJO2() {
         Throwable innerException = new Throwable("Some other exception");
-        JSONException exception = new JSONException("Some error text", innerException);
+        JsonException exception = new JsonException("Some error text", innerException);
         assertEquals("Some error text", exception.getMessage());
         assertEquals(innerException, exception.getCause());
     }
