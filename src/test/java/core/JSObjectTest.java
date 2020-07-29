@@ -2,6 +2,7 @@ package core;
 
 import api.IJson;
 import api.IJsonAble;
+import api.JsonParser;
 import exceptions.JsonParseException;
 import exceptions.KeyDifferentTypeException;
 import exceptions.KeyNotFoundException;
@@ -637,5 +638,15 @@ public class JSObjectTest extends JsonTest {
     public void jsonIsConvertible() {
         IJsonAble builder = JsonBuilder.builder().addString("key", "value");
         assertEquals(builder.convertToJSON(), object.convertToJSON(builder));
+    }
+
+    @Test
+    public void getDifferentType() {
+        try {
+            JsonParser.parse("{\"test\":[]}").getJSONObjectAt("test");
+            fail("The previous method call should have thrown an exception.");
+        } catch (Exception e) {
+            assertEquals("The Type of Object found for key (test) was not expected. Expected: OBJECT  ->  Received: ARRAY", e.getMessage());
+        }
     }
 }

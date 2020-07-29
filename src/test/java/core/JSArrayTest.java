@@ -2,6 +2,7 @@ package core;
 
 import api.IJson;
 import api.IJsonAble;
+import api.JsonParser;
 import exceptions.JsonParseException;
 import exceptions.KeyDifferentTypeException;
 import exceptions.KeyInvalidException;
@@ -591,4 +592,15 @@ public class JSArrayTest extends JsonTest {
         IJsonAble builder = JsonBuilder.builder().addString("key", "value");
         assertEquals(builder.convertToJSON(), array.convertToJSON(builder));
     }
+
+    @Test
+    public void getDifferentType() {
+        try {
+            JsonParser.parse("{\"test\":{}}").getArrayAt("test");
+            fail("The previous method call should have thrown an exception.");
+        } catch (Exception e) {
+            assertEquals("The Type of Object found for key (test) was not expected. Expected: ARRAY  ->  Received: OBJECT", e.getMessage());
+        }
+    }
+
 }
