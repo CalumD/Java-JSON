@@ -11,4 +11,11 @@ public class BuildExceptionTest {
         JsonException exception = new BuildException("Some error text");
         assertEquals("Some error text", exception.getMessage());
     }
+
+    @Test
+    public void basicPOJOWithSubException() {
+        JsonException exception = new BuildException("Some error text", new Throwable("because of this."));
+        assertEquals("Some error text", exception.getMessage());
+        assertEquals("because of this.", exception.getCause().getMessage());
+    }
 }
