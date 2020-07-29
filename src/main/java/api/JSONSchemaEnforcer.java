@@ -13,18 +13,15 @@ public final class JSONSchemaEnforcer implements IJSONSchemaEnforcer {
         }
     }
 
-    private JSONSchemaEnforcer() {
+    public static boolean validateStrict(IJson objectToValidate, IJson schema) {
+        return new JSONSchemaEnforcer().validateWithOutReasoning(objectToValidate, schema);
     }
 
-    public static boolean validateWithoutReasoning(IJson objectToValidate, IJson schema) {
-        return new JSONSchemaEnforcer().validateStrict(objectToValidate, schema);
+    public static boolean validate(IJson objectToValidate, IJson schema) {
+        return new JSONSchemaEnforcer().validateWithReasoning(objectToValidate, schema);
     }
 
-    public static boolean validateWithReasoning(IJson objectToValidate, IJson schema) {
-        return new JSONSchemaEnforcer().validate(objectToValidate, schema);
-    }
-
-    public boolean validate(IJson objectToValidate, IJson schema) throws SchemaException {
+    public boolean validateWithReasoning(IJson objectToValidate, IJson schema) throws SchemaException {
         return new JSONSchemaEnforcer().instanceValidate(objectToValidate, schema);
     }
 

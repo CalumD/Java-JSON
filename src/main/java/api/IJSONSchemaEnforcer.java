@@ -11,9 +11,9 @@ public interface IJSONSchemaEnforcer {
      * @param schema           The Schema JSON Object which defines the object to be validated.
      * @return True if the object passes validation, False if it fails for any reason.
      */
-    default boolean validateStrict(IJson objectToValidate, IJson schema) {
+    default boolean validateWithOutReasoning(IJson objectToValidate, IJson schema) {
         try {
-            return validate(objectToValidate, schema);
+            return validateWithReasoning(objectToValidate, schema);
         } catch (SchemaException e) {
             return false;
         }
@@ -27,5 +27,5 @@ public interface IJSONSchemaEnforcer {
      * @return True if the object passes validation, False if it fails for any reason.
      * @throws SchemaException Thrown to give reason/context as to why an object failed validation.
      */
-    boolean validate(IJson objectToValidate, IJson schema) throws SchemaException;
+    boolean validateWithReasoning(IJson objectToValidate, IJson schema) throws SchemaException;
 }
