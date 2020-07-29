@@ -176,7 +176,7 @@ public class JSStringTest extends JsonTest {
             string.getArray();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: ARRAY  ->  Received: STRING", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: ARRAY  ->  Received: STRING", e.getMessage());
         }
     }
 
@@ -187,7 +187,7 @@ public class JSStringTest extends JsonTest {
             string.getBoolean();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: BOOLEAN  ->  Received: STRING", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: BOOLEAN  ->  Received: STRING", e.getMessage());
         }
     }
 
@@ -198,7 +198,7 @@ public class JSStringTest extends JsonTest {
             string.getDouble();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: DOUBLE  ->  Received: STRING", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: DOUBLE  ->  Received: STRING", e.getMessage());
         }
     }
 
@@ -209,7 +209,7 @@ public class JSStringTest extends JsonTest {
             string.getLong();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: LONG  ->  Received: STRING", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: LONG  ->  Received: STRING", e.getMessage());
         }
     }
 
@@ -226,7 +226,7 @@ public class JSStringTest extends JsonTest {
             string.getJSONObject();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: OBJECT  ->  Received: STRING", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: OBJECT  ->  Received: STRING", e.getMessage());
         }
     }
 

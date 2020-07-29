@@ -270,7 +270,7 @@ public class JSArrayTest extends JsonTest {
             array.getBoolean();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: BOOLEAN  ->  Received: ARRAY", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: BOOLEAN  ->  Received: ARRAY", e.getMessage());
         }
     }
 
@@ -281,7 +281,7 @@ public class JSArrayTest extends JsonTest {
             array.getDouble();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: DOUBLE  ->  Received: ARRAY", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: DOUBLE  ->  Received: ARRAY", e.getMessage());
         }
     }
 
@@ -292,7 +292,7 @@ public class JSArrayTest extends JsonTest {
             array.getLong();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: LONG  ->  Received: ARRAY", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: LONG  ->  Received: ARRAY", e.getMessage());
         }
     }
 
@@ -303,7 +303,7 @@ public class JSArrayTest extends JsonTest {
             array.getString();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: STRING  ->  Received: ARRAY", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: STRING  ->  Received: ARRAY", e.getMessage());
         }
     }
 
@@ -314,7 +314,7 @@ public class JSArrayTest extends JsonTest {
             array.getJSONObject();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: OBJECT  ->  Received: ARRAY", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: OBJECT  ->  Received: ARRAY", e.getMessage());
         }
     }
 

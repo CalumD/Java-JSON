@@ -228,7 +228,7 @@ public class JSNumberTest extends JsonTest {
             numberLong.getArray();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: ARRAY  ->  Received: LONG", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: ARRAY  ->  Received: LONG", e.getMessage());
         }
     }
 
@@ -239,7 +239,7 @@ public class JSNumberTest extends JsonTest {
             numberLong.getBoolean();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: BOOLEAN  ->  Received: LONG", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: BOOLEAN  ->  Received: LONG", e.getMessage());
         }
     }
 
@@ -274,7 +274,7 @@ public class JSNumberTest extends JsonTest {
             numberLong.getString();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: STRING  ->  Received: LONG", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: STRING  ->  Received: LONG", e.getMessage());
         }
     }
 
@@ -285,7 +285,7 @@ public class JSNumberTest extends JsonTest {
             numberLong.getJSONObject();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: OBJECT  ->  Received: LONG", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: OBJECT  ->  Received: LONG", e.getMessage());
         }
     }
 

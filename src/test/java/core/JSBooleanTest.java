@@ -161,7 +161,7 @@ public class JSBooleanTest extends JsonTest {
             boolTrue.getArray();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: ARRAY  ->  Received: BOOLEAN", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: ARRAY  ->  Received: BOOLEAN", e.getMessage());
         }
     }
 
@@ -179,7 +179,7 @@ public class JSBooleanTest extends JsonTest {
             boolTrue.getDouble();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: DOUBLE  ->  Received: BOOLEAN", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: DOUBLE  ->  Received: BOOLEAN", e.getMessage());
         }
     }
 
@@ -190,7 +190,7 @@ public class JSBooleanTest extends JsonTest {
             boolTrue.getLong();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: LONG  ->  Received: BOOLEAN", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: LONG  ->  Received: BOOLEAN", e.getMessage());
         }
     }
 
@@ -201,7 +201,7 @@ public class JSBooleanTest extends JsonTest {
             boolTrue.getString();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: STRING  ->  Received: BOOLEAN", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: STRING  ->  Received: BOOLEAN", e.getMessage());
         }
     }
 
@@ -212,7 +212,7 @@ public class JSBooleanTest extends JsonTest {
             boolTrue.getJSONObject();
             fail("The previous method call should have thrown an exception.");
         } catch (KeyDifferentTypeException e) {
-            assertEquals("The Type of Object found for key  was not expected. Expected: OBJECT  ->  Received: BOOLEAN", e.getMessage());
+            assertEquals("The Type of Object found was not expected. Expected: OBJECT  ->  Received: BOOLEAN", e.getMessage());
         }
     }
 
