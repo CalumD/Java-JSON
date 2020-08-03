@@ -68,9 +68,15 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
 
         private void validateAnyInstanceType(JSONSchemaEnforcerPart currentPart) {
-            // TODO: type
-            // TODO: enum
-            // TODO: const
+            if (currentPart.SCHEMA_SUBSET.contains("type")) {
+                validateType(this);
+            }
+            if (currentPart.SCHEMA_SUBSET.contains("enum")) {
+//                TODO: validateEnum(this);
+            }
+            if (currentPart.SCHEMA_SUBSET.contains("const")) {
+//                TODO: validateConst(this);
+            }
 
             // TODO: allOf
             // TODO: anyOf
@@ -83,7 +89,80 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private void validateNumericInstance(JSONSchemaEnforcerPart currentPart) {
+    private static void validateType(JSONSchemaEnforcerPart currentPart) {
+        IJson type = currentPart.SCHEMA_SUBSET.getAnyAt("type");
+        switch (type.getDataType()) {
+            case STRING:
+                String dataType = currentPart.SCHEMA_SUBSET.getStringAt("type").toLowerCase();
+                if (!ALLOWED_DATA_TYPE_NAMES.contains(dataType)) {
+                    throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "type",
+                            "Unknown type provided: (" + dataType + ")");
+                }
+                validateType(currentPart, Collections.singletonList(dataType));
+                break;
+            case ARRAY:
+                Set<String> distinctTypes = new HashSet<>(10);
+                for (IJson distinctType : currentPart.SCHEMA_SUBSET.getArrayAt("type")) {
+                    try {
+                        distinctTypes.add(distinctType.getString());
+                    } catch (KeyDifferentTypeException e) {
+                        throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "type",
+                                "All values in the (type) property MUST be a valid, distinct String.");
+                    }
+                    if (!ALLOWED_DATA_TYPE_NAMES.contains(distinctType.getString().toLowerCase())) {
+                        throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "type",
+                                "Unknown type provided: (" + distinctType.getString() + ")");
+                    }
+                }
+                if (distinctTypes.size() == 0) {
+                    throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "type",
+                            "You must provide at least one valid data type restriction.");
+                }
+                validateType(currentPart, new ArrayList<>(distinctTypes));
+                break;
+            default:
+                throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "type", Arrays.asList("STRING", "ARRAY"), type.getDataType());
+        }
+    }
+
+    private static void validateType(JSONSchemaEnforcerPart currentPart, List<String> allowedTypes) {
+        JSType currentDataType = currentPart.OBJECT_TO_VALIDATE.getDataType();
+        for (String allowedType : allowedTypes) {
+            switch (allowedType) {
+                case "array":
+                case "list":
+                    if (currentDataType == JSType.ARRAY) return;
+                    break;
+                case "boolean":
+                    if (currentDataType == JSType.BOOLEAN) return;
+                    break;
+                case "long":
+                case "integer":
+                    if (currentDataType == JSType.LONG) return;
+                    break;
+                case "double":
+                    if (currentDataType == JSType.DOUBLE) return;
+                    break;
+                case "number":
+                    if (currentDataType == JSType.DOUBLE || currentDataType == JSType.LONG) return;
+                    break;
+                case "string":
+                    if (currentDataType == JSType.STRING) return;
+                    break;
+                case "object":
+                    if (currentDataType == JSType.OBJECT) return;
+                    break;
+                case "null":
+                case "undefined":
+                default:
+                    throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "type",
+                            "Unrecognised/Unsupported type provided (" + allowedType + ").");
+            }
+        }
+        throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "type", allowedTypes, currentDataType);
+    }
+
+    private static void validateNumericInstance(JSONSchemaEnforcerPart currentPart) {
         // TODO: multipleOf
         // TODO: maximum
         // TODO: exclusiveMaximum
@@ -91,7 +170,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         // TODO: exclusiveMinimum
     }
 
-    private void validateStringInstance(JSONSchemaEnforcerPart currentPart) {
+    private static void validateStringInstance(JSONSchemaEnforcerPart currentPart) {
 
         // TODO: maxLength
         // TODO: minLength
@@ -101,7 +180,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private void validateArrayInstance(JSONSchemaEnforcerPart currentPart) {
+    private static void validateArrayInstance(JSONSchemaEnforcerPart currentPart) {
         // TODO: maxItems
         // TODO: minItems
         // TODO: uniqueItems
@@ -114,7 +193,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         // TODO: unevaluatedItems
     }
 
-    private void validateObjectInstance(JSONSchemaEnforcerPart currentPart) {
+    private static void validateObjectInstance(JSONSchemaEnforcerPart currentPart) {
         // TODO: maxProperties
         // TODO: minProperties
         // TODO: required
@@ -127,7 +206,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         // TODO: unevaluatedProperties
     }
 
-    private void validateFormat(JSONSchemaEnforcerPart currentPart) {
+    private static void validateFormat(JSONSchemaEnforcerPart currentPart) {
         // TODO: dates/times/duration
         // TODO: emails
         //            "email REgex".matches("^((([!#$%&'*+\\-/=?^_`{|}~\\w])|([!#$%&'*+\\-/=?^_`{|}~\\w][!#$%&'*+\\-/=?^_`{|}~\\.\\w]{0,}[!#$%&'*+\\-/=?^_`{|}~\\w]))[@]\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*)$");
@@ -169,7 +248,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 message = "Value in json to validate had a different type than expected." + schemaConstraintBrokenMessage(propertyName, path);
                 break;
         }
-        expectedTypes.replaceAll(String::toUpperCase);
+        new ArrayList<>(expectedTypes).replaceAll(String::toUpperCase);
         message += "\nExpected one of " + expectedTypes + ", got " + gotType + ".";
         return doThrow(source, message);
     }

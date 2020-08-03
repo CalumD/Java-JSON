@@ -6,9 +6,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-class JsonSchemaEnforcerTest {
+public class JsonSchemaEnforcerTest {
 
     private static IJson EMPTY_OBJECT;
 
@@ -28,22 +29,12 @@ class JsonSchemaEnforcerTest {
     }
 
     @Test
-    public void noSchemaProblemShouldBeTrueWhenStrict() {
-        assertFalse(JsonSchemaEnforcer.validateStrict(null, null));
+    public void schemaExceptionShouldBeReturnedAsFalseWhenStrict() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(JsonParser.parse("{}"), JsonParser.parse("true")));
     }
 
     @Test
-    public void schemaExceptionShouldBeReturnedAsFalse() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void schemaExceptionShouldBeThrownAsException() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void objectToValidateShouldBeNull() {
+    public void objectToValidateShouldNeverBeNull() {
         try {
             JsonSchemaEnforcer.validate(null, JsonParser.parse("{}"));
             fail("The previous method call should have thrown an exception");
@@ -53,7 +44,7 @@ class JsonSchemaEnforcerTest {
     }
 
     @Test
-    public void schemaShouldBeNull() {
+    public void schemaShouldNeverBeNull() {
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"), null);
             fail("The previous method call should have thrown an exception");
@@ -64,12 +55,7 @@ class JsonSchemaEnforcerTest {
 
     @Test
     public void baseObjectShouldAcceptUnrecognisedStrings() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void baseObjectMUSTHaveCertainProperties() {
-        fail("Not yet implemented");
+        assertTrue(JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'unknown':123}")));
     }
 
 }

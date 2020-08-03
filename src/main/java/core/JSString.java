@@ -79,8 +79,8 @@ public final class JSString extends Json {
             return true;
         }
 
-        if (other instanceof Character[] || other instanceof String) {
-            return myValue.equals(other.toString());
+        if (other instanceof String) {
+            return myValue.equals(other);
         }
 
         if (getClass() != other.getClass()) {
