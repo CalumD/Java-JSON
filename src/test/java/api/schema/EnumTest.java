@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class EnumTest {
 
@@ -15,6 +16,7 @@ public class EnumTest {
     public void checkEnumMustBeArray() {
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'enum': 'wrong'}"));
+            fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("The value for (enum) @ path: <base element> was the wrong type in the SCHEMA.\n" +
                     "Expected one of [ARRAY], got STRING.", e.getMessage());
@@ -42,6 +44,7 @@ public class EnumTest {
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"),
                     JsonParser.parse("{'enum': [1,2,3,4,5]}"));
+            fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value found for a property in json to validate.\n" +
                     "Constraint broken from SCHEMA property (enum) @ path: <base element>\n" +
@@ -70,6 +73,7 @@ public class EnumTest {
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("true"),
                     JsonParser.parse("{'const': 'some string.'}"));
+            fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value found for a property in json to validate.\n" +
                     "Constraint broken from SCHEMA property (const) @ path: <base element>\n" +

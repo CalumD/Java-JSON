@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TypeTest extends JsonSchemaEnforcerTest {
 
@@ -48,12 +49,14 @@ public class TypeTest extends JsonSchemaEnforcerTest {
         // Type not supported
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'type': 'null'}"));
+            fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for (type) @ path: <base element> in the SCHEMA."
                     + "\nUnrecognised/Unsupported type provided (null).", e.getMessage());
         }
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'type': 'undefined'}"));
+            fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for (type) @ path: <base element> in the SCHEMA."
                     + "\nUnrecognised/Unsupported type provided (undefined).", e.getMessage());
@@ -62,6 +65,7 @@ public class TypeTest extends JsonSchemaEnforcerTest {
         // Type does not exist
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'type': 'wrong'}"));
+            fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for (type) @ path: <base element> in the SCHEMA."
                     + "\nUnknown type provided: (wrong)", e.getMessage());
@@ -73,12 +77,14 @@ public class TypeTest extends JsonSchemaEnforcerTest {
         // Type not supported
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'type': ['null']}"));
+            fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for (type) @ path: <base element> in the SCHEMA."
                     + "\nUnrecognised/Unsupported type provided (null).", e.getMessage());
         }
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'type': ['undefined']}"));
+            fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for (type) @ path: <base element> in the SCHEMA."
                     + "\nUnrecognised/Unsupported type provided (undefined).", e.getMessage());
@@ -87,6 +93,7 @@ public class TypeTest extends JsonSchemaEnforcerTest {
         // Type does not exist
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'type': ['wrong']}"));
+            fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for (type) @ path: <base element> in the SCHEMA."
                     + "\nUnknown type provided: (wrong)", e.getMessage());
@@ -97,6 +104,7 @@ public class TypeTest extends JsonSchemaEnforcerTest {
     public void checkTypeArrayContainsNonString() {
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'type': [1]}"));
+            fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for (type) @ path: <base element> in the SCHEMA."
                     + "\nAll values in the (type) property MUST be a valid, distinct String.", e.getMessage());
@@ -107,6 +115,7 @@ public class TypeTest extends JsonSchemaEnforcerTest {
     public void checkTypeArrayIsEmpty() {
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'type': []}"));
+            fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for (type) @ path: <base element> in the SCHEMA."
                     + "\nYou must provide at least one valid data type restriction.", e.getMessage());
@@ -117,6 +126,7 @@ public class TypeTest extends JsonSchemaEnforcerTest {
     public void checkWhenObjectIsNotWhatSchemaConstrains() {
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'type': 'long'}"));
+            fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
             assertEquals("Value in json to validate had a different type than expected.\n" +
                     "Constraint broken from SCHEMA property (type) @ path: <base element>\n" +

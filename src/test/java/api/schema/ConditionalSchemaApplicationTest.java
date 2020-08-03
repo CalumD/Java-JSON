@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ConditionalSchemaApplicationTest {
 
@@ -23,6 +24,7 @@ public class ConditionalSchemaApplicationTest {
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("1"),
                     JsonParser.parse("{'allOf': [{'type': 'long'}, {'const': 3}]}"));
+            fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
             assertEquals("", e.getMessage());
         }
@@ -41,6 +43,7 @@ public class ConditionalSchemaApplicationTest {
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("1"),
                     JsonParser.parse("{'anyOf': [{'type': 'double'}, {'const': 1.45}]}"));
+            fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
             assertEquals("", e.getMessage());
         }
@@ -59,6 +62,7 @@ public class ConditionalSchemaApplicationTest {
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("1"),
                     JsonParser.parse("{'oneOf': [{'type': 'integer'}, {'const': 1}]}"));
+            fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
             assertEquals("", e.getMessage());
         }
@@ -69,6 +73,7 @@ public class ConditionalSchemaApplicationTest {
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("1"),
                     JsonParser.parse("{'oneOf': [{'type': 'double'}, {'const': 1.45}]}"));
+            fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
             assertEquals("", e.getMessage());
         }
@@ -87,6 +92,7 @@ public class ConditionalSchemaApplicationTest {
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("1"),
                     JsonParser.parse("{'not': {'const': 1}}"));
+            fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
             assertEquals("", e.getMessage());
         }
