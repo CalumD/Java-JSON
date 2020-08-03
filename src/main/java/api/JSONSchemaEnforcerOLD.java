@@ -6,9 +6,9 @@ import core.JSNumber;
 import core.JSObject;
 import core.JSString;
 import core.JSType;
-import exceptions.KeyDifferentTypeException;
-import exceptions.KeyNotFoundException;
 import exceptions.SchemaException;
+import exceptions.json.KeyDifferentTypeException;
+import exceptions.json.KeyNotFoundException;
 
 import java.util.HashSet;
 
@@ -60,7 +60,9 @@ public class JSONSchemaEnforcerOLD {
                         validateArray(toValidate, schema, pathSoFar, localSchema);
                         break;
                     case "boolean":
-                        validateBoolean(toValidate);
+                        if (!(toValidate instanceof JSBoolean)) {
+                            throw new SchemaException("Value found in " + toValidate + " is not the declared type.");
+                        }
                         break;
                     case "null":
                     case "undefined":
@@ -445,18 +447,6 @@ public class JSONSchemaEnforcerOLD {
             }
         } else {
             throw new SchemaException("Value found in " + arr + " is not the declared type.");
-        }
-    }
-
-    /**
-     * Used to validate a JSON object representing a boolean value against the provided schema.
-     *
-     * @param bool The Boolean to validate.
-     * @throws SchemaException Thrown if the object does not satisfy the schema.
-     */
-    private static void validateBoolean(IJson bool) throws SchemaException {
-        if (!(bool instanceof JSBoolean)) {
-            throw new SchemaException("Value found in " + bool + " is not the declared type.");
         }
     }
 

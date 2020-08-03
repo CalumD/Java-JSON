@@ -1,7 +1,7 @@
 package core;
 
-import exceptions.JsonKeyException;
-import exceptions.KeyInvalidException;
+import exceptions.json.JsonKeyException;
+import exceptions.json.KeyInvalidException;
 
 import java.util.ArrayList;
 import java.util.List;

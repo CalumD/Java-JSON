@@ -1,8 +1,8 @@
 package core;
 
-import exceptions.KeyDifferentTypeException;
-import exceptions.KeyInvalidException;
-import exceptions.KeyNotFoundException;
+import exceptions.json.KeyDifferentTypeException;
+import exceptions.json.KeyInvalidException;
+import exceptions.json.KeyNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

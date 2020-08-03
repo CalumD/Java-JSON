@@ -5,9 +5,9 @@ import api.IJsonAble;
 import api.IJsonBuilder;
 import api.JsonParser;
 import exceptions.BuildException;
-import exceptions.KeyDifferentTypeException;
-import exceptions.KeyInvalidException;
-import exceptions.KeyNotFoundException;
+import exceptions.json.KeyDifferentTypeException;
+import exceptions.json.KeyInvalidException;
+import exceptions.json.KeyNotFoundException;
 
 import java.util.ArrayList;
 import java.util.HashMap;

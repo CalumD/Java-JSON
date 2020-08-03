@@ -3,9 +3,9 @@ package core;
 import api.IJson;
 import api.IJsonAble;
 import exceptions.JsonException;
-import exceptions.JsonParseException;
-import exceptions.KeyDifferentTypeException;
-import exceptions.KeyNotFoundException;
+import exceptions.json.JsonParseException;
+import exceptions.json.KeyDifferentTypeException;
+import exceptions.json.KeyNotFoundException;
 
 import java.util.ArrayList;
 import java.util.Collection;

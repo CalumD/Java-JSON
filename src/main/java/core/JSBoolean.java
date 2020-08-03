@@ -1,6 +1,6 @@
 package core;
 
-import exceptions.JsonParseException;
+import exceptions.json.JsonParseException;
 
 public final class JSBoolean extends Json {
 

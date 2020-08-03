@@ -1,4 +1,4 @@
-package exceptions;
+package exceptions.json;
 
 public class KeyNotFoundException extends JsonKeyException {
 

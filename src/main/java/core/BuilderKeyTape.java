@@ -1,6 +1,6 @@
 package core;
 
-public class BuilderKeyTape extends KeyTape {
+final class BuilderKeyTape extends KeyTape {
 
     BuilderKeyTape(String fullInput) {
         super(fullInput);

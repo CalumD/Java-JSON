@@ -1,7 +1,7 @@
 package core;
 
-import exceptions.JsonParseException;
-import exceptions.KeyDifferentTypeException;
+import exceptions.json.JsonParseException;
+import exceptions.json.KeyDifferentTypeException;
 
 public final class JSNumber extends Json {
 

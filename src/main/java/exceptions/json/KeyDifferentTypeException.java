@@ -1,4 +1,4 @@
-package exceptions;
+package exceptions.json;
 
 public class KeyDifferentTypeException extends JsonKeyException {
 

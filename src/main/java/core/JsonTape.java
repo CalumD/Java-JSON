@@ -1,7 +1,7 @@
 package core;
 
 import api.IJson;
-import exceptions.JsonParseException;
+import exceptions.json.JsonParseException;
 
 public final class JsonTape extends Tape<IJson, JsonParseException> {
 

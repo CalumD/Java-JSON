@@ -3,9 +3,9 @@ package core;
 import api.IJson;
 import api.IJsonAble;
 import api.JsonParser;
-import exceptions.JsonParseException;
-import exceptions.KeyDifferentTypeException;
-import exceptions.KeyNotFoundException;
+import exceptions.json.JsonParseException;
+import exceptions.json.KeyDifferentTypeException;
+import exceptions.json.KeyNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

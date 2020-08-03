@@ -2,10 +2,10 @@ package oldTests.Json;
 
 import api.IJson;
 import api.JsonParser;
-import exceptions.JsonParseException;
-import exceptions.KeyDifferentTypeException;
-import exceptions.KeyInvalidException;
-import exceptions.KeyNotFoundException;
+import exceptions.json.JsonParseException;
+import exceptions.json.KeyDifferentTypeException;
+import exceptions.json.KeyInvalidException;
+import exceptions.json.KeyNotFoundException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

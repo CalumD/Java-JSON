@@ -2,8 +2,8 @@ package api;
 
 import core.JSType;
 import exceptions.JsonException;
-import exceptions.JsonParseException;
-import exceptions.KeyDifferentTypeException;
+import exceptions.json.JsonParseException;
+import exceptions.json.KeyDifferentTypeException;
 
 import java.io.Serializable;
 import java.util.Collection;

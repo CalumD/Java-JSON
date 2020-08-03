@@ -1,8 +1,8 @@
 package core;
 
 import api.IJson;
-import exceptions.JsonParseException;
-import exceptions.KeyNotFoundException;
+import exceptions.json.JsonParseException;
+import exceptions.json.KeyNotFoundException;
 
 import java.util.ArrayList;
 import java.util.HashMap;

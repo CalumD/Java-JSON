@@ -1,6 +1,6 @@
 package core;
 
-import exceptions.KeyInvalidException;
+import exceptions.json.KeyInvalidException;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
