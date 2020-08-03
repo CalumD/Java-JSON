@@ -2,11 +2,15 @@ package api;
 
 import core.JSType;
 import exceptions.SchemaException;
+import exceptions.json.KeyDifferentTypeException;
 import exceptions.schema.InvalidSchemaException;
 import exceptions.schema.SchemaViolationException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
@@ -14,7 +18,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     private enum SourceOfProblem {SCHEMA, OBJECT_TO_VALIDATE}
 
     private static final Set<String> ALLOWED_DATA_TYPE_NAMES = new HashSet<>(Arrays.asList(
-            "array", "boolean", "long", "integer", "double", "number", "string", "object", "null", "undefined"));
+            "array", "list", "boolean", "long", "integer", "double", "number", "string", "object", "null", "undefined"));
 
     public static boolean validateStrict(IJson objectToValidate, IJson againstSchema) {
         return new JsonSchemaEnforcer().validateWithOutReasoning(objectToValidate, againstSchema);
@@ -137,36 +141,41 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
 
     private static SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName) {
-        return doThrow(
-                source,
-                "Missing property (" + propertyName + ") at path: "
-                        + (parentOfMissingProperty.equals("") ? "<base element>" : parentOfMissingProperty)
-                        + " within the " + source + "."
-        );
+        String path = parentOfMissingProperty.equals("") ? "<base element>" : parentOfMissingProperty;
+        String message = "Invalid.";
+        switch (source) {
+            case SCHEMA:
+                message = "Missing property (" + propertyName + ") @ path: " + path + " within the SCHEMA.";
+                break;
+            case OBJECT_TO_VALIDATE:
+                message = "Missing property in json to validate." + schemaConstraintBrokenMessage(propertyName, path);
+                break;
+        }
+        return doThrow(source, message);
     }
 
     private static SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName, Throwable cause) {
         return doThrow(source, missingProperty(source, parentOfMissingProperty, propertyName).getMessage(), cause);
     }
 
-    private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, Set<String> expectedTypes, JSType gotType) {
-        return doThrow(
-                source,
-                "The value for (" + propertyName + ") at path: "
-                        + (parentOfMissingProperty.equals("") ? "<base element>" : parentOfMissingProperty)
-                        + " within the " + source + " was the wrong type."
-                        + "\nExpected one of " + expectedTypes + ", got " + gotType + "."
-        );
+    private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, List<String> expectedTypes, JSType gotType) {
+        String path = parentOfMissingProperty.equals("") ? "<base element>" : parentOfMissingProperty;
+        String message = "Invalid.";
+        switch (source) {
+            case SCHEMA:
+                message = "The value for (" + propertyName + ") @ path: " + path + " was the wrong type in the SCHEMA.";
+                break;
+            case OBJECT_TO_VALIDATE:
+                message = "Value in json to validate had a different type than expected." + schemaConstraintBrokenMessage(propertyName, path);
+                break;
+        }
+        expectedTypes.replaceAll(String::toUpperCase);
+        message += "\nExpected one of " + expectedTypes + ", got " + gotType + ".";
+        return doThrow(source, message);
     }
 
     private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, JSType expectedType, JSType gotType) {
-        return doThrow(
-                source,
-                "The value for (" + propertyName + ") at path: "
-                        + (parentOfMissingProperty.equals("") ? "<base element>" : parentOfMissingProperty)
-                        + " within the " + source + " was the wrong type."
-                        + "\nExpected " + expectedType + ", got " + gotType + "."
-        );
+        return valueDifferentType(source, parentOfMissingProperty, propertyName, Collections.singletonList(expectedType.toString()), gotType);
     }
 
     private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, JSType expectedType, JSType gotType, Throwable cause) {
@@ -174,13 +183,18 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private static SchemaException valueUnexpected(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason) {
-        return doThrow(
-                source,
-                "Unexpected value for (" + propertyName + ") at path: "
-                        + (parentOfMissingProperty.equals("") ? "<base element>" : parentOfMissingProperty)
-                        + " within the " + source + "."
-                        + "\n" + reason
-        );
+        String path = parentOfMissingProperty.equals("") ? "<base element>" : parentOfMissingProperty;
+        String message = "Invalid.";
+        switch (source) {
+            case SCHEMA:
+                message = "Unexpected value for (" + propertyName + ") @ path: " + path + " in the SCHEMA.";
+                break;
+            case OBJECT_TO_VALIDATE:
+                message = "Unexpected value found for a property in json to validate." + schemaConstraintBrokenMessage(propertyName, path);
+                break;
+        }
+        message += "\n" + reason;
+        return doThrow(source, message);
     }
 
     private static SchemaException valueUnexpected(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason, Throwable cause) {
@@ -207,5 +221,9 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
             default:
                 return new SchemaException(message, cause);
         }
+    }
+
+    private static String schemaConstraintBrokenMessage(String propertyName, String path) {
+        return "\nConstraint broken from SCHEMA property (" + propertyName + ") @ path: " + path;
     }
 }
