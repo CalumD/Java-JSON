@@ -49,7 +49,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         return (new JSONSchemaEnforcerPart(objectToValidate, schema, "")).enforce();
     }
 
-    private final class JSONSchemaEnforcerPart {
+    private static final class JSONSchemaEnforcerPart {
         private final IJson SCHEMA_REFERENCE;
         private final IJson OBJECT_TO_VALIDATE;
         private final String KEY_SO_FAR;
@@ -58,8 +58,8 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         private JSONSchemaEnforcerPart(IJson objectToValidate, IJson schemaReference, String schemaKeySoFar) {
             this.OBJECT_TO_VALIDATE = objectToValidate;
             this.SCHEMA_REFERENCE = schemaReference;
-            this.KEY_SO_FAR = schemaKeySoFar;
-            this.SCHEMA_SUBSET = schemaReference.getAnyAt(schemaKeySoFar);
+            this.KEY_SO_FAR = schemaKeySoFar.startsWith(".") ? schemaKeySoFar.substring(1) : schemaKeySoFar;
+            this.SCHEMA_SUBSET = schemaReference.getAnyAt(this.KEY_SO_FAR);
         }
 
         private boolean enforce() {
@@ -95,28 +95,105 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
             }
 
             if (currentPart.SCHEMA_SUBSET.contains("if")) {
-                boolean validatedAgainstIf = false;
-                boolean shouldError = false;
-                SchemaException problemWithIfSchemaValidation = null;
-                try {
-                    validateIf(this);
-                    validatedAgainstIf = true;
-                } catch (SchemaException e) {
-                    problemWithIfSchemaValidation = e;
-                    shouldError = true;
-                }
-
-                if (validatedAgainstIf && currentPart.SCHEMA_SUBSET.contains("then")) {
-                    validateThen(this);
-                } else if (!validatedAgainstIf && currentPart.SCHEMA_SUBSET.contains("else")) {
-                    validateElse(this);
-                    shouldError = false;
-                }
-
-                if (shouldError) {
-                    throw problemWithIfSchemaValidation;
-                }
+                validateIf(this);
             }
+        }
+    }
+
+    private static void validateAllOf(JSONSchemaEnforcerPart currentPart) {
+        if (currentPart.SCHEMA_SUBSET.getDataTypeOf("allOf") != JSType.ARRAY) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "allOf",
+                    JSType.ARRAY, currentPart.SCHEMA_SUBSET.getDataTypeOf("allOf"));
+        }
+        if (currentPart.SCHEMA_SUBSET.getArrayAt("allOf").size() == 0) {
+            throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "allOf",
+                    "Array must contain at least 1 sub-schema.");
+        }
+        for (String key : currentPart.SCHEMA_SUBSET.getKeysOf("allOf")) {
+            new JSONSchemaEnforcerPart(currentPart.OBJECT_TO_VALIDATE, currentPart.SCHEMA_REFERENCE,
+                    currentPart.KEY_SO_FAR + ".allOf[" + key + "]").enforce();
+        }
+    }
+
+    private static void validateAnyOf(JSONSchemaEnforcerPart currentPart) {
+        if (currentPart.SCHEMA_SUBSET.getDataTypeOf("anyOf") != JSType.ARRAY) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "anyOf",
+                    JSType.ARRAY, currentPart.SCHEMA_SUBSET.getDataTypeOf("anyOf"));
+        }
+        if (currentPart.SCHEMA_SUBSET.getArrayAt("anyOf").size() == 0) {
+            throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "anyOf",
+                    "Array must contain at least 1 sub-schema.");
+        }
+        for (String key : currentPart.SCHEMA_SUBSET.getKeysOf("anyOf")) {
+            try {
+                new JSONSchemaEnforcerPart(currentPart.OBJECT_TO_VALIDATE, currentPart.SCHEMA_REFERENCE,
+                        currentPart.KEY_SO_FAR + ".anyOf[" + key + "]").enforce();
+                return;
+            } catch (SchemaException e) {
+                // Trapping exceptions as we won't necessarily match all of these.
+            }
+        }
+        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "anyOf",
+                "Provided json failed to match any of the sub-schemas provided.");
+    }
+
+    private static void validateOneOf(JSONSchemaEnforcerPart currentPart) {
+        if (currentPart.SCHEMA_SUBSET.getDataTypeOf("oneOf") != JSType.ARRAY) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "oneOf",
+                    JSType.ARRAY, currentPart.SCHEMA_SUBSET.getDataTypeOf("oneOf"));
+        }
+        if (currentPart.SCHEMA_SUBSET.getArrayAt("oneOf").size() == 0) {
+            throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "oneOf",
+                    "Array must contain at least 1 sub-schema.");
+        }
+        long schemasMatched = 0;
+        for (String key : currentPart.SCHEMA_SUBSET.getKeysOf("oneOf")) {
+            try {
+                new JSONSchemaEnforcerPart(currentPart.OBJECT_TO_VALIDATE, currentPart.SCHEMA_REFERENCE,
+                        currentPart.KEY_SO_FAR + ".oneOf[" + key + "]").enforce();
+            } catch (SchemaException e) {
+                // Trapping exceptions as we won't necessarily match all of these.
+                schemasMatched--;
+            }
+            if (++schemasMatched > 1) {
+                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "oneOf",
+                        "Json validated against more than one sub-schema.");
+            }
+        }
+        if (schemasMatched != 1) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "oneOf",
+                    "Provided json failed to match any of the sub-schemas provided.");
+        }
+    }
+
+    private static void validateNot(JSONSchemaEnforcerPart currentPart) {
+        try {
+            new JSONSchemaEnforcerPart(currentPart.OBJECT_TO_VALIDATE, currentPart.SCHEMA_REFERENCE,
+                    currentPart.KEY_SO_FAR + ".not").enforce();
+        } catch (SchemaException e) {
+            // Ignore the failure - that's what we wanted!
+            return;
+        }
+        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "not",
+                "Json successfully validated against the schema, but a failure was required.");
+    }
+
+    private static void validateIf(JSONSchemaEnforcerPart currentPart) {
+        boolean validatedAgainstIf = false;
+        try {
+            new JSONSchemaEnforcerPart(currentPart.OBJECT_TO_VALIDATE, currentPart.SCHEMA_REFERENCE,
+                    currentPart.KEY_SO_FAR + ".if").enforce();
+            validatedAgainstIf = true;
+        } catch (SchemaException e) {
+            // The IF part of a schema shouldn't effect the result - just which of the then/else is relevant
+        }
+
+        if (validatedAgainstIf && currentPart.SCHEMA_SUBSET.contains("then")) {
+            new JSONSchemaEnforcerPart(currentPart.OBJECT_TO_VALIDATE, currentPart.SCHEMA_REFERENCE,
+                    currentPart.KEY_SO_FAR + ".then").enforce();
+        } else if (!validatedAgainstIf && currentPart.SCHEMA_SUBSET.contains("else")) {
+            new JSONSchemaEnforcerPart(currentPart.OBJECT_TO_VALIDATE, currentPart.SCHEMA_REFERENCE,
+                    currentPart.KEY_SO_FAR + ".else").enforce();
         }
     }
 
