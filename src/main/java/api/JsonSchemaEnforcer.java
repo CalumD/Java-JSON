@@ -81,14 +81,42 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 }
             }
 
-            // TODO: allOf
-            // TODO: anyOf
-            // TODO: oneOf
-            // TODO: not
+            if (currentPart.SCHEMA_SUBSET.contains("allOf")) {
+                validateAllOf(this);
+            }
+            if (currentPart.SCHEMA_SUBSET.contains("anyOf")) {
+                validateAnyOf(this);
+            }
+            if (currentPart.SCHEMA_SUBSET.contains("oneOf")) {
+                validateOneOf(this);
+            }
+            if (currentPart.SCHEMA_SUBSET.contains("not")) {
+                validateNot(this);
+            }
 
-            // TODO: if
-            // TODO: then
-            // TODO: else
+            if (currentPart.SCHEMA_SUBSET.contains("if")) {
+                boolean validatedAgainstIf = false;
+                boolean shouldError = false;
+                SchemaException problemWithIfSchemaValidation = null;
+                try {
+                    validateIf(this);
+                    validatedAgainstIf = true;
+                } catch (SchemaException e) {
+                    problemWithIfSchemaValidation = e;
+                    shouldError = true;
+                }
+
+                if (validatedAgainstIf && currentPart.SCHEMA_SUBSET.contains("then")) {
+                    validateThen(this);
+                } else if (!validatedAgainstIf && currentPart.SCHEMA_SUBSET.contains("else")) {
+                    validateElse(this);
+                    shouldError = false;
+                }
+
+                if (shouldError) {
+                    throw problemWithIfSchemaValidation;
+                }
+            }
         }
     }
 
