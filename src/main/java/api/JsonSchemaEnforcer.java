@@ -63,40 +63,44 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
 
         private boolean enforce() {
-            validateAnyInstanceType(this);
+            validateKeywordsForAllInstanceTypes(this);
+            validateNumericInstance(this);
+            validateStringInstance(this);
+            validateArrayInstance(this);
+            validateObjectInstance(this);
             return true;
         }
+    }
 
-        private void validateAnyInstanceType(JSONSchemaEnforcerPart currentPart) {
-            if (currentPart.SCHEMA_SUBSET.contains("type")) {
-                validateType(this);
+    private static void validateKeywordsForAllInstanceTypes(JSONSchemaEnforcerPart currentPart) {
+        if (currentPart.SCHEMA_SUBSET.contains("type")) {
+            validateType(currentPart);
+        }
+        if (currentPart.SCHEMA_SUBSET.contains("enum")) {
+            validateEnum(currentPart);
+        }
+        if (currentPart.SCHEMA_SUBSET.contains("const")) {
+            if (!currentPart.OBJECT_TO_VALIDATE.equals(currentPart.SCHEMA_SUBSET.getAnyAt("const"))) {
+                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "const",
+                        "Value of json object did not match the constant.");
             }
-            if (currentPart.SCHEMA_SUBSET.contains("enum")) {
-                validateEnum(this);
-            }
-            if (currentPart.SCHEMA_SUBSET.contains("const")) {
-                if (!currentPart.OBJECT_TO_VALIDATE.equals(currentPart.SCHEMA_SUBSET.getAnyAt("const"))) {
-                    throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "const",
-                            "Value of json object did not match the constant.");
-                }
-            }
+        }
 
-            if (currentPart.SCHEMA_SUBSET.contains("allOf")) {
-                validateAllOf(this);
-            }
-            if (currentPart.SCHEMA_SUBSET.contains("anyOf")) {
-                validateAnyOf(this);
-            }
-            if (currentPart.SCHEMA_SUBSET.contains("oneOf")) {
-                validateOneOf(this);
-            }
-            if (currentPart.SCHEMA_SUBSET.contains("not")) {
-                validateNot(this);
-            }
+        if (currentPart.SCHEMA_SUBSET.contains("allOf")) {
+            validateAllOf(currentPart);
+        }
+        if (currentPart.SCHEMA_SUBSET.contains("anyOf")) {
+            validateAnyOf(currentPart);
+        }
+        if (currentPart.SCHEMA_SUBSET.contains("oneOf")) {
+            validateOneOf(currentPart);
+        }
+        if (currentPart.SCHEMA_SUBSET.contains("not")) {
+            validateNot(currentPart);
+        }
 
-            if (currentPart.SCHEMA_SUBSET.contains("if")) {
-                validateIf(this);
-            }
+        if (currentPart.SCHEMA_SUBSET.contains("if")) {
+            validateIf(currentPart);
         }
     }
 
@@ -281,7 +285,6 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
         throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "enum", "Object did not match any options provided by the enum.");
     }
-
 
     private static void validateNumericInstance(JSONSchemaEnforcerPart currentPart) {
         // TODO: multipleOf
