@@ -27,9 +27,9 @@ public class ConditionalSchemaApplicationTest {
                     JsonParser.parse("{'allOf': [{'type': 'long'}, {'const': 3}]}"));
             fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
-            assertEquals("Unexpected value found for a property in json to validate.\n" +
-                    "Constraint broken from SCHEMA property (const) @ path: allOf[1]\n" +
-                    "Value of json object did not match the constant.", e.getMessage());
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: allOf[1].const\n" +
+                    "Value MUST match the schema's constant.", e.getMessage());
         }
     }
 
@@ -40,8 +40,8 @@ public class ConditionalSchemaApplicationTest {
                     JsonParser.parse("{'allOf': {'type': 'long', 'const': 3}}"));
             fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
-            assertEquals("The value for (allOf) @ path: <base element> was the wrong type in the SCHEMA.\n" +
-                    "Expected one of [ARRAY], got OBJECT.", e.getMessage());
+            assertEquals("Wrong type for schema property: <base element>.allOf\n" +
+                    "Expected: ARRAY  ->  Received: OBJECT", e.getMessage());
         }
     }
 
@@ -52,7 +52,7 @@ public class ConditionalSchemaApplicationTest {
                     JsonParser.parse("{'allOf': []}"));
             fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
-            assertEquals("Unexpected value for (allOf) @ path: <base element> in the SCHEMA.\n" +
+            assertEquals("Unexpected value for schema property: <base element>.allOf\n" +
                     "Array must contain at least 1 sub-schema.", e.getMessage());
         }
     }
@@ -72,8 +72,8 @@ public class ConditionalSchemaApplicationTest {
                     JsonParser.parse("{'anyOf': [{'type': 'double'}, {'const': 1.45}]}"));
             fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
-            assertEquals("Unexpected value found for a property in json to validate.\n" +
-                    "Constraint broken from SCHEMA property (anyOf) @ path: <base element>\n" +
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.anyOf\n" +
                     "Provided json failed to match any of the sub-schemas provided.", e.getMessage());
         }
     }
@@ -85,8 +85,8 @@ public class ConditionalSchemaApplicationTest {
                     JsonParser.parse("{'anyOf': {'type': 'long', 'const': 3}}"));
             fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
-            assertEquals("The value for (anyOf) @ path: <base element> was the wrong type in the SCHEMA.\n" +
-                    "Expected one of [ARRAY], got OBJECT.", e.getMessage());
+            assertEquals("Wrong type for schema property: <base element>.anyOf\n" +
+                    "Expected: ARRAY  ->  Received: OBJECT", e.getMessage());
         }
     }
 
@@ -97,7 +97,7 @@ public class ConditionalSchemaApplicationTest {
                     JsonParser.parse("{'anyOf': []}"));
             fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
-            assertEquals("Unexpected value for (anyOf) @ path: <base element> in the SCHEMA.\n" +
+            assertEquals("Unexpected value for schema property: <base element>.anyOf\n" +
                     "Array must contain at least 1 sub-schema.", e.getMessage());
         }
     }
@@ -117,8 +117,8 @@ public class ConditionalSchemaApplicationTest {
                     JsonParser.parse("{'oneOf': [{'type': 'integer'}, {'const': 1}]}"));
             fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
-            assertEquals("Unexpected value found for a property in json to validate.\n" +
-                    "Constraint broken from SCHEMA property (oneOf) @ path: <base element>\n" +
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.oneOf\n" +
                     "Json validated against more than one sub-schema.", e.getMessage());
         }
     }
@@ -130,8 +130,8 @@ public class ConditionalSchemaApplicationTest {
                     JsonParser.parse("{'oneOf': [{'type': 'double'}, {'const': 1.45}]}"));
             fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
-            assertEquals("Unexpected value found for a property in json to validate.\n" +
-                    "Constraint broken from SCHEMA property (oneOf) @ path: <base element>\n" +
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.oneOf\n" +
                     "Provided json failed to match any of the sub-schemas provided.", e.getMessage());
         }
     }
@@ -143,8 +143,8 @@ public class ConditionalSchemaApplicationTest {
                     JsonParser.parse("{'oneOf': {'type': 'long', 'const': 3}}"));
             fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
-            assertEquals("The value for (oneOf) @ path: <base element> was the wrong type in the SCHEMA.\n" +
-                    "Expected one of [ARRAY], got OBJECT.", e.getMessage());
+            assertEquals("Wrong type for schema property: <base element>.oneOf\n" +
+                    "Expected: ARRAY  ->  Received: OBJECT", e.getMessage());
         }
     }
 
@@ -155,7 +155,7 @@ public class ConditionalSchemaApplicationTest {
                     JsonParser.parse("{'oneOf': []}"));
             fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
-            assertEquals("Unexpected value for (oneOf) @ path: <base element> in the SCHEMA.\n" +
+            assertEquals("Unexpected value for schema property: <base element>.oneOf\n" +
                     "Array must contain at least 1 sub-schema.", e.getMessage());
         }
     }
@@ -175,9 +175,9 @@ public class ConditionalSchemaApplicationTest {
                     JsonParser.parse("{'not': {'const': 1}}"));
             fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
-            assertEquals("Unexpected value found for a property in json to validate.\n" +
-                    "Constraint broken from SCHEMA property (not) @ path: <base element>\n" +
-                    "Json successfully validated against the schema, but a failure was required.", e.getMessage());
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.not\n" +
+                    "Json successfully validated against the sub-schema, but a failure was required.", e.getMessage());
         }
     }
 
@@ -194,9 +194,9 @@ public class ConditionalSchemaApplicationTest {
             JsonSchemaEnforcer.validate(JsonParser.parse("1"),
                     JsonParser.parse("{'if': {'const': 1}, 'then': {'type': 'double'}}"));
         } catch (SchemaViolationException e) {
-            assertEquals("Value in json to validate had a different type than expected.\n" +
-                    "Constraint broken from SCHEMA property (type) @ path: then\n" +
-                    "Expected one of [double], got LONG.", e.getMessage());
+            assertEquals("Mismatched data type.\n" +
+                    "Schema constraint violated: then.type\n" +
+                    "Expected one of [DOUBLE], got LONG.", e.getMessage());
         }
     }
 
@@ -213,9 +213,9 @@ public class ConditionalSchemaApplicationTest {
             JsonSchemaEnforcer.validate(JsonParser.parse("1"),
                     JsonParser.parse("{'if': {'const': 2}, 'else': {'type': 'double'}}"));
         } catch (SchemaViolationException e) {
-            assertEquals("Value in json to validate had a different type than expected.\n" +
-                    "Constraint broken from SCHEMA property (type) @ path: else\n" +
-                    "Expected one of [double], got LONG.", e.getMessage());
+            assertEquals("Mismatched data type.\n" +
+                    "Schema constraint violated: else.type\n" +
+                    "Expected one of [DOUBLE], got LONG.", e.getMessage());
         }
     }
 }

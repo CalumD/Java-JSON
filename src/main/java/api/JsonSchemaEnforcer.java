@@ -8,7 +8,6 @@ import exceptions.schema.SchemaViolationException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -82,7 +81,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         if (currentPart.SCHEMA_SUBSET.contains("const")) {
             if (!currentPart.OBJECT_TO_VALIDATE.equals(currentPart.SCHEMA_SUBSET.getAnyAt("const"))) {
                 throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "const",
-                        "Value of json object did not match the constant.");
+                        "Value MUST match the schema's constant.");
             }
         }
 
@@ -105,68 +104,71 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private static void validateAllOf(JSONSchemaEnforcerPart currentPart) {
-        if (currentPart.SCHEMA_SUBSET.getDataTypeOf("allOf") != JSType.ARRAY) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "allOf",
-                    JSType.ARRAY, currentPart.SCHEMA_SUBSET.getDataTypeOf("allOf"));
-        }
-        if (currentPart.SCHEMA_SUBSET.getArrayAt("allOf").size() == 0) {
-            throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "allOf",
-                    "Array must contain at least 1 sub-schema.");
-        }
-        for (String key : currentPart.SCHEMA_SUBSET.getKeysOf("allOf")) {
-            new JSONSchemaEnforcerPart(currentPart.OBJECT_TO_VALIDATE, currentPart.SCHEMA_REFERENCE,
-                    currentPart.KEY_SO_FAR + ".allOf[" + key + "]").enforce();
+        try {
+            if (currentPart.SCHEMA_SUBSET.getArrayAt("allOf").size() == 0) {
+                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "allOf",
+                        "Array must contain at least 1 sub-schema.");
+            } else {
+                for (String arrayIndex : currentPart.SCHEMA_SUBSET.getKeysOf("allOf")) {
+                    new JSONSchemaEnforcerPart(currentPart.OBJECT_TO_VALIDATE, currentPart.SCHEMA_REFERENCE,
+                            currentPart.KEY_SO_FAR + ".allOf[" + arrayIndex + "]").enforce();
+                }
+            }
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "allOf", e);
         }
     }
 
     private static void validateAnyOf(JSONSchemaEnforcerPart currentPart) {
-        if (currentPart.SCHEMA_SUBSET.getDataTypeOf("anyOf") != JSType.ARRAY) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "anyOf",
-                    JSType.ARRAY, currentPart.SCHEMA_SUBSET.getDataTypeOf("anyOf"));
-        }
-        if (currentPart.SCHEMA_SUBSET.getArrayAt("anyOf").size() == 0) {
-            throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "anyOf",
-                    "Array must contain at least 1 sub-schema.");
-        }
-        for (String key : currentPart.SCHEMA_SUBSET.getKeysOf("anyOf")) {
-            try {
-                new JSONSchemaEnforcerPart(currentPart.OBJECT_TO_VALIDATE, currentPart.SCHEMA_REFERENCE,
-                        currentPart.KEY_SO_FAR + ".anyOf[" + key + "]").enforce();
-                return;
-            } catch (SchemaException e) {
-                // Trapping exceptions as we won't necessarily match all of these.
+        try {
+            if (currentPart.SCHEMA_SUBSET.getArrayAt("anyOf").size() == 0) {
+                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "anyOf",
+                        "Array must contain at least 1 sub-schema.");
+            } else {
+                for (String arrayIndex : currentPart.SCHEMA_SUBSET.getKeysOf("anyOf")) {
+                    try {
+                        new JSONSchemaEnforcerPart(currentPart.OBJECT_TO_VALIDATE, currentPart.SCHEMA_REFERENCE,
+                                currentPart.KEY_SO_FAR + ".anyOf[" + arrayIndex + "]").enforce();
+                        return;
+                    } catch (SchemaException e) {
+                        // Trapping exceptions as we won't necessarily match all of these.
+                    }
+                }
+                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "anyOf",
+                        "Provided json failed to match any of the sub-schemas provided.");
             }
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "anyOf", e);
         }
-        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "anyOf",
-                "Provided json failed to match any of the sub-schemas provided.");
     }
 
     private static void validateOneOf(JSONSchemaEnforcerPart currentPart) {
-        if (currentPart.SCHEMA_SUBSET.getDataTypeOf("oneOf") != JSType.ARRAY) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "oneOf",
-                    JSType.ARRAY, currentPart.SCHEMA_SUBSET.getDataTypeOf("oneOf"));
-        }
-        if (currentPart.SCHEMA_SUBSET.getArrayAt("oneOf").size() == 0) {
-            throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "oneOf",
-                    "Array must contain at least 1 sub-schema.");
-        }
-        long schemasMatched = 0;
-        for (String key : currentPart.SCHEMA_SUBSET.getKeysOf("oneOf")) {
-            try {
-                new JSONSchemaEnforcerPart(currentPart.OBJECT_TO_VALIDATE, currentPart.SCHEMA_REFERENCE,
-                        currentPart.KEY_SO_FAR + ".oneOf[" + key + "]").enforce();
-            } catch (SchemaException e) {
-                // Trapping exceptions as we won't necessarily match all of these.
-                schemasMatched--;
+        try {
+            if (currentPart.SCHEMA_SUBSET.getArrayAt("oneOf").size() == 0) {
+                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "oneOf",
+                        "Array must contain at least 1 sub-schema.");
+            } else {
+                long schemasMatched = 0;
+                for (String key : currentPart.SCHEMA_SUBSET.getKeysOf("oneOf")) {
+                    try {
+                        new JSONSchemaEnforcerPart(currentPart.OBJECT_TO_VALIDATE, currentPart.SCHEMA_REFERENCE,
+                                currentPart.KEY_SO_FAR + ".oneOf[" + key + "]").enforce();
+                    } catch (SchemaException e) {
+                        // Trapping exceptions as we won't necessarily match all of these.
+                        schemasMatched--;
+                    }
+                    if (++schemasMatched > 1) {
+                        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "oneOf",
+                                "Json validated against more than one sub-schema.");
+                    }
+                }
+                if (schemasMatched != 1) {
+                    throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "oneOf",
+                            "Provided json failed to match any of the sub-schemas provided.");
+                }
             }
-            if (++schemasMatched > 1) {
-                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "oneOf",
-                        "Json validated against more than one sub-schema.");
-            }
-        }
-        if (schemasMatched != 1) {
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "oneOf",
-                    "Provided json failed to match any of the sub-schemas provided.");
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "oneOf", e);
         }
     }
 
@@ -179,7 +181,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
             return;
         }
         throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "not",
-                "Json successfully validated against the schema, but a failure was required.");
+                "Json successfully validated against the sub-schema, but a failure was required.");
     }
 
     private static void validateIf(JSONSchemaEnforcerPart currentPart) {
@@ -205,12 +207,9 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         IJson type = currentPart.SCHEMA_SUBSET.getAnyAt("type");
         switch (type.getDataType()) {
             case STRING:
-                String dataType = currentPart.SCHEMA_SUBSET.getStringAt("type").toLowerCase();
-                if (!ALLOWED_DATA_TYPE_NAMES.contains(dataType)) {
-                    throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "type",
-                            "Unknown type provided: (" + dataType + ")");
-                }
-                validateType(currentPart, Collections.singletonList(dataType));
+                ArrayList<String> allowedType = new ArrayList<>(1);
+                allowedType.add(currentPart.SCHEMA_SUBSET.getStringAt("type").toLowerCase());
+                validateType(currentPart, allowedType);
                 break;
             case ARRAY:
                 Set<String> distinctTypes = new HashSet<>(10);
@@ -219,11 +218,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                         distinctTypes.add(distinctType.getString());
                     } catch (KeyDifferentTypeException e) {
                         throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "type",
-                                "All values in the (type) property MUST be a valid, distinct String.");
-                    }
-                    if (!ALLOWED_DATA_TYPE_NAMES.contains(distinctType.getString().toLowerCase())) {
-                        throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "type",
-                                "Unknown type provided: (" + distinctType.getString() + ")");
+                                "All values in the (type) property MUST be a valid, distinct STRING.", e);
                     }
                 }
                 if (distinctTypes.size() == 0) {
@@ -233,7 +228,8 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 validateType(currentPart, new ArrayList<>(distinctTypes));
                 break;
             default:
-                throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "type", Arrays.asList("STRING", "ARRAY"), type.getDataType());
+                throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "type",
+                        "Expected one of " + Arrays.asList("STRING", "ARRAY") + ", got " + type.getDataType() + ".");
         }
     }
 
@@ -271,19 +267,23 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                             "Unrecognised/Unsupported type provided (" + allowedType + ").");
             }
         }
-        throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "type", allowedTypes, currentDataType);
+        allowedTypes.replaceAll(String::toUpperCase);
+        throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "type",
+                "Expected one of " + allowedTypes + ", got " + currentDataType + ".");
     }
 
     private static void validateEnum(JSONSchemaEnforcerPart currentPart) {
-        if (!(currentPart.SCHEMA_SUBSET.getDataTypeOf("enum") == JSType.ARRAY)) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "enum", JSType.ARRAY, currentPart.SCHEMA_SUBSET.getDataTypeOf("enum"));
-        }
-        for (IJson instance : currentPart.SCHEMA_SUBSET.getArrayAt("enum")) {
-            if (currentPart.OBJECT_TO_VALIDATE.equals(instance)) {
-                return;
+        try {
+            for (IJson instance : currentPart.SCHEMA_SUBSET.getArrayAt("enum")) {
+                if (currentPart.OBJECT_TO_VALIDATE.equals(instance)) {
+                    return;
+                }
             }
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "enum",
+                    "Object did not match any options provided by the enum.");
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "enum", e);
         }
-        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "enum", "Object did not match any options provided by the enum.");
     }
 
     private static void validateNumericInstance(JSONSchemaEnforcerPart currentPart) {
@@ -344,64 +344,76 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
 
     private static SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName) {
-        String path = parentOfMissingProperty.equals("") ? "<base element>" : parentOfMissingProperty;
-        String message = "Invalid.";
-        switch (source) {
-            case SCHEMA:
-                message = "Missing property (" + propertyName + ") @ path: " + path + " within the SCHEMA.";
-                break;
-            case OBJECT_TO_VALIDATE:
-                message = "Missing property in json to validate." + schemaConstraintBrokenMessage(propertyName, path);
-                break;
-        }
-        return doThrow(source, message);
+        return missingProperty(source, parentOfMissingProperty, propertyName, null);
     }
 
     private static SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName, Throwable cause) {
-        return doThrow(source, missingProperty(source, parentOfMissingProperty, propertyName).getMessage(), cause);
-    }
-
-    private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, List<String> expectedTypes, JSType gotType) {
-        String path = parentOfMissingProperty.equals("") ? "<base element>" : parentOfMissingProperty;
         String message = "Invalid.";
         switch (source) {
             case SCHEMA:
-                message = "The value for (" + propertyName + ") @ path: " + path + " was the wrong type in the SCHEMA.";
+                message = "Missing property in schema at: " + schemaErrorKeyChain(propertyName, parentOfMissingProperty);
                 break;
             case OBJECT_TO_VALIDATE:
-                message = "Value in json to validate had a different type than expected." + schemaConstraintBrokenMessage(propertyName, path);
+                message = "Missing property.\n" +
+                        "Schema constraint violated: " + schemaErrorKeyChain(propertyName, parentOfMissingProperty);
                 break;
         }
-        new ArrayList<>(expectedTypes).replaceAll(String::toUpperCase);
-        message += "\nExpected one of " + expectedTypes + ", got " + gotType + ".";
-        return doThrow(source, message);
+        message += getErrorCauseMessage(cause);
+        return cause == null
+                ? doThrow(source, message)
+                : doThrow(source, message, cause);
     }
 
-    private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, JSType expectedType, JSType gotType) {
-        return valueDifferentType(source, parentOfMissingProperty, propertyName, Collections.singletonList(expectedType.toString()), gotType);
+    private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName) {
+        return valueDifferentType(source, parentOfMissingProperty, propertyName, "");
     }
 
-    private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, JSType expectedType, JSType gotType, Throwable cause) {
-        return doThrow(source, valueDifferentType(source, parentOfMissingProperty, propertyName, expectedType, gotType).getMessage(), cause);
+    private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason) {
+        return valueDifferentType(source, parentOfMissingProperty, propertyName, reason, null);
+    }
+
+    private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, KeyDifferentTypeException cause) {
+        return valueDifferentType(source, parentOfMissingProperty, propertyName, "", cause);
+    }
+
+    private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason, KeyDifferentTypeException cause) {
+        String message = "Invalid.";
+        switch (source) {
+            case SCHEMA:
+                message = "Wrong type for schema property: " + schemaErrorKeyChain(propertyName, parentOfMissingProperty);
+                break;
+            case OBJECT_TO_VALIDATE:
+                message = "Mismatched data type.\n" +
+                        "Schema constraint violated: " + schemaErrorKeyChain(propertyName, parentOfMissingProperty);
+                break;
+        }
+        message += (reason.equals("") ? "" : "\n" + reason);
+        message += getErrorCauseMessage(cause);
+        return cause == null
+                ? doThrow(source, message)
+                : doThrow(source, message, cause);
     }
 
     private static SchemaException valueUnexpected(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason) {
-        String path = parentOfMissingProperty.equals("") ? "<base element>" : parentOfMissingProperty;
-        String message = "Invalid.";
-        switch (source) {
-            case SCHEMA:
-                message = "Unexpected value for (" + propertyName + ") @ path: " + path + " in the SCHEMA.";
-                break;
-            case OBJECT_TO_VALIDATE:
-                message = "Unexpected value found for a property in json to validate." + schemaConstraintBrokenMessage(propertyName, path);
-                break;
-        }
-        message += "\n" + reason;
-        return doThrow(source, message);
+        return valueUnexpected(source, parentOfMissingProperty, propertyName, reason, null);
     }
 
     private static SchemaException valueUnexpected(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason, Throwable cause) {
-        return doThrow(source, valueUnexpected(source, parentOfMissingProperty, propertyName, reason).getMessage(), cause);
+        String message = "Invalid.";
+        switch (source) {
+            case SCHEMA:
+                message = "Unexpected value for schema property: " + schemaErrorKeyChain(propertyName, parentOfMissingProperty);
+                break;
+            case OBJECT_TO_VALIDATE:
+                message = "Unexpected value.\n" +
+                        "Schema constraint violated: " + schemaErrorKeyChain(propertyName, parentOfMissingProperty);
+                break;
+        }
+        message += (reason.equals("") ? "" : "\n" + reason);
+        message += getErrorCauseMessage(cause);
+        return cause == null
+                ? doThrow(source, message)
+                : doThrow(source, message, cause);
     }
 
     private static SchemaException doThrow(SourceOfProblem source, String message) {
@@ -426,7 +438,19 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private static String schemaConstraintBrokenMessage(String propertyName, String path) {
-        return "\nConstraint broken from SCHEMA property (" + propertyName + ") @ path: " + path;
+    private static String getErrorCauseMessage(Throwable cause) {
+        if (cause != null) {
+            String[] causeMessage = cause.getMessage().split("\\. ");
+            if (causeMessage.length >= 2) {
+                return "\n" + causeMessage[1];
+            } else {
+                return "\n" + cause.getMessage();
+            }
+        }
+        return "";
+    }
+
+    private static String schemaErrorKeyChain(String propertyName, String path) {
+        return (path.equals("") ? "<base element>" : path) + "." + propertyName;
     }
 }

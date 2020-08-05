@@ -18,8 +18,8 @@ public class EnumTest {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'enum': 'wrong'}"));
             fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
-            assertEquals("The value for (enum) @ path: <base element> was the wrong type in the SCHEMA.\n" +
-                    "Expected one of [ARRAY], got STRING.", e.getMessage());
+            assertEquals("Wrong type for schema property: <base element>.enum\n" +
+                    "Expected: ARRAY  ->  Received: STRING", e.getMessage());
         }
     }
 
@@ -46,8 +46,8 @@ public class EnumTest {
                     JsonParser.parse("{'enum': [1,2,3,4,5]}"));
             fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
-            assertEquals("Unexpected value found for a property in json to validate.\n" +
-                    "Constraint broken from SCHEMA property (enum) @ path: <base element>\n" +
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.enum\n" +
                     "Object did not match any options provided by the enum.", e.getMessage());
         }
     }
@@ -75,9 +75,9 @@ public class EnumTest {
                     JsonParser.parse("{'const': 'some string.'}"));
             fail("Previous method call should have thrown an exception");
         } catch (SchemaViolationException e) {
-            assertEquals("Unexpected value found for a property in json to validate.\n" +
-                    "Constraint broken from SCHEMA property (const) @ path: <base element>\n" +
-                    "Value of json object did not match the constant.", e.getMessage());
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.const\n" +
+                    "Value MUST match the schema's constant.", e.getMessage());
         }
     }
 }
