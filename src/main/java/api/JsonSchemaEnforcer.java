@@ -61,6 +61,9 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
 
         private boolean enforce() {
+            // TODO: CONVERT EVERY CONSTRAINT KEYWORD INTO A BIG SWITCH STATEMENT ON KEYS
+            //  and throw exception if a keyword isn't recognised, as it's not supported.
+
             Set<String> constraintsSeen = new HashSet<>();
             /*constraintsSeen.addAll(*/
             validateKeywordsForAllInstanceTypes(this)/*)*/;
