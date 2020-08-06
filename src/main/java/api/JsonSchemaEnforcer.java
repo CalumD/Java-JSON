@@ -3,9 +3,11 @@ package api;
 import core.JSType;
 import exceptions.SchemaException;
 import exceptions.json.KeyDifferentTypeException;
+import exceptions.json.KeyNotFoundException;
 import exceptions.schema.InvalidSchemaException;
 import exceptions.schema.SchemaViolationException;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -15,9 +17,6 @@ import java.util.Set;
 public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
     private enum SourceOfProblem {SCHEMA, OBJECT_TO_VALIDATE}
-
-    private static final Set<String> ALLOWED_DATA_TYPE_NAMES = new HashSet<>(Arrays.asList(
-            "array", "list", "boolean", "long", "integer", "double", "number", "string", "object", "null", "undefined"));
 
     public static boolean validateStrict(IJson objectToValidate, IJson againstSchema) {
         return new JsonSchemaEnforcer().validateWithOutReasoning(objectToValidate, againstSchema);
@@ -62,12 +61,42 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
 
         private boolean enforce() {
-            validateKeywordsForAllInstanceTypes(this);
-            validateNumericInstance(this);
-            validateStringInstance(this);
-            validateArrayInstance(this);
-            validateObjectInstance(this);
+            Set<String> constraintsSeen = new HashSet<>();
+            /*constraintsSeen.addAll(*/
+            validateKeywordsForAllInstanceTypes(this)/*)*/;
+            /*constraintsSeen.addAll(*/
+            validateNumericInstance(this)/*)*/;
+            /*constraintsSeen.addAll(*/
+            validateStringInstance(this)/*)*/;
+            /*constraintsSeen.addAll(*/
+            validateArrayInstance(this)/*)*/;
+            /*constraintsSeen.addAll(*/
+            validateObjectInstance(this)/*)*/;
+            Set<String> refConstraints = validate$Ref(constraintsSeen);
+            if (refConstraints.size() != 0) {
+                // TODO: Do something with the refConstraints
+            }
             return true;
+        }
+
+        private Set<String> validate$Ref(Set<String> constraintsSeen) {
+            Set<String> keysToUse = new HashSet<>();
+            if (this.SCHEMA_SUBSET.contains("$ref")) {
+                try {
+                    IJson ref = this.SCHEMA_SUBSET.getJSONObjectAt(""/* TODO: Get the $REF referenced; */);
+                    for (String key : ref.getKeys()) {
+                        if (!constraintsSeen.contains(key)) {
+                            keysToUse.add(key);
+                        }
+                    }
+                } catch (KeyNotFoundException e) {
+                    throw missingProperty(SourceOfProblem.SCHEMA, KEY_SO_FAR, "$ref", e);
+                } catch (KeyDifferentTypeException e) {
+                    throw valueDifferentType(SourceOfProblem.SCHEMA, KEY_SO_FAR, "$ref",
+                            "$ref must link to a valid sub-schema object.", e);
+                }
+            }
+            return keysToUse;
         }
     }
 
@@ -287,11 +316,46 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private static void validateNumericInstance(JSONSchemaEnforcerPart currentPart) {
-        // TODO: multipleOf
-        // TODO: maximum
-        // TODO: exclusiveMaximum
-        // TODO: minimum
-        // TODO: exclusiveMinimum
+        if (currentPart.SCHEMA_SUBSET.contains("multipleOf")) {
+            BigDecimal numberFromSchema = getComparableNumber(currentPart, "multipleOf", true);
+            if (numberFromSchema.equals(BigDecimal.ZERO)) {
+                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "multipleOf",
+                        "You cannot use a multiple of 0.");
+            }
+            if ((getComparableNumber(currentPart, "multipleOf", false).remainder(numberFromSchema))
+                    .compareTo(BigDecimal.ZERO) != 0) {
+                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "multipleOf",
+                        "Value was not a multiple of schema value.");
+            }
+        }
+        if (currentPart.SCHEMA_SUBSET.contains("maximum")) {
+            if ((getComparableNumber(currentPart, "maximum", false)
+                    .compareTo(getComparableNumber(currentPart, "maximum", true))) > 0) {
+                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "maximum",
+                        "Value was greater than the upper bound.");
+            }
+        }
+        if (currentPart.SCHEMA_SUBSET.contains("exclusiveMaximum")) {
+            if ((getComparableNumber(currentPart, "exclusiveMaximum", false)
+                    .compareTo(getComparableNumber(currentPart, "exclusiveMaximum", true))) >= 0) {
+                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "exclusiveMaximum",
+                        "Value was greater than or equal to the upper bound.");
+            }
+        }
+        if (currentPart.SCHEMA_SUBSET.contains("minimum")) {
+            if ((getComparableNumber(currentPart, "minimum", false)
+                    .compareTo(getComparableNumber(currentPart, "minimum", true))) < 0) {
+                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "minimum",
+                        "Value was lower than the lower bound.");
+            }
+        }
+        if (currentPart.SCHEMA_SUBSET.contains("exclusiveMinimum")) {
+            if ((getComparableNumber(currentPart, "exclusiveMinimum", false)
+                    .compareTo(getComparableNumber(currentPart, "exclusiveMinimum", true))) <= 0) {
+                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "exclusiveMinimum",
+                        "Value was lower than or equal to the lower bound.");
+            }
+        }
     }
 
     private static void validateStringInstance(JSONSchemaEnforcerPart currentPart) {
@@ -340,6 +404,22 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         // TODO: uri-template
         // TODO: json pointer
         // TODO: regex
+    }
+
+    private static BigDecimal getComparableNumber(JSONSchemaEnforcerPart currentPart, String propertyKey, boolean isForSchema) {
+        IJson constraint = isForSchema ? currentPart.SCHEMA_SUBSET.getAnyAt(propertyKey) : currentPart.OBJECT_TO_VALIDATE;
+        JSType constraintType = constraint.getDataType();
+        if (constraintType != JSType.DOUBLE && constraintType != JSType.LONG) {
+            throw (isForSchema
+                    ? valueDifferentType(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, propertyKey,
+                    "Expected NUMBER, got " + constraintType + ".")
+                    : valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, propertyKey,
+                    "Value to verify must be a number.")
+            );
+        }
+        return (constraintType == JSType.LONG)
+                ? BigDecimal.valueOf(constraint.getLong())
+                : BigDecimal.valueOf(constraint.getDouble());
     }
 
 
