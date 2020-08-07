@@ -1,6 +1,28 @@
 {
-  "type": [
-    "double",
-    "double"
-  ]
+  "allOf": [
+    {
+      "maximum": 50,
+      "$ref": "wow.foo[0].bar"
+    }
+  ],
+  "wow": {
+    "foo": [
+      {
+        "bar": {
+          "minimum": 5,
+          "description": "me too",
+          "$ref": "wow.other"
+        },
+        "description": "i should be ignored"
+      },
+      1
+    ],
+    "other": {
+      "maximum": 20,
+      "$ref": "final"
+    }
+  },
+  "final": {
+    "const": 7
+  }
 }
