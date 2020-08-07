@@ -50,7 +50,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         return (new JsonSchemaEnforcerPart(objectToValidate, schema, schema, "", subSchemaReferencesSeen, new HashSet<>())).enforce();
     }
 
-    private static final class JsonSchemaEnforcerPart {
+    private final class JsonSchemaEnforcerPart {
         private final IJson SCHEMA_REFERENCE; // The Full Schema
         private final IJson OBJECT_TO_VALIDATE; // The Current object to validate
         private final String PATH_IN_SCHEMA; // The Key in the Full Schema we are at (Not Necessarily valid json key)
@@ -231,7 +231,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
 
     /* CONDITIONAL VALIDATIONS */
-    private static void validateAllOf(JsonSchemaEnforcerPart currentPart) {
+    private void validateAllOf(JsonSchemaEnforcerPart currentPart) {
         try {
             if (currentPart.SCHEMA_SUBSET.getArrayAt("allOf").size() == 0) {
                 throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "allOf",
@@ -247,7 +247,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private static void validateAnyOf(JsonSchemaEnforcerPart currentPart) {
+    private void validateAnyOf(JsonSchemaEnforcerPart currentPart) {
         try {
             if (currentPart.SCHEMA_SUBSET.getArrayAt("anyOf").size() == 0) {
                 throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "anyOf",
@@ -270,7 +270,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private static void validateOneOf(JsonSchemaEnforcerPart currentPart) {
+    private void validateOneOf(JsonSchemaEnforcerPart currentPart) {
         try {
             if (currentPart.SCHEMA_SUBSET.getArrayAt("oneOf").size() == 0) {
                 throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "oneOf",
@@ -300,7 +300,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private static void validateNot(JsonSchemaEnforcerPart currentPart) {
+    private void validateNot(JsonSchemaEnforcerPart currentPart) {
         try {
             subEnforce(currentPart, currentPart.SCHEMA_SUBSET.getAnyAt("not"), currentPart.PATH_IN_SCHEMA + ".not");
         } catch (SchemaException e) {
@@ -311,7 +311,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 "Json successfully validated against the sub-schema, but a failure was required.");
     }
 
-    private static void validateIf(JsonSchemaEnforcerPart currentPart) {
+    private void validateIf(JsonSchemaEnforcerPart currentPart) {
         boolean validatedAgainstIf = false;
         try {
             subEnforce(currentPart, currentPart.SCHEMA_SUBSET.getAnyAt("if"), currentPart.PATH_IN_SCHEMA + ".if");
@@ -327,7 +327,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private static void validateType(JsonSchemaEnforcerPart currentPart) {
+    private void validateType(JsonSchemaEnforcerPart currentPart) {
         IJson type = currentPart.SCHEMA_SUBSET.getAnyAt("type");
         switch (type.getDataType()) {
             case STRING:
@@ -357,7 +357,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private static void validateType(JsonSchemaEnforcerPart currentPart, List<String> allowedTypes) {
+    private void validateType(JsonSchemaEnforcerPart currentPart, List<String> allowedTypes) {
         JSType currentDataType = currentPart.OBJECT_TO_VALIDATE.getDataType();
         for (String allowedType : allowedTypes) {
             switch (allowedType) {
@@ -396,7 +396,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 "Expected one of " + allowedTypes + ", got " + currentDataType + ".");
     }
 
-    private static void validateEnum(JsonSchemaEnforcerPart currentPart) {
+    private void validateEnum(JsonSchemaEnforcerPart currentPart) {
         try {
             for (IJson instance : currentPart.SCHEMA_SUBSET.getArrayAt("enum")) {
                 if (currentPart.OBJECT_TO_VALIDATE.equals(instance)) {
@@ -412,7 +412,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
 
     /* NUMBERS */
-    private static void validateMultipleOf(JsonSchemaEnforcerPart currentPart) {
+    private void validateMultipleOf(JsonSchemaEnforcerPart currentPart) {
         BigDecimal numberFromSchema = getComparableNumber(currentPart, "multipleOf", true);
         if (numberFromSchema.equals(BigDecimal.ZERO)) {
             throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "multipleOf",
@@ -425,7 +425,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private static void validateMaximum(JsonSchemaEnforcerPart currentPart) {
+    private void validateMaximum(JsonSchemaEnforcerPart currentPart) {
         if ((getComparableNumber(currentPart, "maximum", false)
                 .compareTo(getComparableNumber(currentPart, "maximum", true))) > 0) {
             throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maximum",
@@ -433,7 +433,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private static void validateExclusiveMaximum(JsonSchemaEnforcerPart currentPart) {
+    private void validateExclusiveMaximum(JsonSchemaEnforcerPart currentPart) {
         if ((getComparableNumber(currentPart, "exclusiveMaximum", false)
                 .compareTo(getComparableNumber(currentPart, "exclusiveMaximum", true))) >= 0) {
             throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "exclusiveMaximum",
@@ -441,7 +441,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private static void validateMinimum(JsonSchemaEnforcerPart currentPart) {
+    private void validateMinimum(JsonSchemaEnforcerPart currentPart) {
         if ((getComparableNumber(currentPart, "minimum", false)
                 .compareTo(getComparableNumber(currentPart, "minimum", true))) < 0) {
             throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "minimum",
@@ -449,7 +449,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private static void validateExclusiveMinimum(JsonSchemaEnforcerPart currentPart) {
+    private void validateExclusiveMinimum(JsonSchemaEnforcerPart currentPart) {
         if ((getComparableNumber(currentPart, "exclusiveMinimum", false)
                 .compareTo(getComparableNumber(currentPart, "exclusiveMinimum", true))) <= 0) {
             throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "exclusiveMinimum",
@@ -459,95 +459,95 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
 
     /* OBJECTS */
-    private static void validateUnevaluatedProperties(JsonSchemaEnforcerPart currentPart) {
+    private void validateUnevaluatedProperties(JsonSchemaEnforcerPart currentPart) {
 
     }
 
-    private static void validatePropertyNames(JsonSchemaEnforcerPart currentPart) {
+    private void validatePropertyNames(JsonSchemaEnforcerPart currentPart) {
 
     }
 
-    private static void validateAdditionalProperties(JsonSchemaEnforcerPart currentPart) {
+    private void validateAdditionalProperties(JsonSchemaEnforcerPart currentPart) {
 
     }
 
-    private static void validatePatternProperties(JsonSchemaEnforcerPart currentPart) {
+    private void validatePatternProperties(JsonSchemaEnforcerPart currentPart) {
 
     }
 
-    private static void validateProperties(JsonSchemaEnforcerPart currentPart) {
+    private void validateProperties(JsonSchemaEnforcerPart currentPart) {
 
     }
 
-    private static void validateDependentRequired(JsonSchemaEnforcerPart currentPart) {
+    private void validateDependentRequired(JsonSchemaEnforcerPart currentPart) {
 
     }
 
-    private static void validateRequired(JsonSchemaEnforcerPart currentPart) {
+    private void validateRequired(JsonSchemaEnforcerPart currentPart) {
 
     }
 
-    private static void validateMinProperties(JsonSchemaEnforcerPart currentPart) {
+    private void validateMinProperties(JsonSchemaEnforcerPart currentPart) {
 
     }
 
-    private static void validateMaxProperties(JsonSchemaEnforcerPart currentPart) {
+    private void validateMaxProperties(JsonSchemaEnforcerPart currentPart) {
 
     }
 
 
     /* ARRAYS */
-    private static void validateUnevaluatedItems(JsonSchemaEnforcerPart currentPart) {
+    private void validateUnevaluatedItems(JsonSchemaEnforcerPart currentPart) {
 
     }
 
-    private static void validateContains(JsonSchemaEnforcerPart currentPart) {
+    private void validateContains(JsonSchemaEnforcerPart currentPart) {
 
     }
 
-    private static void validateAdditionalItems(JsonSchemaEnforcerPart currentPart) {
+    private void validateAdditionalItems(JsonSchemaEnforcerPart currentPart) {
 
     }
 
-    private static void validateItems(JsonSchemaEnforcerPart currentPart) {
+    private void validateItems(JsonSchemaEnforcerPart currentPart) {
 
     }
 
-    private static void validateMinContains(JsonSchemaEnforcerPart currentPart) {
+    private void validateMinContains(JsonSchemaEnforcerPart currentPart) {
 
     }
 
-    private static void validateMaxContains(JsonSchemaEnforcerPart currentPart) {
-
-
-    }
-
-    private static void validateUniqueItems(JsonSchemaEnforcerPart currentPart) {
+    private void validateMaxContains(JsonSchemaEnforcerPart currentPart) {
 
 
     }
 
-    private static void validateMinItems(JsonSchemaEnforcerPart currentPart) {
+    private void validateUniqueItems(JsonSchemaEnforcerPart currentPart) {
+
 
     }
 
-    private static void validateMaxItems(JsonSchemaEnforcerPart currentPart) {
+    private void validateMinItems(JsonSchemaEnforcerPart currentPart) {
+
+    }
+
+    private void validateMaxItems(JsonSchemaEnforcerPart currentPart) {
 
     }
 
 
     /* STRINGS */
-    private static void validatePattern(JsonSchemaEnforcerPart currentPart) {
+    private void validatePattern(JsonSchemaEnforcerPart currentPart) {
 
     }
 
-    private static void validateMinLength(JsonSchemaEnforcerPart currentPart) {
+    private void validateMinLength(JsonSchemaEnforcerPart currentPart) {
     }
 
-    private static void validateMaxLength(JsonSchemaEnforcerPart currentPart) {
+    private void validateMaxLength(JsonSchemaEnforcerPart currentPart) {
     }
 
-    private static void validateFormat(JsonSchemaEnforcerPart currentPart) {
+    private void validateFormat(JsonSchemaEnforcerPart currentPart) {
         // TODO: dates/times/duration
         // TODO: emails
         //            "email Regex".matches("^((([!#$%&'*+\\-/=?^_`{|}~\\w])|([!#$%&'*+\\-/=?^_`{|}~\\w][!#$%&'*+\\-/=?^_`{|}~\\.\\w]{0,}[!#$%&'*+\\-/=?^_`{|}~\\w]))[@]\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*)$");
@@ -561,7 +561,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
 
     /* Utils */
-    private static BigDecimal getComparableNumber(JsonSchemaEnforcerPart currentPart, String propertyKey, boolean isForSchema) {
+    private BigDecimal getComparableNumber(JsonSchemaEnforcerPart currentPart, String propertyKey, boolean isForSchema) {
         IJson constraint = isForSchema ? currentPart.SCHEMA_SUBSET.getAnyAt(propertyKey) : currentPart.OBJECT_TO_VALIDATE;
         JSType constraintType = constraint.getDataType();
         if (constraintType != JSType.DOUBLE && constraintType != JSType.LONG) {
@@ -577,17 +577,17 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 : BigDecimal.valueOf(constraint.getDouble());
     }
 
-    private static String convert$RefToJsonKey(String $ref) {
+    private String convert$RefToJsonKey(String $ref) {
 
         // TODO:  ACTUALLY IMPLEMENT THIS METHOD
         return $ref;
     }
 
-    private static boolean subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema) {
+    private boolean subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema) {
         return subEnforce(currentPart, updatedSubSchema, updatedPathInSchema, new HashSet<>());
     }
 
-    private static boolean subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema, Set<String> constraintsSeen) {
+    private boolean subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema, Set<String> constraintsSeen) {
         return new JsonSchemaEnforcerPart(
                 currentPart.OBJECT_TO_VALIDATE,
                 currentPart.SCHEMA_REFERENCE,
@@ -600,11 +600,11 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
 
     /* ERROR MANAGEMENT */
-    private static SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName) {
+    private SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName) {
         return missingProperty(source, parentOfMissingProperty, propertyName, null);
     }
 
-    private static SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName, Throwable cause) {
+    private SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName, Throwable cause) {
         String message = "Invalid.";
         switch (source) {
             case SCHEMA:
@@ -621,19 +621,19 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 : doThrow(source, message, cause);
     }
 
-    private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName) {
+    private SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName) {
         return valueDifferentType(source, parentOfMissingProperty, propertyName, "");
     }
 
-    private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason) {
+    private SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason) {
         return valueDifferentType(source, parentOfMissingProperty, propertyName, reason, null);
     }
 
-    private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, KeyDifferentTypeException cause) {
+    private SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, KeyDifferentTypeException cause) {
         return valueDifferentType(source, parentOfMissingProperty, propertyName, "", cause);
     }
 
-    private static SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason, KeyDifferentTypeException cause) {
+    private SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason, KeyDifferentTypeException cause) {
         String message = "Invalid.";
         switch (source) {
             case SCHEMA:
@@ -651,11 +651,11 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 : doThrow(source, message, cause);
     }
 
-    private static SchemaException valueUnexpected(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason) {
+    private SchemaException valueUnexpected(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason) {
         return valueUnexpected(source, parentOfMissingProperty, propertyName, reason, null);
     }
 
-    private static SchemaException valueUnexpected(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason, Throwable cause) {
+    private SchemaException valueUnexpected(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason, Throwable cause) {
         String message = "Invalid.";
         switch (source) {
             case SCHEMA:
@@ -673,7 +673,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 : doThrow(source, message, cause);
     }
 
-    private static SchemaException doThrow(SourceOfProblem source, String message) {
+    private SchemaException doThrow(SourceOfProblem source, String message) {
         switch (source) {
             case SCHEMA:
                 return new InvalidSchemaException(message);
@@ -684,7 +684,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private static SchemaException doThrow(SourceOfProblem source, String message, Throwable cause) {
+    private SchemaException doThrow(SourceOfProblem source, String message, Throwable cause) {
         switch (source) {
             case SCHEMA:
                 return new InvalidSchemaException(message, cause);
@@ -695,7 +695,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private static String getErrorCauseMessage(Throwable cause) {
+    private String getErrorCauseMessage(Throwable cause) {
         if (cause != null) {
             String[] causeMessage = cause.getMessage().split("\\. ");
             if (causeMessage.length >= 2) {
@@ -707,7 +707,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         return "";
     }
 
-    private static String schemaErrorKeyChain(String propertyName, String path) {
+    private String schemaErrorKeyChain(String propertyName, String path) {
         return (path.equals("") ? "<base element>" : path) + "." + propertyName;
     }
 }
