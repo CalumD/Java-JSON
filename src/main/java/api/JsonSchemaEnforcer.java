@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -538,13 +539,71 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
     /* STRINGS */
     private void validatePattern(JsonSchemaEnforcerPart currentPart) {
-
+        Pattern verifiedPattern;
+        String objectToConstrain;
+        try {
+            verifiedPattern = Pattern.compile(currentPart.SCHEMA_SUBSET.getStringAt("pattern"));
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "pattern", e);
+        } catch (Exception e) {
+            throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "pattern",
+                    "Pattern provided was not a valid regex pattern.", e);
+        }
+        try {
+            objectToConstrain = currentPart.OBJECT_TO_VALIDATE.getString();
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "pattern", e);
+        }
+        if (!objectToConstrain.matches(verifiedPattern.pattern())) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "pattern",
+                    "Value did not match the provided pattern.");
+        }
     }
 
     private void validateMinLength(JsonSchemaEnforcerPart currentPart) {
+        long minLength;
+        String objectToConstrain;
+        try {
+            minLength = currentPart.SCHEMA_SUBSET.getLongAt("minLength");
+            if (minLength < 0) {
+                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "minLength",
+                        "Cannot constrain string length using a negative number.");
+            }
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "minLength", e);
+        }
+        try {
+            objectToConstrain = currentPart.OBJECT_TO_VALIDATE.getString();
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "minLength", e);
+        }
+        if (objectToConstrain.length() < minLength) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "minLength",
+                    "String length was shorter than the minimum bound.");
+        }
     }
 
     private void validateMaxLength(JsonSchemaEnforcerPart currentPart) {
+        long maxLength;
+        String objectToConstrain;
+        try {
+            maxLength = currentPart.SCHEMA_SUBSET.getLongAt("maxLength");
+            if (maxLength < 0) {
+                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "maxLength",
+                        "Cannot constrain string length using a negative number.");
+            }
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "maxLength", e);
+        }
+        try {
+            objectToConstrain = currentPart.OBJECT_TO_VALIDATE.getString();
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maxLength", e);
+        }
+        if (objectToConstrain.length() > maxLength) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maxLength",
+                    "String length was longer than the maximum bound.");
+        }
     }
 
     private void validateFormat(JsonSchemaEnforcerPart currentPart) {
@@ -697,12 +756,13 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
     private String getErrorCauseMessage(Throwable cause) {
         if (cause != null) {
-            String[] causeMessage = cause.getMessage().split("\\. ");
-            if (causeMessage.length >= 2) {
-                return "\n" + causeMessage[1];
-            } else {
-                return "\n" + cause.getMessage();
+            if (cause instanceof KeyDifferentTypeException) {
+                String[] causeMessage = cause.getMessage().split("\\. ");
+                if (causeMessage.length >= 2) {
+                    return "\n" + causeMessage[1];
+                }
             }
+            return "\n(" + cause.getMessage().split("\\r?\\n")[0] + ")";
         }
         return "";
     }
