@@ -48,10 +48,10 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private static final class JSONSchemaEnforcerPart {
-        private final IJson SCHEMA_REFERENCE;
-        private final IJson OBJECT_TO_VALIDATE;
-        private final String KEY_SO_FAR;
-        private final IJson SCHEMA_SUBSET;
+        private final IJson SCHEMA_REFERENCE; // The Full Schema
+        private final IJson OBJECT_TO_VALIDATE; // The Current object to validate
+        private final String KEY_SO_FAR; // The Key in the Full Schema we are at
+        private final IJson SCHEMA_SUBSET; // The Schema Subset at the given key
 
         private JSONSchemaEnforcerPart(IJson objectToValidate, IJson schemaReference, String schemaKeySoFar) {
             this.OBJECT_TO_VALIDATE = objectToValidate;
@@ -61,35 +61,23 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
 
         private boolean enforce() {
-            // TODO: CONVERT EVERY CONSTRAINT KEYWORD INTO A BIG SWITCH STATEMENT ON KEYS
-            //  and throw exception if a keyword isn't recognised, as it's not supported.
-
-            Set<String> constraintsSeen = new HashSet<>();
-            /*constraintsSeen.addAll(*/
-            validateKeywordsForAllInstanceTypes(this)/*)*/;
-            /*constraintsSeen.addAll(*/
-            validateNumericInstance(this)/*)*/;
-            /*constraintsSeen.addAll(*/
-            validateStringInstance(this)/*)*/;
-            /*constraintsSeen.addAll(*/
-            validateArrayInstance(this)/*)*/;
-            /*constraintsSeen.addAll(*/
-            validateObjectInstance(this)/*)*/;
-            Set<String> refConstraints = validate$Ref(constraintsSeen);
-            if (refConstraints.size() != 0) {
-                // TODO: Do something with the refConstraints
+            if (this.SCHEMA_SUBSET.getDataType() != JSType.OBJECT) {
+                throw doThrow(SourceOfProblem.SCHEMA, "Schema MUST be an object.");
             }
-            return true;
-        }
-
-        private Set<String> validate$Ref(Set<String> constraintsSeen) {
-            Set<String> keysToUse = new HashSet<>();
-            if (this.SCHEMA_SUBSET.contains("$ref")) {
+            Set<String> constraintsSeen = new HashSet<>();
+            for (String key : this.SCHEMA_SUBSET.getKeys()) {
+                routeConstraint(key, constraintsSeen);
+            }
+            if (constraintsSeen.contains("$ref")) {
+                constraintsSeen.remove("$ref");
                 try {
-                    IJson ref = this.SCHEMA_SUBSET.getJSONObjectAt(""/* TODO: Get the $REF referenced; */);
-                    for (String key : ref.getKeys()) {
-                        if (!constraintsSeen.contains(key)) {
-                            keysToUse.add(key);
+                    String referencedSubSchema = ""/* TODO: Get the $REF referenced; */;
+                    String currentReferencedSubSchemaKey = null;
+                    IJson ref = this.SCHEMA_SUBSET.getJSONObjectAt(referencedSubSchema);
+                    for (String refKey : ref.getKeys()) {
+                        currentReferencedSubSchemaKey = refKey;
+                        if (!constraintsSeen.contains(refKey)) {
+                            routeConstraint(refKey, constraintsSeen);
                         }
                     }
                 } catch (KeyNotFoundException e) {
@@ -99,42 +87,179 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                             "$ref must link to a valid sub-schema object.", e);
                 }
             }
-            return keysToUse;
-        }
-    }
 
-    private static void validateKeywordsForAllInstanceTypes(JSONSchemaEnforcerPart currentPart) {
-        if (currentPart.SCHEMA_SUBSET.contains("type")) {
-            validateType(currentPart);
+
+            // EVERYTHING HAS VALIDATED NOW
+            return true;
         }
-        if (currentPart.SCHEMA_SUBSET.contains("enum")) {
-            validateEnum(currentPart);
-        }
-        if (currentPart.SCHEMA_SUBSET.contains("const")) {
-            if (!currentPart.OBJECT_TO_VALIDATE.equals(currentPart.SCHEMA_SUBSET.getAnyAt("const"))) {
-                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "const",
-                        "Value MUST match the schema's constant.");
+
+        private void routeConstraint(String key, Set<String> constraintsSeen) {
+            switch (key) {
+                case "type":
+                    validateType(this);
+                    constraintsSeen.add("type");
+                    break;
+                case "enum":
+                    validateEnum(this);
+                    constraintsSeen.add("enum");
+                    break;
+                case "const":
+                    if (!this.OBJECT_TO_VALIDATE.equals(this.SCHEMA_SUBSET.getAnyAt("const"))) {
+                        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, this.KEY_SO_FAR, "const",
+                                "Value MUST match the schema's constant.");
+                    }
+                    constraintsSeen.add("const");
+                    break;
+                case "allOf":
+                    validateAllOf(this);
+                    constraintsSeen.add("allOf");
+                    break;
+                case "anyOf":
+                    validateAnyOf(this);
+                    constraintsSeen.add("anyOf");
+                    break;
+                case "oneOf":
+                    validateOneOf(this);
+                    constraintsSeen.add("oneOf");
+                    break;
+                case "not":
+                    validateNot(this);
+                    constraintsSeen.add("not");
+                    break;
+                case "if":
+                    validateIf(this);
+                    constraintsSeen.add("if");
+                    break;
+                case "multipleOf":
+                    validateMultipleOf(this);
+                    constraintsSeen.add("multipleOf");
+                    break;
+                case "maximum":
+                    validateMaximum(this);
+                    constraintsSeen.add("maximum");
+                    break;
+                case "exclusiveMaximum":
+                    validateExclusiveMaximum(this);
+                    constraintsSeen.add("exclusiveMaximum");
+                    break;
+                case "minimum":
+                    validateMinimum(this);
+                    constraintsSeen.add("minimum");
+                    break;
+                case "exclusiveMinimum":
+                    validateExclusiveMinimum(this);
+                    constraintsSeen.add("exclusiveMinimum");
+                    break;
+                case "maxLength":
+                    validateMaxLength(this);
+                    constraintsSeen.add("maxLength");
+                    break;
+                case "minLength":
+                    validateMinLength(this);
+                    constraintsSeen.add("minLength");
+                    break;
+                case "pattern":
+                    validatePattern(this);
+                    constraintsSeen.add("pattern");
+                    break;
+                case "format":
+                    validateFormat(this);
+                    constraintsSeen.add("format");
+                    break;
+                case "maxItems":
+                    validateMaxItems(this);
+                    constraintsSeen.add("maxItems");
+                    break;
+                case "minItems":
+                    validateMinItems(this);
+                    constraintsSeen.add("minItems");
+                    break;
+                case "uniqueItems":
+                    validateUniqueItems(this);
+                    constraintsSeen.add("uniqueItems");
+                    break;
+                case "maxContains":
+                    validateMaxContains(this);
+                    constraintsSeen.add("maxContains");
+                    break;
+                case "minContains":
+                    validateMinContains(this);
+                    constraintsSeen.add("minContains");
+                    break;
+                case "items":
+                    validateItems(this);
+                    constraintsSeen.add("items");
+                    break;
+                case "additionalItems":
+                    validateAdditionalItems(this);
+                    constraintsSeen.add("additionalItems");
+                    break;
+                case "contains":
+                    validateContains(this);
+                    constraintsSeen.add("contains");
+                    break;
+                case "unevaluatedItems":
+                    validateUnevaluatedItems(this);
+                    constraintsSeen.add("unevaluatedItems");
+                    break;
+                case "maxProperties":
+                    validateMaxProperties(this);
+                    constraintsSeen.add("maxProperties");
+                    break;
+                case "minProperties":
+                    validateMinProperties(this);
+                    constraintsSeen.add("minProperties");
+                    break;
+                case "required":
+                    validateRequired(this);
+                    constraintsSeen.add("required");
+                    break;
+                case "dependentRequired":
+                    validateDependentRequired(this);
+                    constraintsSeen.add("dependentRequired");
+                    break;
+                case "properties":
+                    validateProperties(this);
+                    constraintsSeen.add("properties");
+                    break;
+                case "patternProperties":
+                    validatePatternProperties(this);
+                    constraintsSeen.add("patternProperties");
+                    break;
+                case "additionalProperties":
+                    validateAdditionalProperties(this);
+                    constraintsSeen.add("additionalProperties");
+                    break;
+                case "propertyNames":
+                    validatePropertyNames(this);
+                    constraintsSeen.add("propertyNames");
+                    break;
+                case "unevaluatedProperties":
+                    validateUnevaluatedProperties(this);
+                    constraintsSeen.add("unevaluatedProperties");
+                    break;
+                case "$ref":
+                    constraintsSeen.add("$ref");
+                    break;
+                case "title":
+                case "description":
+                case "comment":
+                case "then":
+                case "else":
+                case "examples":
+                case "$id":
+                case "$schema":
+                    // Ignore these keywords
+                    break;
+                default:
+                    throw new InvalidSchemaException("Unrecognised/Unsupported constraint used (" + key + ").\n" +
+                            "Therefore unable to verify all schema requirements.");
             }
         }
-
-        if (currentPart.SCHEMA_SUBSET.contains("allOf")) {
-            validateAllOf(currentPart);
-        }
-        if (currentPart.SCHEMA_SUBSET.contains("anyOf")) {
-            validateAnyOf(currentPart);
-        }
-        if (currentPart.SCHEMA_SUBSET.contains("oneOf")) {
-            validateOneOf(currentPart);
-        }
-        if (currentPart.SCHEMA_SUBSET.contains("not")) {
-            validateNot(currentPart);
-        }
-
-        if (currentPart.SCHEMA_SUBSET.contains("if")) {
-            validateIf(currentPart);
-        }
     }
 
+
+    /* ANY */
     private static void validateAllOf(JSONSchemaEnforcerPart currentPart) {
         try {
             if (currentPart.SCHEMA_SUBSET.getArrayAt("allOf").size() == 0) {
@@ -318,83 +443,141 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private static void validateNumericInstance(JSONSchemaEnforcerPart currentPart) {
-        if (currentPart.SCHEMA_SUBSET.contains("multipleOf")) {
-            BigDecimal numberFromSchema = getComparableNumber(currentPart, "multipleOf", true);
-            if (numberFromSchema.equals(BigDecimal.ZERO)) {
-                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "multipleOf",
-                        "You cannot use a multiple of 0.");
-            }
-            if ((getComparableNumber(currentPart, "multipleOf", false).remainder(numberFromSchema))
-                    .compareTo(BigDecimal.ZERO) != 0) {
-                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "multipleOf",
-                        "Value was not a multiple of schema value.");
-            }
+
+    /* NUMBERS */
+    private static void validateMultipleOf(JSONSchemaEnforcerPart currentPart) {
+        BigDecimal numberFromSchema = getComparableNumber(currentPart, "multipleOf", true);
+        if (numberFromSchema.equals(BigDecimal.ZERO)) {
+            throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.KEY_SO_FAR, "multipleOf",
+                    "You cannot use a multiple of 0.");
         }
-        if (currentPart.SCHEMA_SUBSET.contains("maximum")) {
-            if ((getComparableNumber(currentPart, "maximum", false)
-                    .compareTo(getComparableNumber(currentPart, "maximum", true))) > 0) {
-                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "maximum",
-                        "Value was greater than the upper bound.");
-            }
-        }
-        if (currentPart.SCHEMA_SUBSET.contains("exclusiveMaximum")) {
-            if ((getComparableNumber(currentPart, "exclusiveMaximum", false)
-                    .compareTo(getComparableNumber(currentPart, "exclusiveMaximum", true))) >= 0) {
-                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "exclusiveMaximum",
-                        "Value was greater than or equal to the upper bound.");
-            }
-        }
-        if (currentPart.SCHEMA_SUBSET.contains("minimum")) {
-            if ((getComparableNumber(currentPart, "minimum", false)
-                    .compareTo(getComparableNumber(currentPart, "minimum", true))) < 0) {
-                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "minimum",
-                        "Value was lower than the lower bound.");
-            }
-        }
-        if (currentPart.SCHEMA_SUBSET.contains("exclusiveMinimum")) {
-            if ((getComparableNumber(currentPart, "exclusiveMinimum", false)
-                    .compareTo(getComparableNumber(currentPart, "exclusiveMinimum", true))) <= 0) {
-                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "exclusiveMinimum",
-                        "Value was lower than or equal to the lower bound.");
-            }
+        if ((getComparableNumber(currentPart, "multipleOf", false).remainder(numberFromSchema))
+                .compareTo(BigDecimal.ZERO) != 0) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "multipleOf",
+                    "Value was not a multiple of schema value.");
         }
     }
 
-    private static void validateStringInstance(JSONSchemaEnforcerPart currentPart) {
-
-        // TODO: maxLength
-        // TODO: minLength
-        // TODO: pattern
-        if (currentPart.SCHEMA_SUBSET.contains("format")) {
-            validateFormat(currentPart);
+    private static void validateMaximum(JSONSchemaEnforcerPart currentPart) {
+        if ((getComparableNumber(currentPart, "maximum", false)
+                .compareTo(getComparableNumber(currentPart, "maximum", true))) > 0) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "maximum",
+                    "Value was greater than the upper bound.");
         }
     }
 
-    private static void validateArrayInstance(JSONSchemaEnforcerPart currentPart) {
-        // TODO: maxItems
-        // TODO: minItems
-        // TODO: uniqueItems
-        // TODO: maxContains
-        // TODO: minContains
-
-        // TODO: items
-        // TODO: additionalItems
-        // TODO: contains
-        // TODO: unevaluatedItems
+    private static void validateExclusiveMaximum(JSONSchemaEnforcerPart currentPart) {
+        if ((getComparableNumber(currentPart, "exclusiveMaximum", false)
+                .compareTo(getComparableNumber(currentPart, "exclusiveMaximum", true))) >= 0) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "exclusiveMaximum",
+                    "Value was greater than or equal to the upper bound.");
+        }
     }
 
-    private static void validateObjectInstance(JSONSchemaEnforcerPart currentPart) {
-        // TODO: maxProperties
-        // TODO: minProperties
-        // TODO: required
-        // TODO: dependentRequired
+    private static void validateMinimum(JSONSchemaEnforcerPart currentPart) {
+        if ((getComparableNumber(currentPart, "minimum", false)
+                .compareTo(getComparableNumber(currentPart, "minimum", true))) < 0) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "minimum",
+                    "Value was lower than the lower bound.");
+        }
+    }
 
-        // TODO: properties
-        // TODO: patternProperties
-        // TODO: additionalProperties
-        // TODO: propertyNames
-        // TODO: unevaluatedProperties
+    private static void validateExclusiveMinimum(JSONSchemaEnforcerPart currentPart) {
+        if ((getComparableNumber(currentPart, "exclusiveMinimum", false)
+                .compareTo(getComparableNumber(currentPart, "exclusiveMinimum", true))) <= 0) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.KEY_SO_FAR, "exclusiveMinimum",
+                    "Value was lower than or equal to the lower bound.");
+        }
+    }
+
+
+    /* OBJECTS */
+    private static void validateUnevaluatedProperties(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validatePropertyNames(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validateAdditionalProperties(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validatePatternProperties(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validateProperties(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validateDependentRequired(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validateRequired(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validateMinProperties(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validateMaxProperties(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+
+    /* ARRAYS */
+    private static void validateUnevaluatedItems(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validateContains(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validateAdditionalItems(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validateItems(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validateMinContains(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validateMaxContains(JSONSchemaEnforcerPart currentPart) {
+
+
+    }
+
+    private static void validateUniqueItems(JSONSchemaEnforcerPart currentPart) {
+
+
+    }
+
+    private static void validateMinItems(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validateMaxItems(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+
+    /* STRINGS */
+    private static void validatePattern(JSONSchemaEnforcerPart currentPart) {
+
+    }
+
+    private static void validateMinLength(JSONSchemaEnforcerPart currentPart) {
+    }
+
+    private static void validateMaxLength(JSONSchemaEnforcerPart jsonSchemaEnforcerPart) {
     }
 
     private static void validateFormat(JSONSchemaEnforcerPart currentPart) {
@@ -426,6 +609,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
 
+    /* ERROR MANAGEMENT */
     private static SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName) {
         return missingProperty(source, parentOfMissingProperty, propertyName, null);
     }

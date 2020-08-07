@@ -1,6 +1,7 @@
 package api;
 
 import exceptions.SchemaException;
+import exceptions.schema.InvalidSchemaException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -54,8 +55,18 @@ public class JsonSchemaEnforcerTest {
     }
 
     @Test
-    public void baseObjectShouldAcceptUnrecognisedStrings() {
-        assertTrue(JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'unknown':123}")));
+    public void baseObjectShouldntAcceptUnrecognisedStrings() {
+        try {
+            JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'unknown':123}"));
+        } catch (InvalidSchemaException e) {
+            assertEquals("Unrecognised/Unsupported constraint used (unknown).\n" +
+                    "Therefore unable to verify all schema requirements.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void baseObjectShouldIgnoreNonConstraintStrings() {
+        assertTrue(JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'description':'123'}")));
     }
 
 }
