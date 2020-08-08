@@ -89,7 +89,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                         SCHEMA_REFERENCES_SEEN.add(referencedSubSchema);
                         subEnforce(
                                 this,
-                                this.SCHEMA_REFERENCE.getJSONObjectAt(referencedSubSchema),
+                                this.SCHEMA_REFERENCE.getJSONObjectAt(referencedSubSchema), // TODO: Refactor this assumption that the object is in THIS schema to support web-based schema references.
                                 this.PATH_IN_SCHEMA + ".$ref",
                                 CONSTRAINTS_SEEN
                         );
@@ -607,15 +607,103 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private void validateFormat(JsonSchemaEnforcerPart currentPart) {
-        // TODO: dates/times/duration
-        // TODO: emails
-        //            "email Regex".matches("^((([!#$%&'*+\\-/=?^_`{|}~\\w])|([!#$%&'*+\\-/=?^_`{|}~\\w][!#$%&'*+\\-/=?^_`{|}~\\.\\w]{0,}[!#$%&'*+\\-/=?^_`{|}~\\w]))[@]\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*)$");
-        // TODO: hostnames
-        // TODO: ip addresses
-        // TODO: resource identifiers
-        // TODO: uri-template
-        // TODO: json pointer
-        // TODO: regex
+        String formatToVerify, objectToConstrain;
+        try {
+            formatToVerify = currentPart.SCHEMA_SUBSET.getStringAt("format");
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "format", e);
+        }
+        try {
+            objectToConstrain = currentPart.OBJECT_TO_VALIDATE.getString();
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "format", e);
+        }
+
+        boolean matched = false;
+        try {
+            switch (formatToVerify) {
+                case "date":
+                    // https://rgxdb.com/r/2V9BOC58
+                    matched = objectToConstrain.matches("^(?:(?:(?:[1-9]\\d)(?:0[48]|[2468][048]|[13579][26])|(?:(?:[2468][048]|[13579][26])00))([/\\-.])(?:0?2\\1(?:29)))|(?:(?:[0-9]\\d{3})([/\\-.])(?:(?:(?:0?[13578]|" +
+                            "1[02])\\2(?:31))|(?:(?:0?[13-9]|1[0-2])\\2(?:29|30))|(?:(?:0?[1-9])|(?:1[0-2]))\\2(?:0?[1-9]|1\\d|2[0-8])))$");
+                    break;
+                case "time":
+                    // https://rgxdb.com/r/2LE6429J
+                    matched = objectToConstrain.matches("^(?:(?:(?:0?[1-9]|1[0-2])[:.][0-5]\\d(?:[:.][0-5]\\d)? ?[aApP][mM])|(?:(?:0?\\d|1\\d|2[0-3])[:.][0-5]\\d(?:[:.][0-5]\\d)?))$");
+                    break;
+                case "date-time":
+                case "datetime":
+                case "date/time":
+                    // https://rgxdb.com/r/526K7G5W
+                    matched = objectToConstrain.matches("^(?:[+-]?\\d{4}(?!\\d{2}\\b))(?:(-?)(?:(?:0[1-9]|1[0-2])(?:\\1(?:[12]\\d|0[1-9]|3[01]))?|W(?:[0-4]\\d|5[0-2])(?:-?[1-7])?|(?:00[1-9]|0[1-9]\\d|[12]\\d{2}|" +
+                            "3(?:[0-5]\\d|6[1-6])))(?:[T\\s](?:(?:(?:[01]\\d|2[0-3])(?:(:?)[0-5]\\d)?|24:?00)(?:[.,]\\d+(?!:))?)?(?:\\2[0-5]\\d(?:[.,]\\d+)?)?(?:[zZ]|(?:[+-])(?:[01]\\d|2[0-3]):?(?:[0-5]\\d)?)?)?)?$");
+                    break;
+                case "duration":
+                    // https://rgxdb.com/r/MD2234J
+                    matched = objectToConstrain.matches("^(-?)P(?=\\d|T\\d)(?:(\\d+)Y)?(?:(\\d+)M)?(?:(\\d+)([DW]))?(?:T(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+(?:\\.\\d+)?)S)?)?$");
+                    matched = objectToConstrain.matches("^(?:\\s*\\d+\\s*[YWDHMS]|\\s*\\d+\\.\\d+S)+$");
+                    break;
+
+                case "regex":
+                    Pattern.compile(objectToConstrain);
+                    matched = true;
+                    break;
+                case "email":
+                    // https://regexlib.com/REDetails.aspx?regexp_id=2558
+                    matched = objectToConstrain.matches("^((([!#$%&'*+\\-/=?^_`{|}~\\w])|([!#$%&'*+\\-/=?^_`{|}~\\w][!#$%&'*+\\-/=?^_`{|}~.\\w]*[!#$%&'*+\\-/=?^_`{|}~\\w]))[@]\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*)$");
+                    break;
+                case "phone":
+                    // https://rgxdb.com/r/4KFA61EJ
+                    matched = objectToConstrain.matches("^[+]?(?:\\(\\d+(?:\\.\\d+)?\\)|\\d+(?:\\.\\d+)?)(?:[ -]?(?:\\(\\d+(?:\\.\\d+)?\\)|\\d+(?:\\.\\d+)?))*(?:[ ]?(?:x|ext)\\.?[ ]?\\d{1,5})?$");
+                    break;
+                case "version":
+                case "sem-ver":
+                    // https://rgxdb.com/r/40OZ1HN5
+                    matched = objectToConstrain.matches("(^[Vv]|^)(?:(?<major>(?:0|[1-9](?:(?:0|[1-9])+)*))[.](?<minor>(?:0|[1-9](?:(?:0|[1-9])+)*))[.](?<patch>(?:0|[1-9](?:(?:0|[1-9])+)*))(?:-(?<prerelease>(?:(?:(?:[A-Za-z]|" +
+                            "-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?|(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?)|(?:0|[1-9](?:(?:0|[1-9])+)*))(?:[.](?:(?:(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|" +
+                            "(?:[A-Za-z]|-))+)?|(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?)|(?:0|[1-9](?:(?:0|[1-9])+)*)))*))?(?:[+](?<build>(?:(?:(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|" +
+                            "-))+)?|(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?)|(?:(?:0|[1-9])+))(?:[.](?:(?:(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?|(?:(?:(?:0|[1-9])|(?:[A-Za-z]|" +
+                            "-))+)(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?)|(?:(?:0|[1-9])+)))*))?)$");
+                    break;
+
+                case "hostname":
+                    // Pretty loose matcher for this one :/
+                    matched = objectToConstrain.matches("^(?:[a-zA-Z\\d-.%]+)?$");
+                    break;
+                case "ipv4":
+                    // https://regexlib.com/REDetails.aspx?regexp_id=2685 comment: 5/26/2011 5:37:09 AM
+                    matched = objectToConstrain.matches("^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(\\\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])){3}$");
+                    break;
+                case "ipv6":
+                    // https://stackoverflow.com/a/32368136
+                    matched = objectToConstrain.matches("^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|" +
+                            "([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|" +
+                            ":((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}(25[0-5]|(2[0-4]|1?[0-9])?[0-9])|([0-9a-fA-F]{1,4}:){1,4}:" +
+                            "((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\\.){3}(25[0-5]|(2[0-4]|1?[0-9])?[0-9]))$");
+                    break;
+                case "mac":
+                    // https://rgxdb.com/r/4SBEN3OY with some nudging
+                    matched = objectToConstrain.matches("^(?:[0-9A-Fa-f]{2}(?:([:-])|)[0-9A-Fa-f]{2})(?:(\\1)(?:[0-9A-Fa-f]{2}([:-]?)[0-9A-Fa-f]{2})){2}$");
+                    break;
+
+                case "uri":
+                case "url":
+                    // https://rgxdb.com/r/5JXUI5A2
+                    matched = objectToConstrain.matches("^(?:(?<scheme>[a-zA-Z][a-zA-Z\\d+-.]*):)?(?:(?:(?://(?:(?:((?:[a-zA-Z\\d\\-._~!$&'()*+,;=%]*)(?::(?:[a-zA-Z\\d\\-._~!$&'()*+,;=:%]*))?)@)?((?:[a-zA-Z\\d-.%]+)|" +
+                            "(?:\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})|(?:\\[(?:[a-fA-F\\d.:]+)]))?(?::(\\d*))?))((?:/[a-zA-Z\\d\\-._~!$&'()*+,;=:@%]*)*))|(/(?:[a-zA-Z\\d\\-._~!$&'()*+,;=:@%]+(?:/[a-zA-Z\\d\\-._~!$&'()*+,;=:@%]*)*)?)|" +
+                            "([a-zA-Z\\d\\-._~!$&'()*+,;=:@%]+(?:/[a-zA-Z\\d\\-._~!$&'()*+,;=:@%]*)*))?(?:\\?([a-zA-Z\\d\\-._~!$&'()*+,;=:@%/?]*))?(?:#([a-zA-Z\\d\\-._~!$&'()*+,;=:@%/?]*))?$");
+                case "uuid":
+                    matched = objectToConstrain.matches("^([uU]{2}[iI][dD]:)?[\\t ]*([a-fA-F0-9\\\\-]+)$");
+                default:
+                    throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "format",
+                            "Unrecognised/Unsupported format provided (" + formatToVerify + ").");
+            }
+        } catch (Exception e) {/*Ignore as we will throw below*/}
+
+        if (!matched) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "format",
+                    "Value failed to match against the format constraint.");
+        }
     }
 
 
