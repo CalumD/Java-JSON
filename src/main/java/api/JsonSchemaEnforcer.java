@@ -633,7 +633,6 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                     break;
                 case "date-time":
                 case "datetime":
-                case "date/time":
                     // https://rgxdb.com/r/526K7G5W
                     matched = objectToConstrain.matches("^(?:[+-]?\\d{4}(?!\\d{2}\\b))(?:(-?)(?:(?:0[1-9]|1[0-2])(?:\\1(?:[12]\\d|0[1-9]|3[01]))?|W(?:[0-4]\\d|5[0-2])(?:-?[1-7])?|(?:00[1-9]|0[1-9]\\d|[12]\\d{2}|" +
                             "3(?:[0-5]\\d|6[1-6])))(?:[T\\s](?:(?:(?:[01]\\d|2[0-3])(?:(:?)[0-5]\\d)?|24:?00)(?:[.,]\\d+(?!:))?)?(?:\\2[0-5]\\d(?:[.,]\\d+)?)?(?:[zZ]|(?:[+-])(?:[01]\\d|2[0-3]):?(?:[0-5]\\d)?)?)?)?$");
@@ -658,17 +657,14 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                     break;
                 case "version":
                 case "sem-ver":
-                    // https://rgxdb.com/r/40OZ1HN5
-                    matched = objectToConstrain.matches("(^[Vv]|^)(?:(?<major>(?:0|[1-9](?:(?:0|[1-9])+)*))[.](?<minor>(?:0|[1-9](?:(?:0|[1-9])+)*))[.](?<patch>(?:0|[1-9](?:(?:0|[1-9])+)*))(?:-(?<prerelease>(?:(?:(?:[A-Za-z]|" +
-                            "-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?|(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?)|(?:0|[1-9](?:(?:0|[1-9])+)*))(?:[.](?:(?:(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|" +
-                            "(?:[A-Za-z]|-))+)?|(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?)|(?:0|[1-9](?:(?:0|[1-9])+)*)))*))?(?:[+](?<build>(?:(?:(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|" +
-                            "-))+)?|(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?)|(?:(?:0|[1-9])+))(?:[.](?:(?:(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?|(?:(?:(?:0|[1-9])|(?:[A-Za-z]|" +
-                            "-))+)(?:[A-Za-z]|-)(?:(?:(?:0|[1-9])|(?:[A-Za-z]|-))+)?)|(?:(?:0|[1-9])+)))*))?)$");
+                    // ME :D
+                    matched = objectToConstrain.matches("^(?:[vV](?:ersion)?(?:[:/-])?)?(?<major>[0-9]+)(?:\\.)?(?<minor>[0-9]+)?(?:\\.)?(?<patch>[0-9]+)?" +
+                            "(?:-(?<prerelease>[0-9a-zA-Z-]+(?:\\.(?:[0-9a-zA-Z-]+))*)(?<![-.]))?(?:\\+(?<metadata>[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*)(?<![-.]))?$");
                     break;
 
                 case "hostname":
-                    // Pretty loose matcher for this one :/
-                    matched = objectToConstrain.matches("^(?:[a-zA-Z\\d-.%]+)?$");
+                    // ME - Fairly loose matcher :/
+                    matched = objectToConstrain.matches("^(?![-.])+(?:[a-zA-Z\\d-.%]+)?(?<![-.])$");
                     break;
                 case "ipv4":
                     // https://regexlib.com/REDetails.aspx?regexp_id=2685 comment: 5/26/2011 5:37:09 AM
@@ -689,7 +685,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 case "uri":
                 case "url":
                     // https://rgxdb.com/r/5JXUI5A2
-                    matched = objectToConstrain.matches("^(?:(?<scheme>[a-zA-Z][a-zA-Z\\d+-.]*):)?(?:(?:(?://(?:(?:((?:[a-zA-Z\\d\\-._~!$&'()*+,;=%]*)(?::(?:[a-zA-Z\\d\\-._~!$&'()*+,;=:%]*))?)@)?((?:[a-zA-Z\\d-.%]+)|" +
+                    matched = objectToConstrain.matches("^(?:([a-zA-Z][a-zA-Z\\d+-.]*):)?(?:(?:(?://(?:(?:((?:[a-zA-Z\\d\\-._~!$&'()*+,;=%]*)(?::(?:[a-zA-Z\\d\\-._~!$&'()*+,;=:%]*))?)@)?((?:[a-zA-Z\\d-.%]+)|" +
                             "(?:\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})|(?:\\[(?:[a-fA-F\\d.:]+)]))?(?::(\\d*))?))((?:/[a-zA-Z\\d\\-._~!$&'()*+,;=:@%]*)*))|(/(?:[a-zA-Z\\d\\-._~!$&'()*+,;=:@%]+(?:/[a-zA-Z\\d\\-._~!$&'()*+,;=:@%]*)*)?)|" +
                             "([a-zA-Z\\d\\-._~!$&'()*+,;=:@%]+(?:/[a-zA-Z\\d\\-._~!$&'()*+,;=:@%]*)*))?(?:\\?([a-zA-Z\\d\\-._~!$&'()*+,;=:@%/?]*))?(?:#([a-zA-Z\\d\\-._~!$&'()*+,;=:@%/?]*))?$");
                 case "uuid":
