@@ -1884,4 +1884,132 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'mac'}")
         ));
     }
+
+    @Test
+    public void validUUID1() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'2EB8AA08-AA98-11EA-B4AA-73B441D16380'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void validUUID2() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'2eb8aa08-aa98-11ea-b4aa-73b441d16380'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void validUUID3() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'2eb8aa08-AA98-11ea-B4Aa-73B441D16380'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void validUUID4() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'00000000-0000-0000-0000-000000000000'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void validUUID5() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'98d80576-482e-427f-8434-7f86890ab222'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void validUUID6() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'99c17cbb-656f-564a-940f-1a4568f03487'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void validUUID7() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'99c17cbb-656f-664a-940f-1a4568f03487'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void validUUID8() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'99c17cbb-656f-f64a-940f-1a4568f03487'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void validUUID9() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void invalidUUID1() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'2eb8aa08-aa98-11ea-b4aa-73b441d1638'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void invalidUUID2() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'2eb8aa08-aa98-11ea-b4aa-73b441d1638'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void invalidUUID3() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'2eb8aa08-aa98-11ea-73b441d16380'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void invalidUUID4() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'2eb8aa08-aa98-11ea-b4ga-73b441d16380'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void invalidUUID5() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'99c17cbb:656f:f64a:940f:1a4568f03487'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void invalidUUID6() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'99c17cbb_656f_f64a_940f_1a4568f03487'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
+
+    @Test
+    public void invalidUUID7() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'000000G0-0000-0000-0000-000000000000'"),
+                JsonParser.parse("{'format': 'uuid'}")
+        ));
+    }
 }
