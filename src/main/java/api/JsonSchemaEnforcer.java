@@ -639,8 +639,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                     break;
                 case "duration":
                     // https://rgxdb.com/r/MD2234J
-                    matched = objectToConstrain.matches("^(-?)P(?=\\d|T\\d)(?:(\\d+)Y)?(?:(\\d+)M)?(?:(\\d+)([DW]))?(?:T(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+(?:\\.\\d+)?)S)?)?$");
-                    matched = objectToConstrain.matches("^(?:\\s*\\d+\\s*[YWDHMS]|\\s*\\d+\\.\\d+S)+$");
+                    matched = objectToConstrain.matches("^(-?)P(?=\\d|T\\d)(?:(\\d+)Y)?(?:(\\d+)M)?(?:(\\d+)([DW]))?(?:T(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+(?:\\.\\d+)?)S)?(?<!T))?$");
                     break;
 
                 case "regex":

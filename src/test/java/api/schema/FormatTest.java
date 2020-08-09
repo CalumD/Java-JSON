@@ -732,4 +732,148 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'datetime'}")
         ));
     }
+
+    @Test
+    public void validDuration() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'P3Y6M4DT12H30M5S'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void validDuration2() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'P4DT12H30M5S'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void validDuration3() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'P3Y6M4DT12H30M5S'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void validDuration4() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'P4Y'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void validDuration5() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'PT0S'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void validDuration6() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'P0D'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void validDuration7() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'P1M'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void validDuration8() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'PT1M'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void validDuration9() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'PT36H'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void validDuration10() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'P1DT12H'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void validDuration11() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'P2W'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void invalidDuration1() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'PT1D'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void invalidDuration2() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'P'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void invalidDuration3() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'P1YT'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void invalidDuration4() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'PT'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void invalidDuration5() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'P2D1Y'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void invalidDuration6() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'P1D2H'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
+
+    @Test
+    public void invalidDuration7() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'P2S'"),
+                JsonParser.parse("{'format': 'duration'}")
+        ));
+    }
 }
