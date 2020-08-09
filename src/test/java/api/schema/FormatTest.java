@@ -1516,4 +1516,300 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'ipv4'}")
         ));
     }
+
+    @Test
+    public void validIPV6_1() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'1::d6:192.168.0.1'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_2() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'1000:1000:1000:1000:1000:1000:255.255.255.255'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_3() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'0000:0000:0000:0000:0000:0000:0000:0001'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_4() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'::1'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_5() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'::'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_6() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'684D:1111:222:3333:4444:5555:6:77'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_7() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'::42:ff:1'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_8() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'d6::'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_9() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'1:2::192.168.0.1'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_10() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'::ffff:192.168.0.1'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_11() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'1:2:3:4:5:6:7:8'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_12() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'fe80::1ff:fe23:4567:890a%eth2'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_13() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'fe80::a%eth1'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_14() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'fe80::1ff:fe23:4567:890a%3'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_15() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'fe80::/64'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_16() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'2001:0db8:0000:0000:0000:ff00:0042:8329'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_17() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'2001:db8:0:0:0:ff00:42:8329'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_18() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'2001:db8::ff00:42:8329'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_19() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'2001:db8:ffff:ffff:ffff:ffff:ffff:ffff'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void validIPV6_20() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'100::ffff:ffff:ffff:ffff'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_1() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'100:100:100:100:100:100:255.255.255.255.255'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_2() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'100:100:100:100:100:100:100:255.255.255.255'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_3() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'  ::1'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_4() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'::1111111111'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_5() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'12345::'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_6() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_7() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'::laptop'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_8() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("':2:3:4:5:6:7:8'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_9() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'1:2:3:4:5:6:7:'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_10() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("':2:3:4::8'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_11() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'1::d6::42'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_12() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'1::2:192.168.256.1'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_13() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'1::2:192.168.ff.1'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_14() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'1:2:3:4:5:::8'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_15() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'1:2:3:4:5:6:7'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_16() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'1'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV6_17() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'127.0.0.1'"),
+                JsonParser.parse("{'format': 'ipv6'}")
+        ));
+    }
 }
