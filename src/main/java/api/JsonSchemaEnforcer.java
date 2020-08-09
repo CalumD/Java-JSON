@@ -659,7 +659,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 case "sem-ver":
                 case "semVer":
                     // ME :D
-                    matched = objectToConstrain.matches("^(?:[vV](?:ersion)?(?:[:/-])?)?(?<major>[0-9]+)(?:\\.)?(?<minor>[0-9]+)?(?:\\.)?(?<patch>[0-9]+)?" +
+                    matched = objectToConstrain.matches("^(?:[vV](?:ersion)?(?:[: /-])?)?(?<major>[0-9]+)(?<minor>[.][0-9]+)?(?<patch>[.][0-9]+)?" +
                             "(?:-(?<prerelease>[0-9a-zA-Z-]+(?:\\.(?:[0-9a-zA-Z-]+))*)(?<![-.]))?(?:\\+(?<metadata>[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*)(?<![-.]))?$");
                     break;
 

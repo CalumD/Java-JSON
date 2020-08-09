@@ -1124,4 +1124,92 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'phone'}")
         ));
     }
+
+    @Test
+    public void validSemVer1() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'v1'"),
+                JsonParser.parse("{'format': 'version'}")
+        ));
+    }
+
+    @Test
+    public void validSemVer2() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'version 1.0'"),
+                JsonParser.parse("{'format': 'version'}")
+        ));
+    }
+
+    @Test
+    public void validSemVer3() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'v1.0.0'"),
+                JsonParser.parse("{'format': 'version'}")
+        ));
+    }
+
+    @Test
+    public void validSemVer4() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'v1.0.0-beta'"),
+                JsonParser.parse("{'format': 'version'}")
+        ));
+    }
+
+    @Test
+    public void validSemVer5() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'v1.0.0-beta+test1'"),
+                JsonParser.parse("{'format': 'version'}")
+        ));
+    }
+
+    @Test
+    public void validSemVer6() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'45.20.1-beta.123'"),
+                JsonParser.parse("{'format': 'version'}")
+        ));
+    }
+
+    @Test
+    public void validSemVer7() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'1.0.2-a'"),
+                JsonParser.parse("{'format': 'version'}")
+        ));
+    }
+
+    @Test
+    public void invalidSemVer1() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'ab'"),
+                JsonParser.parse("{'format': 'version'}")
+        ));
+    }
+
+    @Test
+    public void invalidSemVer2() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'123.'"),
+                JsonParser.parse("{'format': 'version'}")
+        ));
+    }
+
+    @Test
+    public void invalidSemVer3() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'.123'"),
+                JsonParser.parse("{'format': 'version'}")
+        ));
+    }
+
+    @Test
+    public void invalidSemVer4() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'1.a.3'"),
+                JsonParser.parse("{'format': 'version'}")
+        ));
+    }
 }
