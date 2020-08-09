@@ -684,8 +684,8 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                             "(\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])){3}))|:)))(?:(%.+)|(/[0-9]{1,2}))?$");
                     break;
                 case "mac":
-                    // https://rgxdb.com/r/4SBEN3OY with some nudging
-                    matched = objectToConstrain.matches("^(?:[0-9A-Fa-f]{2}(?:([:-])|)[0-9A-Fa-f]{2})(?:(\\1)(?:[0-9A-Fa-f]{2}([:-]?)[0-9A-Fa-f]{2})){2}$");
+                    // https://rgxdb.com/r/4QCDJ0QF
+                    matched = objectToConstrain.matches("^(?:[0-9A-Fa-f]{2}([:-]?)[0-9A-Fa-f]{2})(?:(?:\\1|\\.)(?:[0-9A-Fa-f]{2}([:-]?)[0-9A-Fa-f]{2})){2}$");
                     break;
 
                 case "uri":

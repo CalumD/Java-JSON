@@ -1812,4 +1812,76 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'ipv6'}")
         ));
     }
+
+    @Test
+    public void validMAC_1() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'01:23:45:67:89:ab'"),
+                JsonParser.parse("{'format': 'mac'}")
+        ));
+    }
+
+    @Test
+    public void validMAC_2() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'01-23-45-67-89-ab'"),
+                JsonParser.parse("{'format': 'mac'}")
+        ));
+    }
+
+    @Test
+    public void validMAC_3() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'0123456789ab'"),
+                JsonParser.parse("{'format': 'mac'}")
+        ));
+    }
+
+    @Test
+    public void validMAC_4() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'FF:FF:FF:FF:FF:FF'"),
+                JsonParser.parse("{'format': 'mac'}")
+        ));
+    }
+
+    @Test
+    public void validMAC_5() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'00:00:00:00:00:00'"),
+                JsonParser.parse("{'format': 'mac'}")
+        ));
+    }
+
+    @Test
+    public void validMAC_6() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'0123.4567.89ab'"),
+                JsonParser.parse("{'format': 'mac'}")
+        ));
+    }
+
+    @Test
+    public void invalidMAC_1() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'0123:45:67:89:ab'"),
+                JsonParser.parse("{'format': 'mac'}")
+        ));
+    }
+
+    @Test
+    public void invalidMAC_2() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("''"),
+                JsonParser.parse("{'format': 'mac'}")
+        ));
+    }
+
+    @Test
+    public void invalidMAC_3() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'01:GG:45:67:89:ab'"),
+                JsonParser.parse("{'format': 'mac'}")
+        ));
+    }
 }
