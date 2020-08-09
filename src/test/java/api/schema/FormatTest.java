@@ -876,4 +876,22 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'duration'}")
         ));
     }
+
+    @Test
+    public void validRegex() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'^([0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12})$'"),
+                JsonParser.parse("{'format': 'regex'}")
+        ));
+    }
+
+    @Test
+    public void invalidRegex() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'^([0-9A-Fa-f{3}-)$'"),
+                JsonParser.parse("{'format': 'regex'}")
+        ));
+    }
+
+
 }
