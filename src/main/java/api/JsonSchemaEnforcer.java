@@ -651,11 +651,13 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                     matched = objectToConstrain.matches("^((([!#$%&'*+\\-/=?^_`{|}~\\w])|([!#$%&'*+\\-/=?^_`{|}~\\w]([!#$%&'*+\\-/=?^_`{|}~\\w]|((?<!\\.)\\.(?!\\.)))*[!#$%&'*+\\-/=?^_`{|}~\\w]))[@]\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*)$");
                     break;
                 case "phone":
-                    // https://rgxdb.com/r/4KFA61EJ
-                    matched = objectToConstrain.matches("^[+]?(?:\\(\\d+(?:\\.\\d+)?\\)|\\d+(?:\\.\\d+)?)(?:[ -]?(?:\\(\\d+(?:\\.\\d+)?\\)|\\d+(?:\\.\\d+)?))*(?:[ ]?(?:x|ext)\\.?[ ]?\\d{1,5})?$");
+                case "phone-number":
+                    // Me
+                    matched = objectToConstrain.matches("^(?:\\([+]?\\d{1,3}\\)|[+]?\\d{1,3})?(?:[ -]?(\\(\\d{1,5}\\)|\\d{1,5}))?(?:([ -]?\\d{1,15})|([ -]?\\d{1,4}){1,3})(?:[ ]ext\\.?[ ]?(?:(\\d{1,5})|([ .]\\d{1,2}){1,5}))?$");
                     break;
                 case "version":
                 case "sem-ver":
+                case "semVer":
                     // ME :D
                     matched = objectToConstrain.matches("^(?:[vV](?:ersion)?(?:[:/-])?)?(?<major>[0-9]+)(?:\\.)?(?<minor>[0-9]+)?(?:\\.)?(?<patch>[0-9]+)?" +
                             "(?:-(?<prerelease>[0-9a-zA-Z-]+(?:\\.(?:[0-9a-zA-Z-]+))*)(?<![-.]))?(?:\\+(?<metadata>[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*)(?<![-.]))?$");

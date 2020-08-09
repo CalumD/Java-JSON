@@ -893,5 +893,235 @@ public class FormatTest {
         ));
     }
 
+    @Test
+    public void validEmail1() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'john.appleseed@example.com'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
 
+    @Test
+    public void validEmail2() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'te~st@example.com'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
+
+    @Test
+    public void validEmail3() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'~test@example.com'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
+
+    @Test
+    public void validEmail4() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'test~@example.com'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
+
+    @Test
+    public void validEmail5() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'te.s.t@example.com'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
+
+    @Test
+    public void validEmail6() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'te.s.t@examp.le.co.uk'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
+
+    @Test
+    public void validEmail7() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'google+example@gmail.com'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
+
+    @Test
+    public void invalidEmail1() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'2962'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
+
+    @Test
+    public void invalidEmail2() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'.test@example.com'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
+
+    @Test
+    public void invalidEmail3() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'test.@example.com'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
+
+    @Test
+    public void invalidEmail4() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'te..st@example.com'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
+
+    @Test
+    public void invalidEmail5() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'test@example..com'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
+
+    @Test
+    public void invalidEmail6() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'test@example.com.'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
+
+    @Test
+    public void invalidEmail8() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'test@example.com-'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
+
+    @Test
+    public void invalidEmail9() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'testexample.com'"),
+                JsonParser.parse("{'format': 'email'}")
+        ));
+    }
+
+    @Test
+    public void validPhone1() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'(999) 999 9999'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
+
+    @Test
+    public void validPhone2() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'(999) 999-9999'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
+
+    @Test
+    public void validPhone3() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'999-999-9999'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
+
+    @Test
+    public void validPhone4() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'+9 999-999-9999'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
+
+    @Test
+    public void validPhone5() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'+9 (999) 999-9999'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
+
+    @Test
+    public void validPhone6() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'999-9999'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
+
+    @Test
+    public void validPhone7() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'99-9999'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
+
+    @Test
+    public void validPhone8() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'+44 (1746) 746 0927'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
+
+    @Test
+    public void validPhone9() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'12345678 ext 1.3.5'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
+
+    @Test
+    public void validPhone10() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'111'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
+
+    @Test
+    public void validPhone11() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'01234567890'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
+
+    @Test
+    public void invalidPhone1() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'abc'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
+
+    @Test
+    public void invalidPhone2() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'+999 (999.9) 99-999-9999'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
+
+    @Test
+    public void invalidPhone3() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'999999999999999999999999'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
 }
