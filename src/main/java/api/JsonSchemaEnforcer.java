@@ -668,6 +668,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                     matched = objectToConstrain.matches("^(?![-.])+(?:[a-zA-Z\\d-%]{0,63})(((?<!\\.)\\.(?!\\.))(?:[a-zA-Z\\d-%]{0,63}))*(?<![-.])$");
                     break;
                 case "ipv4":
+                case "ip":
                     // https://regexlib.com/REDetails.aspx?regexp_id=2685 comment: 5/26/2011 5:37:09 AM
                     matched = objectToConstrain.matches("^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])){3}$");
                     break;

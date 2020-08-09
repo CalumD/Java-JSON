@@ -1372,4 +1372,148 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'hostname'}")
         ));
     }
+
+    @Test
+    public void validIPV4_1() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'192.168.0.1'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void validIPV4_2() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'127.0.0.1'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void validIPV4_3() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'10.10.20.10'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void validIPV4_4() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'100.100.100.100'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void validIPV4_5() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'255.255.255.255'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void validIPV4_6() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'0.0.0.0'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV4_1() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'127.0.0.0.1'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV4_2() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'256.256.256.256'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV4_3() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'127.0'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV4_4() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'0x7f000001'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV4_5() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'2130706433'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV4_6() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'192.168.001.001'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV4_7() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'192.168.001.001'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV4_8() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'192,168,1,1'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV4_9() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'256.0.0.0'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV4_10() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'192.256.0.0'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV4_11() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'192.192.256.0'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
+
+    @Test
+    public void invalidIPV4_12() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'192.192.192.256'"),
+                JsonParser.parse("{'format': 'ipv4'}")
+        ));
+    }
 }
