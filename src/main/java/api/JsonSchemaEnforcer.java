@@ -665,7 +665,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
                 case "hostname":
                     // ME - Fairly loose matcher :/
-                    matched = objectToConstrain.matches("^(?![-.])+(?:[a-zA-Z\\d-%]{0,63})(((?<!\\.)\\.(?!\\.))(?:[a-zA-Z\\d-%]{0,63}))+(?<![-.])$");
+                    matched = objectToConstrain.matches("^(?![-.])+(?:[a-zA-Z\\d-%]{0,63})(((?<!\\.)\\.(?!\\.))(?:[a-zA-Z\\d-%]{0,63}))*(?<![-.])$");
                     break;
                 case "ipv4":
                     // https://regexlib.com/REDetails.aspx?regexp_id=2685 comment: 5/26/2011 5:37:09 AM

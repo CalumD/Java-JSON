@@ -1212,4 +1212,164 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'version'}")
         ));
     }
+
+    @Test
+    public void validHostname1() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'www.example.com'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void validHostname2() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'xn--4gbwdl.xn--wgbh1c'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void validHostname3() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.com'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void validHostname4() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'localhost'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void validHostname5() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'localhost123'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void validHostname9() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'www.google.com'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void validHostname10() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghi.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.com'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void invalidHostname1() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'www..example.com'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void invalidHostname2() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://www.google.com/search?q=regular%20expression'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void invalidHostname3() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://www.google.com/search?q=regular%20expression'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void invalidHostname4() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://www.google.com/'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void invalidHostname5() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'-a-host-name-that-starts-with--'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void invalidHostname6() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'not_a_valid_host_name'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void invalidHostname7() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'a-vvvvvvvvvvvvvvvveeeeeeeeeeeeeeeerrrrrrrrrrrrrrrryyyyyyyyyyyyyyyy-long-host-name-component'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void invalidHostname8() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'-hostname'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void invalidHostname9() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'hostname-'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void invalidHostname10() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'_hostname'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void invalidHostname11() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'hostname_'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void invalidHostname12() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'host_name'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
+
+    @Test
+    public void invalidHostname13() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl.com'"),
+                JsonParser.parse("{'format': 'hostname'}")
+        ));
+    }
 }
