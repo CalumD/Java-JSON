@@ -485,7 +485,31 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private void validateRequired(JsonSchemaEnforcerPart currentPart) {
+        List<String> requiredKeys = new ArrayList<>();
+        try {
+            List<IJson> keysAsJson = currentPart.SCHEMA_REFERENCE.getArrayAt("required");
+            if (keysAsJson.size() == 0) {
+                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "required",
+                        "Must provide at least one required property.");
+            }
+            for (IJson key : keysAsJson) {
+                requiredKeys.add(key.getString());
+            }
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "required",
+                    "Required constraint must be a non-empty array of strings representing property names.", e);
+        }
+        if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "required",
+                    "Required constraint can only be applied to Object properties.");
+        }
 
+        for (String requiredKey : requiredKeys) {
+            if (!currentPart.OBJECT_TO_VALIDATE.contains(requiredKey)) {
+                throw missingProperty(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "required",
+                        "Property (" + requiredKey + ") is mandatory, but couldn't be found.");
+            }
+        }
     }
 
     private void validateMinProperties(JsonSchemaEnforcerPart currentPart) {
@@ -755,10 +779,18 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
     /* ERROR MANAGEMENT */
     private SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName) {
-        return missingProperty(source, parentOfMissingProperty, propertyName, null);
+        return missingProperty(source, parentOfMissingProperty, propertyName, "", null);
+    }
+
+    private SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason) {
+        return missingProperty(source, parentOfMissingProperty, propertyName, reason, null);
     }
 
     private SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName, Throwable cause) {
+        return missingProperty(source, parentOfMissingProperty, propertyName, "", cause);
+    }
+
+    private SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason, Throwable cause) {
         String message = "Invalid.";
         switch (source) {
             case SCHEMA:
@@ -769,6 +801,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                         "Schema constraint violated: " + schemaErrorKeyChain(propertyName, parentOfMissingProperty);
                 break;
         }
+        message += (reason.equals("") ? "" : "\n" + reason);
         message += getErrorCauseMessage(cause);
         return cause == null
                 ? doThrow(source, message)
