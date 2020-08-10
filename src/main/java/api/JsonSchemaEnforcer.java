@@ -513,11 +513,27 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private void validateMinProperties(JsonSchemaEnforcerPart currentPart) {
-
+        long minProperties = getNonNegativeInteger(currentPart, "minProperties");
+        if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "minProperties",
+                    "This constraint can only be used against an object.");
+        }
+        if (currentPart.OBJECT_TO_VALIDATE.getKeys().size() < minProperties) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "minProperties",
+                    "Object doesn't have enough properties to pass the constraint.");
+        }
     }
 
     private void validateMaxProperties(JsonSchemaEnforcerPart currentPart) {
-
+        long maxProperties = getNonNegativeInteger(currentPart, "maxProperties");
+        if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maxProperties",
+                    "This constraint can only be used against an object.");
+        }
+        if (currentPart.OBJECT_TO_VALIDATE.getKeys().size() > maxProperties) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maxProperties",
+                    "Object has more properties than the constraint allows.");
+        }
     }
 
 
@@ -753,6 +769,20 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         return (constraintType == JSType.LONG)
                 ? BigDecimal.valueOf(constraint.getLong())
                 : BigDecimal.valueOf(constraint.getDouble());
+    }
+
+    private long getNonNegativeInteger(JsonSchemaEnforcerPart currentPart, String propertyKey) {
+        try {
+            long value = currentPart.SCHEMA_REFERENCE.getLongAt(propertyKey);
+            if (value < 0) {
+                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, propertyKey,
+                        "Value must be >= 0.");
+            }
+            return value;
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, propertyKey,
+                    "Constraint must provide a non-negative integer.", e);
+        }
     }
 
     private String convert$RefToJsonKey(String $ref) {
