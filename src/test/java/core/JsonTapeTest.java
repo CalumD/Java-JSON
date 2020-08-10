@@ -220,6 +220,7 @@ class JsonTapeTest {
     public void returnsCorrectObjectString() {
         assertEquals(JSType.STRING, new JsonTape("\"string\"").parseNextElement().getDataType());
         assertEquals(JSType.STRING, new JsonTape("'string'").parseNextElement().getDataType());
+        assertEquals(JSType.STRING, new JsonTape("`string`").parseNextElement().getDataType());
     }
 
     @Test

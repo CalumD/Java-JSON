@@ -141,6 +141,7 @@ public class FormatTest {
         ));
     }
 
+
     @Test
     public void testValidTime() {
         assertTrue(JsonSchemaEnforcer.validateStrict(
@@ -228,6 +229,7 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'time'}")
         ));
     }
+
 
     @Test
     public void testValidDateTime1() {
@@ -733,6 +735,7 @@ public class FormatTest {
         ));
     }
 
+
     @Test
     public void validDuration() {
         assertTrue(JsonSchemaEnforcer.validateStrict(
@@ -877,6 +880,7 @@ public class FormatTest {
         ));
     }
 
+
     @Test
     public void validRegex() {
         assertTrue(JsonSchemaEnforcer.validateStrict(
@@ -892,6 +896,7 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'regex'}")
         ));
     }
+
 
     @Test
     public void validEmail1() {
@@ -1013,6 +1018,7 @@ public class FormatTest {
         ));
     }
 
+
     @Test
     public void validPhone1() {
         assertTrue(JsonSchemaEnforcer.validateStrict(
@@ -1102,6 +1108,14 @@ public class FormatTest {
     }
 
     @Test
+    public void validPhone12() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'+1-816-555-1212'"),
+                JsonParser.parse("{'format': 'phone'}")
+        ));
+    }
+
+    @Test
     public void invalidPhone1() {
         assertFalse(JsonSchemaEnforcer.validateStrict(
                 JsonParser.parse("'abc'"),
@@ -1124,6 +1138,7 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'phone'}")
         ));
     }
+
 
     @Test
     public void validSemVer1() {
@@ -1212,6 +1227,7 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'version'}")
         ));
     }
+
 
     @Test
     public void validHostname1() {
@@ -1373,6 +1389,7 @@ public class FormatTest {
         ));
     }
 
+
     @Test
     public void validIPV4_1() {
         assertTrue(JsonSchemaEnforcer.validateStrict(
@@ -1516,6 +1533,7 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'ipv4'}")
         ));
     }
+
 
     @Test
     public void validIPV6_1() {
@@ -1813,6 +1831,7 @@ public class FormatTest {
         ));
     }
 
+
     @Test
     public void validMAC_1() {
         assertTrue(JsonSchemaEnforcer.validateStrict(
@@ -1884,6 +1903,425 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'mac'}")
         ));
     }
+
+
+    @Test
+    public void validURL1() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://www.google.com/'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void validURL2() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://www.google.com/search?q=regular%20expression#anotherOne'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void validURL3() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://foo.bar/?baz=qux#quux'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void validURL4() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://foo.com/blah_(wikipedia)_blah#cite-1'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void validURL5() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://foo.bar/?q=Test%20URL-encoded%20stuff'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void validURL6() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://xn--nw2a.xn--j6w193g/'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void validURL7() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("`http://-.~_!$&'()*+,;=:%40:80%2f::::::@example.com`"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void validURL8() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://223.255.255.254'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void validURL9() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'ftp://ftp.is.co.za/rfc/rfc1808.txt'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void validURL10() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://www.ietf.org/rfc/rfc2396.txt'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void validURL11() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'ldap://[2001:db8::7]/c=GB?objectClass?one'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void validURL12() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'mailto:John.Doe@example.com'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void validURL13() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'news:comp.infosystems.www.servers.unix'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void validURL14() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'tel:+1-816-555-1212'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void validURL15() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'urn:oasis:names:specification:docbook:dtd:xml:4.1.2'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void invalidURL1() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'test?huh.straight%20away#subPart'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void invalidURL2() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'/search?q=regular%20expression'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void invalidURL3() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'www.google.com/'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void invalidURL4() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'//foo.bar/?baz=qux#quux'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void invalidURL5() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'/abc'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void invalidURL6() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'abc'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void invalidURL7() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'../relative/backup/../../.././anotherOne'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void invalidURL8() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'bar,baz:foo'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void invalidURL9() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'\\\\WINDOWS\\fileshare'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void invalidURL10() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http:// shouldfail.com'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+    @Test
+    public void invalidURL11() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("':// should fail'"),
+                JsonParser.parse("{'format': 'url'}")
+        ));
+    }
+
+
+    @Test
+    public void validURL_ref1() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://www.google.com/'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref2() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://www.google.com/search?q=regular%20expression#anotherOne'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref3() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://foo.bar/?baz=qux#quux'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref4() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://foo.com/blah_(wikipedia)_blah#cite-1'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref5() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://foo.bar/?q=Test%20URL-encoded%20stuff'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref6() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://xn--nw2a.xn--j6w193g/'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref7() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://-.~_!$&'()*+,;=:%40:80%2f::::::@example.com'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref8() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://223.255.255.254'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref9() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'ftp://ftp.is.co.za/rfc/rfc1808.txt'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref10() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http://www.ietf.org/rfc/rfc2396.txt'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref11() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'ldap://[2001:db8::7]/c=GB?objectClass?one'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref12() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'mailto:John.Doe@example.com'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref13() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'news:comp.infosystems.www.servers.unix'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref14() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'tel:+1-816-555-1212'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref15() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'urn:oasis:names:specification:docbook:dtd:xml:4.1.2'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref16() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'test?huh.straight%20away#subPart'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref17() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'/search?q=regular%20expression'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref18() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'www.google.com/'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref19() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'//foo.bar/?baz=qux#quux'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref20() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'/abc'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref21() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'abc'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref22() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'../relative/backup/../../.././anotherOne'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void validURL_ref23() {
+        assertTrue(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'bar,baz:foo'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void invalidURL_ref1() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'\\\\WINDOWS\\fileshare'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void invalidURL_ref2() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("'http:// shouldfail.com'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
+    @Test
+    public void invalidURL_ref3() {
+        assertFalse(JsonSchemaEnforcer.validateStrict(
+                JsonParser.parse("':// should fail'"),
+                JsonParser.parse("{'format': 'uri-reference'}")
+        ));
+    }
+
 
     @Test
     public void validUUID1() {

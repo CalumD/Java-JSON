@@ -33,6 +33,7 @@ public final class JsonTape extends Tape<IJson, JsonParseException> {
                 break;
             case '"':
             case '\'':
+            case '`':
                 nextElement = new JSString(this);
                 break;
             case '-':

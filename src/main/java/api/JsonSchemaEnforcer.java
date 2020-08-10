@@ -690,12 +690,17 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
                 case "uri":
                 case "url":
-                    // https://rgxdb.com/r/5JXUI5A2
-                    matched = objectToConstrain.matches("^(?:([a-zA-Z][a-zA-Z\\d+-.]*):)?(?:(?:(?://(?:(?:((?:[a-zA-Z\\d\\-._~!$&'()*+,;=%]*)(?::(?:[a-zA-Z\\d\\-._~!$&'()*+,;=:%]*))?)@)?((?:[a-zA-Z\\d-.%]+)|" +
-                            "(?:\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})|(?:\\[(?:[a-fA-F\\d.:]+)]))?(?::(\\d*))?))((?:/[a-zA-Z\\d\\-._~!$&'()*+,;=:@%]*)*))|(/(?:[a-zA-Z\\d\\-._~!$&'()*+,;=:@%]+(?:/[a-zA-Z\\d\\-._~!$&'()*+,;=:@%]*)*)?)|" +
-                            "([a-zA-Z\\d\\-._~!$&'()*+,;=:@%]+(?:/[a-zA-Z\\d\\-._~!$&'()*+,;=:@%]*)*))?(?:\\?([a-zA-Z\\d\\-._~!$&'()*+,;=:@%/?]*))?(?:#([a-zA-Z\\d\\-._~!$&'()*+,;=:@%/?]*))?$");
+                    // https://rgxdb.com/r/2MQXJD5 with some nudging
+                    matched = objectToConstrain.matches("^(?:(?:[a-zA-Z][a-zA-Z\\d]*):)(?://(?:(?:[a-zA-Z\\d-._~!$&'()*+,;=%]*)(?::(?:[a-zA-Z\\d-._~!$&'()*+,;=:%]*))?@)?(?:(?:[a-zA-Z\\d-.%]+)|(?:\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})|(?:\\[(?:[a-fA-F\\d.:]+)]))?(?::(?:\\d*))?(?:(?:/[a-zA-Z\\d-._~!$&'()*+,;=:@%]*)*)|([/]?(?:[a-zA-Z\\d-._~!$&'()*+,;=:@%]+(?:/[a-zA-Z\\d-._~!$&'()*+,;=:@%]*)*)))?(?:\\?(?:[a-zA-Z\\d-._~!$&'()*+,;=:@%/?]*))?(?:#(?:[a-zA-Z\\d-._~!$&'()*+,;=:@%/?]*))?$");
+                    break;
+                case "uri-reference":
+                case "url-reference":
+                    // https://rgxdb.com/r/2MQXJD5 with some nudging
+                    matched = objectToConstrain.matches("^(?:(?:[a-zA-Z][a-zA-Z\\d]*):)?(?://(?:(?:[a-zA-Z\\d-._~!$&'()*+,;=%]*)(?::(?:[a-zA-Z\\d-._~!$&'()*+,;=:%]*))?@)?(?:(?:[a-zA-Z\\d-.%]+)|(?:\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})|(?:\\[(?:[a-fA-F\\d.:]+)]))?(?::(?:\\d*))?(?:(?:/[a-zA-Z\\d-._~!$&'()*+,;=:@%]*)*)|([/]?(?:[a-zA-Z\\d-._~!$&'()*+,;=:@%]+(?:/[a-zA-Z\\d-._~!$&'()*+,;=:@%]*)*)))?(?:\\?(?:[a-zA-Z\\d-._~!$&'()*+,;=:@%/?]*))?(?:#(?:[a-zA-Z\\d-._~!$&'()*+,;=:@%/?]*))?$");
+                    break;
                 case "uuid":
                     matched = objectToConstrain.matches("^([0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12})$");
+                    break;
                 default:
                     throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "format",
                             "Unrecognised/Unsupported format provided (" + formatToVerify + ").");
