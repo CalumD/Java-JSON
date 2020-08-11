@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FormatTest {
 
@@ -19,6 +20,7 @@ public class FormatTest {
                     JsonParser.parse("'0000-00-00'"),
                     JsonParser.parse("{'format': 1}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Wrong type for schema property: <base element>.format\n" +
                     "Expected: STRING  ->  Received: LONG", e.getMessage());
@@ -32,6 +34,7 @@ public class FormatTest {
                     JsonParser.parse("12345"),
                     JsonParser.parse("{'format': 'date'}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (SchemaViolationException e) {
             assertEquals("Mismatched data type.\n" +
                     "Schema constraint violated: <base element>.format\n" +
@@ -46,6 +49,7 @@ public class FormatTest {
                     JsonParser.parse("'0000-00-00'"),
                     JsonParser.parse("{'format': 'date'}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value.\n" +
                     "Schema constraint violated: <base element>.format\n" +

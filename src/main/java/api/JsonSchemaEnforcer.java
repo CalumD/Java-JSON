@@ -460,27 +460,34 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
 
     /* OBJECTS */
-    private void validateUnevaluatedProperties(JsonSchemaEnforcerPart currentPart) {
-
-    }
-
-    private void validatePropertyNames(JsonSchemaEnforcerPart currentPart) {
-
+    private void validateProperties(JsonSchemaEnforcerPart currentPart) {
+        IJson propertiesObject;
+        try {
+            propertiesObject = currentPart.SCHEMA_SUBSET.getJSONObjectAt("properties");
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "properties",
+                    "Properties constraint must be an object", e);
+        }
+        for (String key : propertiesObject.getKeys()) {
+            if (currentPart.OBJECT_TO_VALIDATE.contains(key)) {
+                String keyInSchema = (key.contains(" ") || key.contains("\\")) ? "[`" + key + "`]" : "." + key;
+                IJson subSchema;
+                try {
+                    subSchema = currentPart.SCHEMA_SUBSET.getJSONObjectAt(key);
+                } catch (KeyDifferentTypeException e) {
+                    throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "properties" + keyInSchema, e);
+                }
+                subEnforce(currentPart, subSchema, currentPart.PATH_IN_SCHEMA + keyInSchema);
+            }
+        }
     }
 
     private void validateAdditionalProperties(JsonSchemaEnforcerPart currentPart) {
-
-    }
-
-    private void validatePatternProperties(JsonSchemaEnforcerPart currentPart) {
-
-    }
-
-    private void validateProperties(JsonSchemaEnforcerPart currentPart) {
-
-    }
-
-    private void validateDependentRequired(JsonSchemaEnforcerPart currentPart) {
+        JSType schemaType = currentPart.SCHEMA_SUBSET.getDataTypeOf("additionalProperties");
+        if (schemaType != JSType.BOOLEAN && schemaType != JSType.OBJECT) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "additionalProperties",
+                    "Expected one of " + Arrays.asList("BOOLEAN", "ARRAY") + ", got " + schemaType + ".");
+        }
 
     }
 
@@ -534,6 +541,22 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
             throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maxProperties",
                     "Object has more properties than the constraint allows.");
         }
+    }
+
+    private void validateUnevaluatedProperties(JsonSchemaEnforcerPart currentPart) {
+
+    }
+
+    private void validatePropertyNames(JsonSchemaEnforcerPart currentPart) {
+
+    }
+
+    private void validatePatternProperties(JsonSchemaEnforcerPart currentPart) {
+
+    }
+
+    private void validateDependentRequired(JsonSchemaEnforcerPart currentPart) {
+
     }
 
 
@@ -791,12 +814,12 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         return $ref;
     }
 
-    private boolean subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema) {
-        return subEnforce(currentPart, updatedSubSchema, updatedPathInSchema, new HashSet<>());
+    private void subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema) {
+        subEnforce(currentPart, updatedSubSchema, updatedPathInSchema, new HashSet<>());
     }
 
-    private boolean subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema, Set<String> constraintsSeen) {
-        return new JsonSchemaEnforcerPart(
+    private void subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema, Set<String> constraintsSeen) {
+        new JsonSchemaEnforcerPart(
                 currentPart.OBJECT_TO_VALIDATE,
                 currentPart.SCHEMA_REFERENCE,
                 updatedSubSchema,

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ObjectTest {
 
@@ -18,6 +19,7 @@ public class ObjectTest {
                     JsonParser.parse("''"),
                     JsonParser.parse("{'required': ''}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Wrong type for schema property: <base element>.required\n" +
                     "Required constraint must be a non-empty array of strings representing property names.\n" +
@@ -32,6 +34,7 @@ public class ObjectTest {
                     JsonParser.parse("''"),
                     JsonParser.parse("{'required': []}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for schema property: <base element>.required\n" +
                     "Must provide at least one required property.", e.getMessage());
@@ -45,6 +48,7 @@ public class ObjectTest {
                     JsonParser.parse("''"),
                     JsonParser.parse("{'required': ['', '', 123]}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Wrong type for schema property: <base element>.required\n" +
                     "Required constraint must be a non-empty array of strings representing property names.\n" +
@@ -59,6 +63,7 @@ public class ObjectTest {
                     JsonParser.parse("''"),
                     JsonParser.parse("{'required': ['key1', 'key2']}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (SchemaViolationException e) {
             assertEquals("Mismatched data type.\n" +
                     "Schema constraint violated: <base element>.required\n" +
@@ -73,6 +78,7 @@ public class ObjectTest {
                     JsonParser.parse("{'key1':1,'missing key 2':2}"),
                     JsonParser.parse("{'required': ['key1', 'key2']}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (SchemaViolationException e) {
             assertEquals("Missing property.\n" +
                     "Schema constraint violated: <base element>.required\n" +
@@ -111,6 +117,7 @@ public class ObjectTest {
                     JsonParser.parse("''"),
                     JsonParser.parse("{'minProperties': []}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Wrong type for schema property: <base element>.minProperties\n" +
                     "Constraint must provide a non-negative integer.\n" +
@@ -125,6 +132,7 @@ public class ObjectTest {
                     JsonParser.parse("''"),
                     JsonParser.parse("{'minProperties': -5}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for schema property: <base element>.minProperties\n" +
                     "Value must be >= 0.", e.getMessage());
@@ -138,6 +146,7 @@ public class ObjectTest {
                     JsonParser.parse("''"),
                     JsonParser.parse("{'minProperties': 2}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (SchemaViolationException e) {
             assertEquals("Mismatched data type.\n" +
                     "Schema constraint violated: <base element>.minProperties\n" +
@@ -152,6 +161,7 @@ public class ObjectTest {
                     JsonParser.parse("{'key1':1}"),
                     JsonParser.parse("{'minProperties': 2}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value.\n" +
                     "Schema constraint violated: <base element>.minProperties\n" +
@@ -174,6 +184,7 @@ public class ObjectTest {
                     JsonParser.parse("''"),
                     JsonParser.parse("{'maxProperties': []}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Wrong type for schema property: <base element>.maxProperties\n" +
                     "Constraint must provide a non-negative integer.\n" +
@@ -188,6 +199,7 @@ public class ObjectTest {
                     JsonParser.parse("''"),
                     JsonParser.parse("{'maxProperties': -5}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for schema property: <base element>.maxProperties\n" +
                     "Value must be >= 0.", e.getMessage());
@@ -201,6 +213,7 @@ public class ObjectTest {
                     JsonParser.parse("''"),
                     JsonParser.parse("{'maxProperties': 2}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (SchemaViolationException e) {
             assertEquals("Mismatched data type.\n" +
                     "Schema constraint violated: <base element>.maxProperties\n" +
@@ -215,6 +228,7 @@ public class ObjectTest {
                     JsonParser.parse("{'key1':1,'key2':2,'key3':3}"),
                     JsonParser.parse("{'maxProperties': 2}")
             );
+            fail("Previous method call should have thrown an exception.");
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value.\n" +
                     "Schema constraint violated: <base element>.maxProperties\n" +
@@ -228,5 +242,20 @@ public class ObjectTest {
                 JsonParser.parse("{'key1':1,'key2':2}"),
                 JsonParser.parse("{'maxProperties': 2}")
         ));
+    }
+
+
+    @Test
+    public void additionalPropertiesCannotBeString() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("''"),
+                    JsonParser.parse("{'additionalProperties': ''}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.additionalProperties\n" +
+                    "Expected one of [BOOLEAN, ARRAY], got STRING.", e.getMessage());
+        }
     }
 }
