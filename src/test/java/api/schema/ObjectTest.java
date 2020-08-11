@@ -244,6 +244,109 @@ public class ObjectTest {
         ));
     }
 
+    @Test
+    public void propertiesMustBeObject() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("''"),
+                    JsonParser.parse("{'properties': 2}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.properties\n" +
+                    "Properties constraint must be an object.\n" +
+                    "Expected: OBJECT  ->  Received: LONG", e.getMessage());
+        }
+    }
+
+    @Test
+    public void propertiesObjectToValidateMustBeObject() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("''"),
+                    JsonParser.parse("{'properties': {}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Mismatched data type.\n" +
+                    "Schema constraint violated: <base element>.properties\n" +
+                    "Properties constraint can only be run against an Object.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void ifPropertyDoesntExistInObjectThenContentsDontMatter() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{}"),
+                JsonParser.parse("{'properties': {'key1': 12312312312}}")
+        ));
+    }
+
+    @Test
+    public void ifPropertyDoesExistInObjectThenContentMustBeAnObject_withSpacesInKey() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{'prop 1':1}"),
+                    JsonParser.parse("{'properties': {'prop 1': 1}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.properties[`prop 1`]\n" +
+                    "Expected: OBJECT  ->  Received: LONG", e.getMessage());
+        }
+    }
+
+    @Test
+    public void ifPropertyDoesExistInObjectThenContentMustBeAnObject_withBackSlashInKey() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{'prop\\\\1':1}"),
+                    JsonParser.parse("{'properties': {'prop\\\\1': 1}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.properties[`prop\\1`]\n" +
+                    "Expected: OBJECT  ->  Received: LONG", e.getMessage());
+        }
+    }
+
+    @Test
+    public void ifPropertyDoesExistInObjectThenContentMustBeAnObject_withoutSpaceInKey() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{'prop1':1}"),
+                    JsonParser.parse("{'properties': {'prop1': 1}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.properties.prop1\n" +
+                    "Expected: OBJECT  ->  Received: LONG", e.getMessage());
+        }
+    }
+
+    @Test
+    public void allPropertiesValidate() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'prop1':1, 'prop2':[]}"),
+                JsonParser.parse("{'properties': {'prop1': {'const':1}, 'prop2': {'type':'array'}}}")
+        ));
+    }
+
+    @Test
+    public void notAllPropertiesValidate() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{'prop1':1, 'prop2':123}"),
+                    JsonParser.parse("{'properties': {'prop1': {'const':1}, 'prop2': {'type':'array'}}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Mismatched data type.\n" +
+                    "Schema constraint violated: properties.prop2.type\n" +
+                    "Expected one of [ARRAY], got LONG.", e.getMessage());
+        }
+    }
+
 
     @Test
     public void additionalPropertiesCannotBeString() {

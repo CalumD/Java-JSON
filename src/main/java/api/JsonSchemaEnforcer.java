@@ -466,18 +466,23 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
             propertiesObject = currentPart.SCHEMA_SUBSET.getJSONObjectAt("properties");
         } catch (KeyDifferentTypeException e) {
             throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "properties",
-                    "Properties constraint must be an object", e);
+                    "Properties constraint must be an object.", e);
+        }
+        if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "properties",
+                    "Properties constraint can only be run against an Object.");
         }
         for (String key : propertiesObject.getKeys()) {
             if (currentPart.OBJECT_TO_VALIDATE.contains(key)) {
                 String keyInSchema = (key.contains(" ") || key.contains("\\")) ? "[`" + key + "`]" : "." + key;
                 IJson subSchema;
                 try {
-                    subSchema = currentPart.SCHEMA_SUBSET.getJSONObjectAt(key);
+                    subSchema = currentPart.SCHEMA_SUBSET.getJSONObjectAt("properties" + keyInSchema);
                 } catch (KeyDifferentTypeException e) {
                     throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "properties" + keyInSchema, e);
                 }
-                subEnforce(currentPart, subSchema, currentPart.PATH_IN_SCHEMA + keyInSchema);
+                subEnforce(currentPart, currentPart.OBJECT_TO_VALIDATE.getAnyAt(key), subSchema,
+                        currentPart.PATH_IN_SCHEMA + ".properties" + keyInSchema);
             }
         }
     }
@@ -488,7 +493,6 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
             throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "additionalProperties",
                     "Expected one of " + Arrays.asList("BOOLEAN", "ARRAY") + ", got " + schemaType + ".");
         }
-
     }
 
     private void validateRequired(JsonSchemaEnforcerPart currentPart) {
@@ -812,6 +816,17 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
         // TODO:  ACTUALLY IMPLEMENT THIS METHOD
         return $ref;
+    }
+
+    private void subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedObjectToValidate, IJson updatedSubSchema, String updatedPathInSchema) {
+        new JsonSchemaEnforcerPart(
+                updatedObjectToValidate,
+                currentPart.SCHEMA_REFERENCE,
+                updatedSubSchema,
+                updatedPathInSchema,
+                currentPart.SCHEMA_REFERENCES_SEEN,
+                new HashSet<>()
+        ).enforce();
     }
 
     private void subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema) {
