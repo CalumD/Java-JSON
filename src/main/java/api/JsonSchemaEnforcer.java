@@ -69,7 +69,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
             this.CONSTRAINTS_SEEN = constraintsSeen;
         }
 
-        private boolean enforce() {
+        private boolean enforce() throws SchemaException {
             if (this.SCHEMA_SUBSET.getDataType() != JSType.OBJECT) {
                 throw doThrow(SourceOfProblem.SCHEMA, "Schema MUST be an object.");
             }
@@ -469,20 +469,18 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                     "Properties constraint must be an object.", e);
         }
         if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
-            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "properties",
-                    "Properties constraint can only be run against an Object.");
+            return;
         }
         for (String key : propertiesObject.getKeys()) {
             if (currentPart.OBJECT_TO_VALIDATE.contains(key)) {
                 String keyInSchema = (key.contains(" ") || key.contains("\\")) ? "[`" + key + "`]" : "." + key;
-                IJson subSchema;
                 try {
-                    subSchema = currentPart.SCHEMA_SUBSET.getJSONObjectAt("properties" + keyInSchema);
+                    subEnforce(currentPart, currentPart.OBJECT_TO_VALIDATE.getAnyAt(key),
+                            currentPart.SCHEMA_SUBSET.getJSONObjectAt("properties" + keyInSchema),
+                            currentPart.PATH_IN_SCHEMA + ".properties" + keyInSchema);
                 } catch (KeyDifferentTypeException e) {
                     throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "properties" + keyInSchema, e);
                 }
-                subEnforce(currentPart, currentPart.OBJECT_TO_VALIDATE.getAnyAt(key), subSchema,
-                        currentPart.PATH_IN_SCHEMA + ".properties" + keyInSchema);
             }
         }
     }
@@ -818,7 +816,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         return $ref;
     }
 
-    private void subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedObjectToValidate, IJson updatedSubSchema, String updatedPathInSchema) {
+    private void subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedObjectToValidate, IJson updatedSubSchema, String updatedPathInSchema) throws SchemaException {
         new JsonSchemaEnforcerPart(
                 updatedObjectToValidate,
                 currentPart.SCHEMA_REFERENCE,
@@ -829,11 +827,11 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         ).enforce();
     }
 
-    private void subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema) {
+    private void subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema) throws SchemaException {
         subEnforce(currentPart, updatedSubSchema, updatedPathInSchema, new HashSet<>());
     }
 
-    private void subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema, Set<String> constraintsSeen) {
+    private void subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema, Set<String> constraintsSeen) throws SchemaException {
         new JsonSchemaEnforcerPart(
                 currentPart.OBJECT_TO_VALIDATE,
                 currentPart.SCHEMA_REFERENCE,

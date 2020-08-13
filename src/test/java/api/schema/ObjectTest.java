@@ -260,18 +260,19 @@ public class ObjectTest {
     }
 
     @Test
-    public void propertiesObjectToValidateMustBeObject() {
-        try {
-            JsonSchemaEnforcer.validate(
-                    JsonParser.parse("''"),
-                    JsonParser.parse("{'properties': {}}")
-            );
-            fail("Previous method call should have thrown an exception.");
-        } catch (SchemaViolationException e) {
-            assertEquals("Mismatched data type.\n" +
-                    "Schema constraint violated: <base element>.properties\n" +
-                    "Properties constraint can only be run against an Object.", e.getMessage());
-        }
+    public void propertiesShouldIgnoreIfNotAnObject() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("''"),
+                JsonParser.parse("{'properties': {'key1': {}}}")
+        ));
+    }
+
+    @Test
+    public void propertiesShouldIgnoreIfValueIsArray() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[]"),
+                JsonParser.parse("{'properties': {'key1': {}}}")
+        ));
     }
 
     @Test
