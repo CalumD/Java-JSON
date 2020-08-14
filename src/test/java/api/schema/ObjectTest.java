@@ -173,7 +173,7 @@ public class ObjectTest {
     public void minPropertiesHasEnough() {
         assertTrue(JsonSchemaEnforcer.validate(
                 JsonParser.parse("{'key1':1,'key2':2}"),
-                JsonParser.parse("{'maxProperties': 2}")
+                JsonParser.parse("{'minProperties': 2}")
         ));
     }
 
