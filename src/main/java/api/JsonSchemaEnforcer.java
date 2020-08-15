@@ -550,7 +550,16 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private void validatePropertyNames(JsonSchemaEnforcerPart currentPart) {
-
+        IJson subSchema;
+        try {
+            subSchema = currentPart.SCHEMA_SUBSET.getJSONObjectAt("propertyNames");
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "propertyNames",
+                    "Schema value must be a valid sub-schema.", e);
+        }
+        for (String key : currentPart.OBJECT_TO_VALIDATE.getKeys()) {
+            subEnforce(currentPart, JsonParser.parse('`' + key + '`'), subSchema, currentPart.PATH_IN_SCHEMA + ".propertyNames");
+        }
     }
 
     private void validatePatternProperties(JsonSchemaEnforcerPart currentPart) {

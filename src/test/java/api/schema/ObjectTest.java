@@ -348,6 +348,74 @@ public class ObjectTest {
         }
     }
 
+    @Test
+    public void propertyNamesSchemaMustBeObject() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("''"),
+                    JsonParser.parse("{'propertyNames':[]}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.propertyNames\n" +
+                    "Schema value must be a valid sub-schema.\n" +
+                    "Expected: OBJECT  ->  Received: ARRAY", e.getMessage());
+        }
+    }
+
+    @Test
+    public void propertyNamesShouldNotEvaluateIfNotObject() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("''"),
+                JsonParser.parse("{'propertyNames':{'minLength':2}}")
+        ));
+    }
+
+    @Test
+    public void propertyNamesMayStillEvaluateIfArrayFail() {
+        try {
+            assertTrue(JsonSchemaEnforcer.validate(
+                    JsonParser.parse("[1,2,3]"),
+                    JsonParser.parse("{'propertyNames':{'oneOf':[{'const':1},{'const':2},{'const':3}]}}")
+            ));
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: propertyNames.oneOf\n" +
+                    "Provided json failed to match any of the sub-schemas provided.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void propertyNamesMayStillEvaluateIfArrayPass() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[1,2,3]"),
+                JsonParser.parse("{'propertyNames':{'oneOf':[{'const':'0'},{'const':'1'},{'const':'2'}]}}")
+        ));
+    }
+
+    @Test
+    public void propertyNamesForObjectFail() {
+        try {
+            assertTrue(JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{'hey':1}"),
+                    JsonParser.parse("{'propertyNames':{'const':'hey1'}}")
+            ));
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: propertyNames.const\n" +
+                    "Value MUST match the schema's constant.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void propertyNamesForObjectPass() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'hey1':1}"),
+                JsonParser.parse("{'propertyNames':{'const':'hey1'}}")
+        ));
+    }
 
     @Test
     public void additionalPropertiesCannotBeString() {
