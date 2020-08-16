@@ -147,7 +147,10 @@ public final class JSObject extends Json {
 
         //print the full internals based on the next depth though
         for (String key : json.keySet()) {
-            ret.append("\"").append(key).append("\"").append(":")
+            ret
+                    .append("\"")
+                    .append(key.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\""))
+                    .append("\"").append(":")
                     .append(json.get(key).asString(depth - 1)).append(",");
         }
 
@@ -182,7 +185,10 @@ public final class JSObject extends Json {
             getKeysAsCompressedForString(result);
         } else {
             json.forEach((key, value) -> {
-                result.append('"').append(key).append("\": ");
+                result
+                        .append('"').append(
+                        key.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\""))
+                        .append("\": ");
                 ((Json) value).asPrettyString(indent, tabSize, result, depth - 1);
                 result.append(",\n").append(indent);
             });

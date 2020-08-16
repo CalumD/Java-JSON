@@ -67,7 +67,7 @@ public final class JSString extends Json {
 
     @Override
     public String asString(int depth) {
-        return "\"" + myValue + "\"";
+        return "\"" + myValue.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"") + "\"";
     }
 
     @Override

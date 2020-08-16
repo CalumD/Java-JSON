@@ -649,4 +649,20 @@ public class JSObjectTest extends JsonTest {
             assertEquals("The Type of Object found for key (test) was not expected. Expected: OBJECT  ->  Received: ARRAY", e.getMessage());
         }
     }
+
+    @Test
+    public void ensureProperEscapingOfKeysBasic() {
+        assertEquals("{\"\\\"\":1}", new JSObject(new JsonTape("{\"\\\"\":1}")).asString());
+    }
+
+    @Test
+    public void ensureProperEscapingOfKeysMedium() {
+        assertEquals("{\"\\\\ \\\\ \\\"\":1}", new JSObject(new JsonTape("{\"\\\\ \\\\ \\\"\":1}")).asString());
+    }
+
+    @Test
+    public void ensureProperEscapingOfKeysAdvanced() {
+        String escape = "{\"\\\\ \\\\ \\\"\":1}";
+        assertEquals(escape, new JSObject(new JsonTape(new JSObject(new JsonTape(escape)).asString())).asString());
+    }
 }

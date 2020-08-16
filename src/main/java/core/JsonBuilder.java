@@ -317,7 +317,7 @@ public final class JsonBuilder implements IJsonBuilder, IJsonAble {
             }
             //print all of our strings with keys
             for (String key : strings.keySet()) {
-                o.append('"').append(key).append("\":\"").append(strings.get(key)).append("\",");
+                o.append('"').append(key).append("\":\"").append(strings.get(key).replaceAll("\"", "\\\"")).append("\",");
             }
 
             //print all of our sub objects too (again, with keys)

@@ -449,4 +449,26 @@ public class JSStringTest extends JsonTest {
         IJsonAble builder = JsonBuilder.builder().addString("key", "value");
         assertEquals(builder.convertToJSON(), string.convertToJSON(builder));
     }
+
+    @Test
+    public void ensureProperEscapingOfContentBasic() {
+        assertEquals("\"string with \\\" characters\"", new JSString(new JsonTape("\"string with \\\" characters\"")).asString());
+        assertEquals("\"string with \\\" characters\"", new JSString(new JsonTape("'string with \" characters'")).asString());
+        assertEquals("\"string with \\\" characters\"", new JSString(new JsonTape("`string with \" characters`")).asString());
+    }
+
+    @Test
+    public void ensureProperEscapingOfContentMedium() {
+        assertEquals("\"string with \\\\ \\\\ \\\" characters\"", new JSString(new JsonTape("\"string with \\\\ \\\\ \\\" characters\"")).asString());
+        assertEquals("\"string with \\\\ \\\\ \\\" characters\"", new JSString(new JsonTape("'string with \\\\ \\\\ \" characters'")).asString());
+        assertEquals("\"string with \\\\ \\\\ \\\" characters\"", new JSString(new JsonTape("`string with \\\\ \\\\ \" characters`")).asString());
+    }
+
+    @Test
+    public void ensureProperEscapingOfContentAdvanced() {
+        String escape = "\"string with \\\\ \\\\ \\\" characters\"";
+        assertEquals(escape, new JSString(new JsonTape(new JSString(new JsonTape(escape)).asString())).asString());
+        assertEquals(escape, new JSString(new JsonTape(new JSString(new JsonTape("'string with \\\\ \\\\ \" characters'")).asString())).asString());
+        assertEquals(escape, new JSString(new JsonTape(new JSString(new JsonTape("`string with \\\\ \\\\ \" characters`")).asString())).asString());
+    }
 }
