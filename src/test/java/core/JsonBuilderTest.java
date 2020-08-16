@@ -509,7 +509,12 @@ class JsonBuilderTest {
                 "}";
 
         IJson parsedJSON = JsonParser.parse(jsonContent);
-        assertEquals(JsonBuilder.builder().convertFromJSON(parsedJSON).convertToJSON(), parsedJSON);
+        assertEquals(
+                JsonBuilder.builder().convertFromJSON(
+                        JsonBuilder.builder().convertFromJSON(parsedJSON).convertToJSON()
+                ).convertToJSON(),
+                parsedJSON
+        );
     }
 
     @Test
