@@ -284,7 +284,7 @@ public final class JsonBuilder implements IJsonBuilder, IJsonAble {
 
                 //if it is a string, be sure to bookend with quotes else call the default toString
                 if (value instanceof String) {
-                    o.append('"').append(value).append('"');
+                    o.append('"').append(escapeString((String) value)).append('"');
                 } else {
                     o.append(value.toString());
                 }
@@ -305,24 +305,24 @@ public final class JsonBuilder implements IJsonBuilder, IJsonAble {
 
             //print all of our booleans with keys
             for (String key : booleans.keySet()) {
-                o.append('"').append(key).append("\":").append(booleans.get(key)).append(',');
+                o.append('"').append(escapeString(key)).append("\":").append(booleans.get(key)).append(',');
             }
             //print all of our doubles with keys
             for (String key : doubles.keySet()) {
-                o.append('"').append(key).append("\":").append(doubles.get(key)).append(',');
+                o.append('"').append(escapeString(key)).append("\":").append(doubles.get(key)).append(',');
             }
             //print all of our longs with keys
             for (String key : longs.keySet()) {
-                o.append('"').append(key).append("\":").append(longs.get(key)).append(',');
+                o.append('"').append(escapeString(key)).append("\":").append(longs.get(key)).append(',');
             }
             //print all of our strings with keys
             for (String key : strings.keySet()) {
-                o.append('"').append(key).append("\":\"").append(strings.get(key).replaceAll("\"", "\\\"")).append("\",");
+                o.append('"').append(escapeString(key)).append("\":\"").append(escapeString(strings.get(key))).append("\",");
             }
 
             //print all of our sub objects too (again, with keys)
             for (String key : objects.keySet()) {
-                o.append('"').append(key).append("\":");
+                o.append('"').append(escapeString(key)).append("\":");
                 o.append(objects.get(key).toString());
                 o.append(',');
             }
@@ -336,5 +336,11 @@ public final class JsonBuilder implements IJsonBuilder, IJsonAble {
             o.append('}');
         }
         return o.toString();
+    }
+
+    private String escapeString(String stringToEscape) {
+        return stringToEscape
+                .replaceAll("\\\\", "\\\\\\\\")
+                .replaceAll("\"", "\\\\\"");
     }
 }

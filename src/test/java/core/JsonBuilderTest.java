@@ -343,6 +343,7 @@ class JsonBuilderTest {
                 "  \"title\": \"CS Schema\",\n" +
                 "  \"description\": \"Th\",\n" +
                 "  \"type\": \"object\",\n" +
+                "  \"escape\\\"key\": \"escape\\\\object\",\n" +
                 "  \"properties\": {\n" +
                 "    \"system\": {\n" +
                 "      \"description\": \"r advanced/future work/development.\",\n" +
