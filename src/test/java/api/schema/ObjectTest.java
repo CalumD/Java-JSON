@@ -418,6 +418,14 @@ public class ObjectTest {
     }
 
     @Test
+    public void propertyNamesForObjectsWithEscapedCharacters() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'he\\\\y1':1}"),
+                JsonParser.parse("{'propertyNames':{'const':'he\\\\y1'}}")
+        ));
+    }
+
+    @Test
     public void additionalPropertiesCannotBeString() {
         try {
             JsonSchemaEnforcer.validate(

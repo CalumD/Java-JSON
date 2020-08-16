@@ -558,7 +558,12 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                     "Schema value must be a valid sub-schema.", e);
         }
         for (String key : currentPart.OBJECT_TO_VALIDATE.getKeys()) {
-            subEnforce(currentPart, JsonParser.parse('`' + key + '`'), subSchema, currentPart.PATH_IN_SCHEMA + ".propertyNames");
+            subEnforce(currentPart,
+                    JsonParser.parse("\""
+                            + key.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"")
+                            + "\""),
+                    subSchema, currentPart.PATH_IN_SCHEMA + ".propertyNames"
+            );
         }
     }
 
