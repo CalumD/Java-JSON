@@ -234,4 +234,117 @@ public class ArrayTest {
                     "Found no match against the contains property in the value array.", e.getMessage());
         }
     }
+
+    @Test
+    public void itemsCanOnlyBeObjectOrArray() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[]"),
+                JsonParser.parse("{'items': []}")
+        ));
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[]"),
+                JsonParser.parse("{'items': {}}")
+        ));
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("[]"),
+                    JsonParser.parse("{'items': ''}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.items\n" +
+                    "Expected one of [OBJECT, ARRAY], got STRING.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void itemsMustBeUsedAgainstArray() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{}"),
+                    JsonParser.parse("{'items': []}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Mismatched data type.\n" +
+                    "Schema constraint violated: <base element>.items\n" +
+                    "This constraint can only be used against an array.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void itemsWhenUsingObjectMatchAll() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[1,1,1,1,1,1,1,1,1,1]"),
+                JsonParser.parse("{'items': {'const':1}}")
+        ));
+    }
+
+    @Test
+    public void itemsWhenUsingObjectDoesNotMatchAll() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("[1,1,1,1,1,1,1,2,1,1]"),
+                    JsonParser.parse("{'items': {'const':1}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.items\n" +
+                    "An element in the value array did not match against the constraint.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void itemsWhenUsingArrayHasNonObject() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("[1]"),
+                    JsonParser.parse("{'items': [1]}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.items[0]\n" +
+                    "Expected: OBJECT  ->  Received: LONG", e.getMessage());
+        }
+    }
+
+    @Test
+    public void itemsWhenUsingArrayHasAllMatches() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[1]"),
+                JsonParser.parse("{'items': [{'const':1}]}")
+        ));
+    }
+
+    @Test
+    public void itemsWhenUsingArrayHasMisMatch() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("[1, 2, 3]"),
+                    JsonParser.parse("{'items': [{'const':1}, {'const':2}, {'const':3.0}]}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.items[2]\n" +
+                    "Element in value array did not match against matching index in sub-schema.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void itemsWhenUsingArrayHasMoreThanValueArray() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[1]"),
+                JsonParser.parse("{'items': [{'const':1}, {'const':2}, {'const':3}]}")
+        ));
+    }
+
+    @Test
+    public void itemsWhenUsingArrayHasLessThanValueArray() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[1,2,3]"),
+                JsonParser.parse("{'items': [{'const':1}]}")
+        ));
+    }
 }

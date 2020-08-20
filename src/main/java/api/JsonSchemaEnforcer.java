@@ -651,7 +651,44 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private void validateItems(JsonSchemaEnforcerPart currentPart) {
-
+        JSType schemaType = currentPart.SCHEMA_SUBSET.getDataTypeOf("items");
+        if (schemaType != JSType.OBJECT && schemaType != JSType.ARRAY) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "items",
+                    "Expected one of " + Arrays.asList("OBJECT", "ARRAY") + ", got " + schemaType + ".");
+        }
+        if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.ARRAY) {
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "items",
+                    "This constraint can only be used against an array.");
+        }
+        if (schemaType == JSType.OBJECT) {
+            for (IJson element : currentPart.OBJECT_TO_VALIDATE.getArray()) {
+                try {
+                    subEnforce(currentPart, element, currentPart.SCHEMA_SUBSET.getJSONObjectAt("items"), currentPart.PATH_IN_SCHEMA + ".items");
+                } catch (SchemaException e) {
+                    throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "items",
+                            "An element in the value array did not match against the constraint.");
+                }
+            }
+        } else {
+            int maxSizeToEvaluate = Math.min(currentPart.OBJECT_TO_VALIDATE.getArray().size(),
+                    currentPart.SCHEMA_SUBSET.getArrayAt("items").size());
+            String key;
+            for (int index = 0; index < maxSizeToEvaluate; index++) {
+                key = "items[" + index + "]";
+                try {
+                    currentPart.SCHEMA_SUBSET.getJSONObjectAt(key);
+                } catch (KeyDifferentTypeException e) {
+                    throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, key, e);
+                }
+                try {
+                    subEnforce(currentPart, currentPart.OBJECT_TO_VALIDATE.getAnyAt("[" + index + "]"),
+                            currentPart.SCHEMA_SUBSET.getJSONObjectAt(key), currentPart.PATH_IN_SCHEMA + "." + key);
+                } catch (SchemaException e) {
+                    throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, key,
+                            "Element in value array did not match against matching index in sub-schema.");
+                }
+            }
+        }
     }
 
     private void validateUniqueItems(JsonSchemaEnforcerPart currentPart) {
