@@ -425,20 +425,6 @@ public class ObjectTest {
     }
 
     @Test
-    public void additionalPropertiesCannotBeString() {
-        try {
-            JsonSchemaEnforcer.validate(
-                    JsonParser.parse("''"),
-                    JsonParser.parse("{'additionalProperties': ''}")
-            );
-            fail("Previous method call should have thrown an exception.");
-        } catch (InvalidSchemaException e) {
-            assertEquals("Wrong type for schema property: <base element>.additionalProperties\n" +
-                    "Expected one of [BOOLEAN, ARRAY], got STRING.", e.getMessage());
-        }
-    }
-
-    @Test
     public void additionalPropertiesWithTrueAllowsAnything() {
         assertTrue(JsonSchemaEnforcer.validate(
                 JsonParser.parse("123456789"),
@@ -579,5 +565,125 @@ public class ObjectTest {
                         "}}"
                 )
         ));
+    }
+
+    @Test
+    public void dependentMustBeObject() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{}"),
+                    JsonParser.parse("{'dependentRequired': []}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.dependentRequired\n" +
+                    "Expected: OBJECT  ->  Received: ARRAY", e.getMessage());
+        }
+    }
+
+    @Test
+    public void dependentShouldIgnoreNonObject() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[]"),
+                JsonParser.parse("{'dependentRequired': {'a':1}}")
+        ));
+    }
+
+    @Test
+    public void dependentsKeysShouldBeArrays() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{'a':1}"),
+                    JsonParser.parse("{'dependentRequired': {'a': {}}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.dependentRequired.a\n" +
+                    "Dependents can only be specified in an ARRAY.\n" +
+                    "Expected: ARRAY  ->  Received: OBJECT", e.getMessage());
+        }
+    }
+
+    @Test
+    public void dependentObjectToValidateHasNoMatching() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'a':1}"),
+                JsonParser.parse("{'dependentRequired': {}}")
+        ));
+    }
+
+    @Test
+    public void dependentArrayContainsANonString() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{'a':1}"),
+                    JsonParser.parse("{'dependentRequired': {'a': [123]}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.dependentRequired.a\n" +
+                    "Constraint must be the keys of dependent properties.\n" +
+                    "Expected: STRING  ->  Received: LONG", e.getMessage());
+        }
+    }
+
+    @Test
+    public void dependentContainsAllRequiredDependents() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'a':1,'b':2,'c':3}"),
+                JsonParser.parse("{'dependentRequired': {'a': ['b', 'c']}}")
+        ));
+    }
+
+    @Test
+    public void dependentContainsAllRequiredDependentsWithAdvancedKey() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'a':1,'b\\\"':2,'c':3}"),
+                JsonParser.parse("{'dependentRequired': {'a': ['b\\\"', 'c']}}")
+        ));
+    }
+
+    @Test
+    public void dependentDoesntContainAllRequiredDependentsWithAdvancedKey() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{'a':1,'b':2,'c':3}"),
+                    JsonParser.parse("{'dependentRequired': {'a': ['b\\\"', 'c']}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Missing property.\n" +
+                    "Schema constraint violated: <base element>.dependentRequired.a[0]\n" +
+                    "Missing dependent property (b\") required because property (a) present.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void dependentDoesNotContainAllRequiredDependents() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{'a':1,'b':2,'d':3}"),
+                    JsonParser.parse("{'dependentRequired': {'a': ['b', 'c']}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Missing property.\n" +
+                    "Schema constraint violated: <base element>.dependentRequired.a[1]\n" +
+                    "Missing dependent property (c) required because property (a) present.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void additionalPropertiesCannotBeString() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("''"),
+                    JsonParser.parse("{'additionalProperties': ''}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.additionalProperties\n" +
+                    "Expected one of [BOOLEAN, ARRAY], got STRING.", e.getMessage());
+        }
     }
 }

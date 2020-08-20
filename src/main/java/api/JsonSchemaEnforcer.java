@@ -591,7 +591,40 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private void validateDependentRequired(JsonSchemaEnforcerPart currentPart) {
-
+        IJson dependentDefinitions;
+        try {
+            dependentDefinitions = currentPart.SCHEMA_SUBSET.getJSONObjectAt("dependentRequired");
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "dependentRequired", e);
+        }
+        if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
+            return;
+        }
+        List<IJson> dependentDefinition;
+        for (String key : dependentDefinitions.getKeys()) {
+            String keyInSchema = (key.contains(" ") || key.contains("\\")) ? "[`" + key + "`]" : "." + key;
+            try {
+                dependentDefinition = currentPart.SCHEMA_SUBSET.getArrayAt("dependentRequired" + keyInSchema);
+            } catch (KeyDifferentTypeException e) {
+                throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "dependentRequired" + keyInSchema,
+                        "Dependents can only be specified in an ARRAY.", e);
+            }
+            if (currentPart.OBJECT_TO_VALIDATE.contains(key)) {
+                try {
+                    for (int index = 0; index < dependentDefinition.size(); index++) {
+                        if (!currentPart.OBJECT_TO_VALIDATE.contains(dependentDefinition.get(index).getString())) {
+                            throw missingProperty(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA,
+                                    "dependentRequired" + keyInSchema + "[" + index + "]",
+                                    "Missing dependent property (" + dependentDefinition.get(index).getString()
+                                            + ") required because property (" + key + ") present.");
+                        }
+                    }
+                } catch (KeyDifferentTypeException e) {
+                    throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "dependentRequired" + keyInSchema,
+                            "Constraint must be the keys of dependent properties.", e);
+                }
+            }
+        }
     }
 
 
