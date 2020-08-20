@@ -264,7 +264,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                     }
                 }
                 throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "anyOf",
-                        "Provided json failed to match any of the sub-schemas provided.");
+                        "A provided JSON value failed to match any of the sub-schemas provided.");
             }
         } catch (KeyDifferentTypeException e) {
             throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "anyOf", e);
@@ -293,7 +293,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 }
                 if (schemasMatched != 1) {
                     throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "oneOf",
-                            "Provided json failed to match any of the sub-schemas provided.");
+                            "A provided JSON value failed to match any of the sub-schemas provided.");
                 }
             }
         } catch (KeyDifferentTypeException e) {
@@ -465,8 +465,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         try {
             propertiesObject = currentPart.SCHEMA_SUBSET.getJSONObjectAt("properties");
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "properties",
-                    "Properties constraint must be an object.", e);
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "properties", e);
         }
         if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
             return;
@@ -482,14 +481,6 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                     throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "properties" + keyInSchema, e);
                 }
             }
-        }
-    }
-
-    private void validateAdditionalProperties(JsonSchemaEnforcerPart currentPart) {
-        JSType schemaType = currentPart.SCHEMA_SUBSET.getDataTypeOf("additionalProperties");
-        if (schemaType != JSType.BOOLEAN && schemaType != JSType.OBJECT) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "additionalProperties",
-                    "Expected one of " + Arrays.asList("BOOLEAN", "ARRAY") + ", got " + schemaType + ".");
         }
     }
 
@@ -545,10 +536,6 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private void validateUnevaluatedProperties(JsonSchemaEnforcerPart currentPart) {
-
-    }
-
     private void validatePropertyNames(JsonSchemaEnforcerPart currentPart) {
         IJson subSchema;
         try {
@@ -568,6 +555,38 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private void validatePatternProperties(JsonSchemaEnforcerPart currentPart) {
+        IJson propertiesObject;
+        try {
+            propertiesObject = currentPart.SCHEMA_SUBSET.getJSONObjectAt("patternProperties");
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "patternProperties", e);
+        }
+        if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
+            return;
+        }
+        for (String regexKey : propertiesObject.getKeys()) {
+            Pattern regexPattern;
+            try {
+                regexPattern = Pattern.compile(regexKey);
+            } catch (Exception e) {
+                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "patternProperties",
+                        "Key in patternProperties (" + regexKey + ") was not a valid regex.", e);
+            }
+            for (String objectKey : currentPart.OBJECT_TO_VALIDATE.getKeys()) {
+                if (regexPattern.matcher(objectKey).find()) {
+                    String keyInSchema = "[`" + regexKey + "`]";
+                    try {
+                        subEnforce(currentPart, currentPart.OBJECT_TO_VALIDATE.getAnyAt(objectKey),
+                                currentPart.SCHEMA_SUBSET.getJSONObjectAt("patternProperties" + keyInSchema),
+                                currentPart.PATH_IN_SCHEMA + ".patternProperties" + keyInSchema);
+                    } catch (KeyDifferentTypeException e) {
+                        throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA,
+                                "patternProperties" + keyInSchema, e);
+                    }
+                }
+            }
+        }
+    }
 
     }
 
@@ -633,7 +652,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         } catch (KeyDifferentTypeException e) {
             throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "pattern", e);
         }
-        if (!objectToConstrain.matches(verifiedPattern.pattern())) {
+        if (!verifiedPattern.matcher(objectToConstrain).find()) {
             throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "pattern",
                     "Value did not match the provided pattern.");
         }
@@ -788,7 +807,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
         if (!matched) {
             throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "format",
-                    "Value failed to match against the format constraint.");
+                    "Value failed to match against the format (" + formatToVerify + ") constraint.");
         }
     }
 
@@ -855,7 +874,6 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 constraintsSeen
         ).enforce();
     }
-
 
     /* ERROR MANAGEMENT */
     private SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName) {

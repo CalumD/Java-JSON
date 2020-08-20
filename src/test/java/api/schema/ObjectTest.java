@@ -254,7 +254,6 @@ public class ObjectTest {
             fail("Previous method call should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Wrong type for schema property: <base element>.properties\n" +
-                    "Properties constraint must be an object.\n" +
                     "Expected: OBJECT  ->  Received: LONG", e.getMessage());
         }
     }
@@ -382,7 +381,7 @@ public class ObjectTest {
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value.\n" +
                     "Schema constraint violated: propertyNames.oneOf\n" +
-                    "Provided json failed to match any of the sub-schemas provided.", e.getMessage());
+                    "A provided JSON value failed to match any of the sub-schemas provided.", e.getMessage());
         }
     }
 
@@ -437,5 +436,148 @@ public class ObjectTest {
             assertEquals("Wrong type for schema property: <base element>.additionalProperties\n" +
                     "Expected one of [BOOLEAN, ARRAY], got STRING.", e.getMessage());
         }
+    }
+
+    @Test
+    public void additionalPropertiesWithTrueAllowsAnything() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("123456789"),
+                JsonParser.parse("{'additionalProperties':true}")
+        ));
+    }
+
+    @Test
+    public void patternPropertiesMustBeObject() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{}"),
+                    JsonParser.parse("{'patternProperties': ''}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.patternProperties\n" +
+                    "Expected: OBJECT  ->  Received: STRING", e.getMessage());
+        }
+    }
+
+    @Test
+    public void patternPropertiesShouldIgnoreNonObjects() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[]"),
+                JsonParser.parse("{'patternProperties': {}}")
+        ));
+    }
+
+    @Test
+    public void patternPropertiesShouldWarnIfNotValidRegex() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{}"),
+                    JsonParser.parse("{'patternProperties': {'^[':{}}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Unexpected value for schema property: <base element>.patternProperties\n" +
+                    "Key in patternProperties (^[) was not a valid regex.\n" +
+                    "(Unclosed character class near index 1)", e.getMessage());
+        }
+    }
+
+    @Test
+    public void patternPropertiesHasNoMatchesDoesNothing() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'int':1}"),
+                JsonParser.parse("{'patternProperties': {'^str':{'const':'5'}}}")
+        ));
+    }
+
+    @Test
+    public void patternPropertiesMatchesPass() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'int':1}"),
+                JsonParser.parse("{'patternProperties': {" +
+                        "'^str':{'const':'5'}," +
+                        "'^int':{'const':1}" +
+                        "}}"
+                )
+        ));
+    }
+
+    @Test
+    public void patternPropertiesMatchesFails() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{'int':1}"),
+                    JsonParser.parse("{'patternProperties': {" +
+                            "'^str':{'const':'5'}," +
+                            "'^int':{'const':4}" +
+                            "}}"
+                    )
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: patternProperties[`^int`].const\n" +
+                    "Value MUST match the schema's constant.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void patternPropertiesMultipleMatchesFails() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{" +
+                            "'int-1':1," +
+                            "'int-2':4," +
+                            "'str-1':'wow'," +
+                            "'str-2':'owo'" +
+                            "}"),
+                    JsonParser.parse("{'patternProperties': {" +
+                            "'^str':{'minLength':3, 'maxLength':3}," +
+                            "'^int':{'oneOf':[{'const':1},{'const':9}]}" +
+                            "}}"
+                    )
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: patternProperties[`^int`].oneOf\n" +
+                    "A provided JSON value failed to match any of the sub-schemas provided.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void patternPropertiesMultipleMatchesPasses() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{" +
+                        "'int-1':1," +
+                        "'int-2':4," +
+                        "'str-1':'wow'," +
+                        "'str-2':'owo'" +
+                        "}"),
+                JsonParser.parse("{'patternProperties': {" +
+                        "'^str':{'minLength':3, 'maxLength':3}," +
+                        "'^int':{'oneOf':[{'const':1},{'const':4}]}" +
+                        "}}"
+                )
+        ));
+    }
+
+    @Test
+    public void patternPropertiesWithExtraKeyStillPasses() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{" +
+                        "'int-1':1," +
+                        "'int-2':4," +
+                        "'str-1':'wow'," +
+                        "'str-2':'owo'" +
+                        "}"),
+                JsonParser.parse("{'patternProperties': {" +
+                        "'^str':{'minLength':3, 'maxLength':3}," +
+                        "'^int':{'oneOf':[{'const':1},{'const':4}]}," +
+                        "'^other':{'const': 123}" +
+                        "}}"
+                )
+        ));
     }
 }

@@ -74,7 +74,7 @@ public class ConditionalSchemaApplicationTest {
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value.\n" +
                     "Schema constraint violated: <base element>.anyOf\n" +
-                    "Provided json failed to match any of the sub-schemas provided.", e.getMessage());
+                    "A provided JSON value failed to match any of the sub-schemas provided.", e.getMessage());
         }
     }
 
@@ -132,7 +132,7 @@ public class ConditionalSchemaApplicationTest {
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value.\n" +
                     "Schema constraint violated: <base element>.oneOf\n" +
-                    "Provided json failed to match any of the sub-schemas provided.", e.getMessage());
+                    "A provided JSON value failed to match any of the sub-schemas provided.", e.getMessage());
         }
     }
 

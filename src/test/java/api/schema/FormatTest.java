@@ -53,7 +53,7 @@ public class FormatTest {
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value.\n" +
                     "Schema constraint violated: <base element>.format\n" +
-                    "Value failed to match against the format constraint.", e.getMessage());
+                    "Value failed to match against the format (date) constraint.", e.getMessage());
         }
     }
 
