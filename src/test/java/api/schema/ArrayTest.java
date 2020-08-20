@@ -182,4 +182,56 @@ public class ArrayTest {
                     "Index [6] in value to verify was not unique.", e.getMessage());
         }
     }
+
+    @Test
+    public void containsShouldBeObject() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{}"),
+                    JsonParser.parse("{'contains': 1}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.contains\n" +
+                    "Expected: OBJECT  ->  Received: LONG", e.getMessage());
+        }
+    }
+
+    @Test
+    public void containsCanOnlyBeUsedAgainstArray() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{}"),
+                    JsonParser.parse("{'contains': {}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Mismatched data type.\n" +
+                    "Schema constraint violated: <base element>.contains\n" +
+                    "This constraint can only be used against an array.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void containsAndDoesMatch() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[1,2,3,4,5]"),
+                JsonParser.parse("{'contains': {'const':3}}")
+        ));
+    }
+
+    @Test
+    public void containsAndDoesNotMatch() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("[1,2,3.0,4,5]"),
+                    JsonParser.parse("{'contains': {'const':3}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.contains\n" +
+                    "Found no match against the contains property in the value array.", e.getMessage());
+        }
+    }
 }

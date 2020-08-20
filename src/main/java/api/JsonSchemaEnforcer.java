@@ -628,19 +628,29 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
     /* ARRAYS */
     private void validateContains(JsonSchemaEnforcerPart currentPart) {
-
+        IJson subSchema;
+        try {
+            subSchema = currentPart.SCHEMA_SUBSET.getJSONObjectAt("contains");
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "contains", e);
+        }
+        if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.ARRAY) {
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "contains",
+                    "This constraint can only be used against an array.");
+        }
+        for (IJson element : currentPart.OBJECT_TO_VALIDATE.getArray()) {
+            try {
+                subEnforce(currentPart, element, subSchema, currentPart.PATH_IN_SCHEMA + ".contains");
+                return;
+            } catch (SchemaException e) {
+                // Ignore, we wont necessarily match everything
+            }
+        }
+        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "contains",
+                "Found no match against the contains property in the value array.");
     }
 
     private void validateItems(JsonSchemaEnforcerPart currentPart) {
-
-    }
-
-    private void validateMinContains(JsonSchemaEnforcerPart currentPart) {
-
-    }
-
-    private void validateMaxContains(JsonSchemaEnforcerPart currentPart) {
-
 
     }
 
@@ -699,6 +709,14 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private void validateUnevaluatedItems(JsonSchemaEnforcerPart currentPart) {
+
+    }
+
+    private void validateMinContains(JsonSchemaEnforcerPart currentPart) {
+
+    }
+
+    private void validateMaxContains(JsonSchemaEnforcerPart currentPart) {
 
     }
 
