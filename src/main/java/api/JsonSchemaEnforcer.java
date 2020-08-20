@@ -588,8 +588,6 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    }
-
     private void validateDependentRequired(JsonSchemaEnforcerPart currentPart) {
         IJson dependentDefinitions;
         try {
@@ -629,15 +627,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
 
     /* ARRAYS */
-    private void validateUnevaluatedItems(JsonSchemaEnforcerPart currentPart) {
-
-    }
-
     private void validateContains(JsonSchemaEnforcerPart currentPart) {
-
-    }
-
-    private void validateAdditionalItems(JsonSchemaEnforcerPart currentPart) {
 
     }
 
@@ -655,15 +645,60 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private void validateUniqueItems(JsonSchemaEnforcerPart currentPart) {
-
-
+        boolean shouldValidate;
+        try {
+            shouldValidate = currentPart.SCHEMA_SUBSET.getBooleanAt("uniqueItems");
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "uniqueItems", e);
+        }
+        try {
+            currentPart.OBJECT_TO_VALIDATE.getArray();
+        } catch (KeyDifferentTypeException e) {
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "uniqueItems", e);
+        }
+        if (shouldValidate) {
+            IJson outerObject;
+            for (int outer = 0; outer < currentPart.OBJECT_TO_VALIDATE.getArray().size(); outer++) {
+                outerObject = currentPart.OBJECT_TO_VALIDATE.getAnyAt("[" + outer + "]");
+                for (int inner = outer + 1; inner < currentPart.OBJECT_TO_VALIDATE.getArray().size(); inner++) {
+                    if (outerObject.equals(currentPart.OBJECT_TO_VALIDATE.getAnyAt("[" + inner + "]"))) {
+                        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "uniqueItems",
+                                "Index [" + outer + "] in value to verify was not unique.");
+                    }
+                }
+            }
+        }
     }
 
     private void validateMinItems(JsonSchemaEnforcerPart currentPart) {
-
+        long minProperties = getNonNegativeInteger(currentPart, "minItems");
+        if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.ARRAY) {
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "minItems",
+                    "This constraint can only be used against an array.");
+        }
+        if (currentPart.OBJECT_TO_VALIDATE.getArray().size() < minProperties) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "minItems",
+                    "Array doesn't have enough elements to pass the constraint.");
+        }
     }
 
     private void validateMaxItems(JsonSchemaEnforcerPart currentPart) {
+        long maxProperties = getNonNegativeInteger(currentPart, "maxItems");
+        if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.ARRAY) {
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maxItems",
+                    "This constraint can only be used against an array.");
+        }
+        if (currentPart.OBJECT_TO_VALIDATE.getArray().size() > maxProperties) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maxItems",
+                    "Array has more elements than the constraint allows.");
+        }
+    }
+
+    private void validateAdditionalItems(JsonSchemaEnforcerPart currentPart) {
+
+    }
+
+    private void validateUnevaluatedItems(JsonSchemaEnforcerPart currentPart) {
 
     }
 
