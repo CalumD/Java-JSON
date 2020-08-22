@@ -81,7 +81,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
             if (CONSTRAINTS_SEEN.contains("$ref")) {
                 CONSTRAINTS_SEEN.remove("$ref");
                 try {
-                    String referencedSubSchema = convert$RefToJsonKey(this.SCHEMA_SUBSET.getStringAt("$ref"));
+                    String referencedSubSchema = convert$RefToJsonKey(this);
                     if (SCHEMA_REFERENCES_SEEN.contains(referencedSubSchema)) {
                         throw valueUnexpected(SourceOfProblem.SCHEMA, PATH_IN_SCHEMA, "$ref",
                                 "Schema Reference has a cyclic dependency.");
@@ -89,13 +89,13 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                         SCHEMA_REFERENCES_SEEN.add(referencedSubSchema);
                         subEnforce(
                                 this,
-                                this.SCHEMA_REFERENCE.getJSONObjectAt(referencedSubSchema), // TODO: Refactor this assumption that the object is in THIS schema to support web-based schema references.
+                                this.SCHEMA_REFERENCE.getJSONObjectAt(referencedSubSchema),
                                 this.PATH_IN_SCHEMA + ".$ref",
                                 CONSTRAINTS_SEEN
                         );
                     }
                 } catch (KeyNotFoundException e) {
-                    throw missingProperty(SourceOfProblem.SCHEMA, PATH_IN_SCHEMA, "$ref", e);
+                    throw missingProperty(PATH_IN_SCHEMA, "$ref", e);
                 } catch (KeyDifferentTypeException e) {
                     throw valueDifferentType(SourceOfProblem.SCHEMA, PATH_IN_SCHEMA, "$ref",
                             "$ref must link to a valid sub-schema object.", e);
@@ -506,7 +506,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
         for (String requiredKey : requiredKeys) {
             if (!currentPart.OBJECT_TO_VALIDATE.contains(requiredKey)) {
-                throw missingProperty(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "required",
+                throw missingProperty(currentPart.PATH_IN_SCHEMA, "required",
                         "Property (" + requiredKey + ") is mandatory, but couldn't be found.");
             }
         }
@@ -611,7 +611,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 try {
                     for (int index = 0; index < dependentDefinition.size(); index++) {
                         if (!currentPart.OBJECT_TO_VALIDATE.contains(dependentDefinition.get(index).getString())) {
-                            throw missingProperty(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA,
+                            throw missingProperty(currentPart.PATH_IN_SCHEMA,
                                     "dependentRequired" + keyInSchema + "[" + index + "]",
                                     "Missing dependent property (" + dependentDefinition.get(index).getString()
                                             + ") required because property (" + key + ") present.");
@@ -966,10 +966,51 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private String convert$RefToJsonKey(String $ref) {
+    private String convert$RefToJsonKey(JsonSchemaEnforcerPart currentPart) {
+        String resolvedRef = currentPart.SCHEMA_SUBSET.getStringAt("$ref");
+        if (resolvedRef.equals("")) {
+            return resolvedRef;
+        }
 
-        // TODO:  ACTUALLY IMPLEMENT THIS METHOD
-        return $ref;
+        // Absolute
+        if (resolvedRef.startsWith("#/")) {
+            resolvedRef = convert$RefPathToJsonKeyEncoding(resolvedRef.substring(2));
+        } else if (resolvedRef.startsWith("#") || resolvedRef.startsWith("/")) {
+            resolvedRef = convert$RefPathToJsonKeyEncoding(resolvedRef.substring(1));
+        }
+        // Relative
+        else {
+            throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "$ref",
+                    "Relative sub-schema keys are not supported in this implementation.");
+        }
+
+        return resolvedRef;
+    }
+
+    private String convert$RefPathToJsonKeyEncoding(String refPath) {
+        StringBuilder resolvedPath = new StringBuilder();
+        String[] steps = refPath.split("/");
+
+        for (String step : steps) {
+            step = step
+                    .replaceAll("~0", "~")
+                    .replaceAll("~1", "/");
+            try {
+                int arrayRef = Integer.parseInt(step);
+                resolvedPath.append("[").append(arrayRef).append("]");
+            } catch (NumberFormatException e) {
+                if (step.contains(" ") || step.contains("\\")) {
+                    resolvedPath.append("[`").append(step).append("`]");
+                } else {
+                    resolvedPath.append(".").append(step);
+                }
+            }
+        }
+        if (resolvedPath.length() > 0 && resolvedPath.charAt(0) == '.') {
+            resolvedPath.deleteCharAt(0);
+        }
+
+        return resolvedPath.toString();
     }
 
     private void subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedObjectToValidate, IJson updatedSubSchema, String updatedPathInSchema) throws SchemaException {
@@ -999,16 +1040,12 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     /* ERROR MANAGEMENT */
-    private SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName) {
-        return missingProperty(source, parentOfMissingProperty, propertyName, "", null);
+    private SchemaException missingProperty(String parentOfMissingProperty, String propertyName, String reason) {
+        return missingProperty(SourceOfProblem.OBJECT_TO_VALIDATE, parentOfMissingProperty, propertyName, reason, null);
     }
 
-    private SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason) {
-        return missingProperty(source, parentOfMissingProperty, propertyName, reason, null);
-    }
-
-    private SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName, Throwable cause) {
-        return missingProperty(source, parentOfMissingProperty, propertyName, "", cause);
+    private SchemaException missingProperty(String parentOfMissingProperty, String propertyName, Throwable cause) {
+        return missingProperty(SourceOfProblem.SCHEMA, parentOfMissingProperty, propertyName, "", cause);
     }
 
     private SchemaException missingProperty(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason, Throwable cause) {
@@ -1027,10 +1064,6 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         return cause == null
                 ? doThrow(source, message)
                 : doThrow(source, message, cause);
-    }
-
-    private SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName) {
-        return valueDifferentType(source, parentOfMissingProperty, propertyName, "");
     }
 
     private SchemaException valueDifferentType(SourceOfProblem source, String parentOfMissingProperty, String propertyName, String reason) {
