@@ -357,7 +357,6 @@ public class ObjectTest {
             fail("Previous method call should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Wrong type for schema property: <base element>.propertyNames\n" +
-                    "Schema value must be a valid sub-schema.\n" +
                     "Expected: OBJECT  ->  Received: ARRAY", e.getMessage());
         }
     }

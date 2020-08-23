@@ -52,14 +52,14 @@ public class TypeTest extends JsonSchemaEnforcerTest {
             fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for schema property: <base element>.type\n" +
-                    "Unrecognised/Unsupported type provided (null).", e.getMessage());
+                    "Unrecognised/Unsupported type provided (NULL).", e.getMessage());
         }
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'type': 'undefined'}"));
             fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for schema property: <base element>.type\n" +
-                    "Unrecognised/Unsupported type provided (undefined).", e.getMessage());
+                    "Unrecognised/Unsupported type provided (UNDEFINED).", e.getMessage());
         }
 
         // Type does not exist
@@ -68,7 +68,7 @@ public class TypeTest extends JsonSchemaEnforcerTest {
             fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for schema property: <base element>.type\n" +
-                    "Unrecognised/Unsupported type provided (wrong).", e.getMessage());
+                    "Unrecognised/Unsupported type provided (WRONG).", e.getMessage());
         }
     }
 
@@ -80,14 +80,14 @@ public class TypeTest extends JsonSchemaEnforcerTest {
             fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for schema property: <base element>.type\n" +
-                    "Unrecognised/Unsupported type provided (null).", e.getMessage());
+                    "Unrecognised/Unsupported type provided (NULL).", e.getMessage());
         }
         try {
             JsonSchemaEnforcer.validate(JsonParser.parse("{}"), JsonParser.parse("{'type': ['undefined']}"));
             fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for schema property: <base element>.type\n" +
-                    "Unrecognised/Unsupported type provided (undefined).", e.getMessage());
+                    "Unrecognised/Unsupported type provided (UNDEFINED).", e.getMessage());
         }
 
         // Type does not exist
@@ -96,7 +96,7 @@ public class TypeTest extends JsonSchemaEnforcerTest {
             fail("Previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for schema property: <base element>.type\n" +
-                    "Unrecognised/Unsupported type provided (wrong).", e.getMessage());
+                    "Unrecognised/Unsupported type provided (WRONG).", e.getMessage());
         }
     }
 
