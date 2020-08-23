@@ -22,6 +22,7 @@ public class StringTest {
             fail("The previous method should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Wrong type for schema property: <base element>.minLength\n" +
+                    "Constraint must provide a non-negative integer.\n" +
                     "Expected: LONG  ->  Received: ARRAY", e.getMessage());
         }
     }
@@ -36,7 +37,7 @@ public class StringTest {
             fail("The previous method should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for schema property: <base element>.minLength\n" +
-                    "Cannot constrain string length using a negative number.", e.getMessage());
+                    "Value must be >= 0.", e.getMessage());
         }
     }
 
@@ -97,6 +98,7 @@ public class StringTest {
             fail("The previous method should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Wrong type for schema property: <base element>.maxLength\n" +
+                    "Constraint must provide a non-negative integer.\n" +
                     "Expected: LONG  ->  Received: OBJECT", e.getMessage());
         }
     }
@@ -111,7 +113,7 @@ public class StringTest {
             fail("The previous method should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for schema property: <base element>.maxLength\n" +
-                    "Cannot constrain string length using a negative number.", e.getMessage());
+                    "Value must be >= 0.", e.getMessage());
         }
     }
 

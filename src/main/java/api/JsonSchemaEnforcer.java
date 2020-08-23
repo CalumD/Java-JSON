@@ -10,8 +10,10 @@ import exceptions.schema.SchemaViolationException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -48,317 +50,335 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
             throw new SchemaException("JSON Schemas MUST be a valid JSON Object with defined mandatory keys and structure. You provided a " + schema.getDataType() + ".");
         }
         Set<String> subSchemaReferencesSeen = Stream.of("").collect(Collectors.toSet());
-        return (new JsonSchemaEnforcerPart(objectToValidate, schema, schema, "", subSchemaReferencesSeen, new HashSet<>())).enforce();
+        return (new JsonSchemaEnforcerPart(objectToValidate, schema, schema, "", subSchemaReferencesSeen)).enforce();
+    }
+
+    private final class RefResolvedSchemaPart {
+        private final String canonicalPath; // The key in the top level schema to reach this property (not necessarily valid JSON)
+        private final String propertyName; // The property being evaluated
+        private final IJson schema; // The sub-schema at this property.
+
+        private RefResolvedSchemaPart(String canonicalPath, String propertyName, IJson schema) {
+            this.canonicalPath = canonicalPath.startsWith(".") ? canonicalPath.substring(1) : canonicalPath;
+            this.propertyName = propertyName;
+            this.schema = schema;
+        }
+
+        private RefResolvedSchemaPart(String canonicalPath, IJson schema) {
+            this(canonicalPath, null, schema);
+        }
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "path='" + canonicalPath + '\'' +
+                    ", prop='" + propertyName + '\'' +
+                    ", schema=" + schema +
+                    '}';
+        }
     }
 
     private final class JsonSchemaEnforcerPart {
+
         private final IJson SCHEMA_REFERENCE; // The Full Schema
         private final IJson OBJECT_TO_VALIDATE; // The Current object to validate
-        private final String PATH_IN_SCHEMA; // The Key in the Full Schema we are at (Not Necessarily valid json key)
-        private final IJson SCHEMA_SUBSET; // The Schema Subset at the given key
         private final Set<String> SCHEMA_REFERENCES_SEEN; // The Schema Subset at the given key
-        private final Set<String> CONSTRAINTS_SEEN;
+        private final HashMap<String, RefResolvedSchemaPart> resolvableConstraints = new HashMap<>();
 
-
-        private JsonSchemaEnforcerPart(IJson objectToValidate, IJson fullSchema, IJson currentSchemaFragment, String schemaKeySoFar, Set<String> schemaReferencesSeen, Set<String> constraintsSeen) {
-            this.OBJECT_TO_VALIDATE = objectToValidate;
+        private JsonSchemaEnforcerPart(IJson objectToValidate, IJson fullSchema, IJson currentSchemaFragment, String schemaKeySoFar, Set<String> schemaReferencesSeen) {
             this.SCHEMA_REFERENCE = fullSchema;
-            this.PATH_IN_SCHEMA = schemaKeySoFar.startsWith(".") ? schemaKeySoFar.substring(1) : schemaKeySoFar;
-            this.SCHEMA_SUBSET = currentSchemaFragment;
+            this.OBJECT_TO_VALIDATE = objectToValidate;
             this.SCHEMA_REFERENCES_SEEN = schemaReferencesSeen;
-            this.CONSTRAINTS_SEEN = constraintsSeen;
+            pullUp$Refs(new RefResolvedSchemaPart(schemaKeySoFar, currentSchemaFragment));
         }
 
-        private boolean enforce() throws SchemaException {
-            if (this.SCHEMA_SUBSET.getDataType() != JSType.OBJECT) {
-                throw doThrow(SourceOfProblem.SCHEMA, "Schema MUST be an object.");
-            }
-            for (String key : this.SCHEMA_SUBSET.getKeys()) {
-                if (!CONSTRAINTS_SEEN.contains(key)) {
-                    routeConstraint(key, CONSTRAINTS_SEEN);
-                }
-            }
-            if (CONSTRAINTS_SEEN.contains("$ref")) {
-                CONSTRAINTS_SEEN.remove("$ref");
+        private void pullUp$Refs(RefResolvedSchemaPart pathing) {
+            List<String> subSchemaKeys = pathing.schema.getKeys();
+
+            // Deal with any lower level $ref constraints
+            if (subSchemaKeys.remove("$ref")) {
                 try {
-                    String referencedSubSchema = convert$RefToJsonKey(this);
+                    String referencedSubSchema = convert$RefToJsonKey(pathing.canonicalPath, pathing.schema.getStringAt("$ref"));
                     if (SCHEMA_REFERENCES_SEEN.contains(referencedSubSchema)) {
-                        throw valueUnexpected(SourceOfProblem.SCHEMA, PATH_IN_SCHEMA, "$ref",
+                        throw valueUnexpected(SourceOfProblem.SCHEMA, pathing.canonicalPath, "$ref",
                                 "Schema Reference has a cyclic dependency.");
                     } else {
                         SCHEMA_REFERENCES_SEEN.add(referencedSubSchema);
-                        subEnforce(
-                                this,
-                                this.SCHEMA_REFERENCE.getJSONObjectAt(referencedSubSchema),
-                                this.PATH_IN_SCHEMA + ".$ref",
-                                CONSTRAINTS_SEEN
+                        pullUp$Refs(new RefResolvedSchemaPart(
+                                pathing.canonicalPath + ".$ref",
+                                this.SCHEMA_REFERENCE.getJSONObjectAt(referencedSubSchema))
                         );
                     }
                 } catch (KeyNotFoundException e) {
-                    throw missingProperty(PATH_IN_SCHEMA, "$ref", e);
+                    throw missingProperty(pathing.canonicalPath, "$ref", e);
                 } catch (KeyDifferentTypeException e) {
-                    throw valueDifferentType(SourceOfProblem.SCHEMA, PATH_IN_SCHEMA, "$ref",
+                    throw valueDifferentType(SourceOfProblem.SCHEMA, pathing.canonicalPath, "$ref",
                             "$ref must link to a valid sub-schema object.", e);
+                }
+            }
+
+            // Deal with everything else
+            for (String key : subSchemaKeys) {
+                String canonicalKey = (key.contains(" ") || key.contains("\\")) ? "[`" + key + "`]" : key;
+                resolvableConstraints.put(key, new RefResolvedSchemaPart(pathing.canonicalPath, canonicalKey, pathing.schema.getAnyAt(key)));
+            }
+        }
+
+        private boolean enforce() throws SchemaException {
+            for (Map.Entry<String, RefResolvedSchemaPart> constraint : resolvableConstraints.entrySet()) {
+                switch (constraint.getKey()) {
+                    case "type":
+                        validateType(this, constraint.getValue());
+                        break;
+                    case "enum":
+                        validateEnum(this, constraint.getValue());
+                        break;
+                    case "const":
+                        if (!this.OBJECT_TO_VALIDATE.equals(resolvableConstraints.get("const").schema)) {
+                            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, resolvableConstraints.get("const").canonicalPath, "const",
+                                    "Value MUST match the schema's constant.");
+                        }
+                        break;
+                    case "allOf":
+                        validateAllOf(this, constraint.getValue());
+                        break;
+                    case "anyOf":
+                        validateAnyOf(this, constraint.getValue());
+                        break;
+                    case "oneOf":
+                        validateOneOf(this, constraint.getValue());
+                        break;
+                    case "not":
+                        validateNot(this, constraint.getValue());
+                        break;
+                    case "if":
+                        validateIf(this);
+                        break;
+                    case "multipleOf":
+                        validateMultipleOf(this, constraint.getValue());
+                        break;
+                    case "maximum":
+                        validateMaximum(this, constraint.getValue());
+                        break;
+                    case "exclusiveMaximum":
+                        validateExclusiveMaximum(this, constraint.getValue());
+                        break;
+                    case "minimum":
+                        validateMinimum(this, constraint.getValue());
+                        break;
+                    case "exclusiveMinimum":
+                        validateExclusiveMinimum(this, constraint.getValue());
+                        break;
+                    case "maxLength":
+                        validateMaxLength(this, constraint.getValue());
+                        break;
+                    case "minLength":
+                        validateMinLength(this, constraint.getValue());
+                        break;
+                    case "pattern":
+                        validatePattern(this, constraint.getValue());
+                        break;
+                    case "format":
+                        validateFormat(this, constraint.getValue());
+                        break;
+                    case "maxItems":
+                        validateMaxItems(this, constraint.getValue());
+                        break;
+                    case "minItems":
+                        validateMinItems(this, constraint.getValue());
+                        break;
+                    case "uniqueItems":
+                        validateUniqueItems(this, constraint.getValue());
+                        break;
+                    case "maxContains":
+                        validateMaxContains(this);
+                        break;
+                    case "minContains":
+                        validateMinContains(this);
+                        break;
+                    case "items":
+                        validateItems(this, constraint.getValue());
+                        break;
+                    case "additionalItems":
+                        validateAdditionalItems(this);
+                        break;
+                    case "contains":
+                        validateContains(this, constraint.getValue());
+                        break;
+                    case "unevaluatedItems":
+                        validateUnevaluatedItems(this);
+                        break;
+                    case "maxProperties":
+                        validateMaxProperties(this, constraint.getValue());
+                        break;
+                    case "minProperties":
+                        validateMinProperties(this, constraint.getValue());
+                        break;
+                    case "required":
+                        validateRequired(this, constraint.getValue());
+                        break;
+                    case "dependentRequired":
+                        validateDependentRequired(this, constraint.getValue());
+                        break;
+                    case "properties":
+                        validateProperties(this, constraint.getValue());
+                        break;
+                    case "patternProperties":
+                        validatePatternProperties(this, constraint.getValue());
+                        break;
+                    case "additionalProperties":
+                        validateAdditionalProperties(this);
+                        break;
+                    case "propertyNames":
+                        validatePropertyNames(this, constraint.getValue());
+                        break;
+                    case "unevaluatedProperties":
+                        validateUnevaluatedProperties(this);
+                        break;
+//                case "Some Unsupported Keyword!":
+//                    throw new InvalidSchemaException("Unsupported constraint used (" + key + ").\n" +
+//                            "Unable to verify all schema requirements, so failing.");
+//                    break;
+//                default:
+                    // Ignore unknown properties.
                 }
             }
 
             // EVERYTHING HAS VALIDATED NOW
             return true;
         }
-
-        private void routeConstraint(String key, Set<String> constraintsSeen) {
-            switch (key) {
-                case "type":
-                    validateType(this);
-                    break;
-                case "enum":
-                    validateEnum(this);
-                    break;
-                case "const":
-                    if (!this.OBJECT_TO_VALIDATE.equals(this.SCHEMA_SUBSET.getAnyAt("const"))) {
-                        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, this.PATH_IN_SCHEMA, "const",
-                                "Value MUST match the schema's constant.");
-                    }
-                    break;
-                case "allOf":
-                    validateAllOf(this);
-                    break;
-                case "anyOf":
-                    validateAnyOf(this);
-                    break;
-                case "oneOf":
-                    validateOneOf(this);
-                    break;
-                case "not":
-                    validateNot(this);
-                    break;
-                case "if":
-                    validateIf(this);
-                    break;
-                case "multipleOf":
-                    validateMultipleOf(this);
-                    break;
-                case "maximum":
-                    validateMaximum(this);
-                    break;
-                case "exclusiveMaximum":
-                    validateExclusiveMaximum(this);
-                    break;
-                case "minimum":
-                    validateMinimum(this);
-                    break;
-                case "exclusiveMinimum":
-                    validateExclusiveMinimum(this);
-                    break;
-                case "maxLength":
-                    validateMaxLength(this);
-                    break;
-                case "minLength":
-                    validateMinLength(this);
-                    break;
-                case "pattern":
-                    validatePattern(this);
-                    break;
-                case "format":
-                    validateFormat(this);
-                    break;
-                case "maxItems":
-                    validateMaxItems(this);
-                    break;
-                case "minItems":
-                    validateMinItems(this);
-                    break;
-                case "uniqueItems":
-                    validateUniqueItems(this);
-                    break;
-                case "maxContains":
-                    validateMaxContains(this);
-                    break;
-                case "minContains":
-                    validateMinContains(this);
-                    break;
-                case "items":
-                    validateItems(this);
-                    break;
-                case "additionalItems":
-                    validateAdditionalItems(this);
-                    break;
-                case "contains":
-                    validateContains(this);
-                    break;
-                case "unevaluatedItems":
-                    validateUnevaluatedItems(this);
-                    break;
-                case "maxProperties":
-                    validateMaxProperties(this);
-                    break;
-                case "minProperties":
-                    validateMinProperties(this);
-                    break;
-                case "required":
-                    validateRequired(this);
-                    break;
-                case "dependentRequired":
-                    validateDependentRequired(this);
-                    break;
-                case "properties":
-                    validateProperties(this);
-                    break;
-                case "patternProperties":
-                    validatePatternProperties(this);
-                    break;
-                case "additionalProperties":
-                    validateAdditionalProperties(this);
-                    break;
-                case "propertyNames":
-                    validatePropertyNames(this);
-                    break;
-                case "unevaluatedProperties":
-                    validateUnevaluatedProperties(this);
-                    break;
-                case "$ref":
-                    break;
-//                case "Some Unsupported Keyword!":
-//                    throw new InvalidSchemaException("Unsupported constraint used (" + key + ").\n" +
-//                            "Unable to verify all schema requirements, so failing.");
-//                    break;
-                default:
-                    // Ignore unknown properties.
-                    return;
-            }
-            constraintsSeen.add(key);
-        }
     }
 
 
     /* CONDITIONAL VALIDATIONS */
-    private void validateAllOf(JsonSchemaEnforcerPart currentPart) {
+    private void validateAllOf(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
         try {
-            if (currentPart.SCHEMA_SUBSET.getArrayAt("allOf").size() == 0) {
-                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "allOf",
+            if (partStructure.schema.getArray().size() == 0) {
+                throw valueUnexpected(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                         "Array must contain at least 1 sub-schema.");
             } else {
-                for (String arrayIndex : currentPart.SCHEMA_SUBSET.getKeysOf("allOf")) {
-                    subEnforce(currentPart, currentPart.SCHEMA_SUBSET.getAnyAt("allOf[" + arrayIndex + "]"),
-                            currentPart.PATH_IN_SCHEMA + ".allOf[" + arrayIndex + "]");
+                for (String arrayIndex : partStructure.schema.getKeys()) {
+                    subEnforce(currentPart, partStructure.schema.getAnyAt("[" + arrayIndex + "]"),
+                            partStructure.canonicalPath + ".allOf[" + arrayIndex + "]");
                 }
             }
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "allOf", e);
+            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName, e);
         }
     }
 
-    private void validateAnyOf(JsonSchemaEnforcerPart currentPart) {
+    private void validateAnyOf(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
         try {
-            if (currentPart.SCHEMA_SUBSET.getArrayAt("anyOf").size() == 0) {
-                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "anyOf",
+            if (partStructure.schema.getArray().size() == 0) {
+                throw valueUnexpected(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                         "Array must contain at least 1 sub-schema.");
             } else {
-                for (String arrayIndex : currentPart.SCHEMA_SUBSET.getKeysOf("anyOf")) {
+                for (String arrayIndex : partStructure.schema.getKeys()) {
                     try {
-                        subEnforce(currentPart, currentPart.SCHEMA_SUBSET.getAnyAt("anyOf[" + arrayIndex + "]"),
-                                currentPart.PATH_IN_SCHEMA + ".anyOf[" + arrayIndex + "]");
+                        subEnforce(currentPart, partStructure.schema.getAnyAt("[" + arrayIndex + "]"),
+                                partStructure.canonicalPath + ".anyOf[" + arrayIndex + "]");
                         return;
                     } catch (SchemaException e) {
                         // Trapping exceptions as we won't necessarily match all of these.
                     }
                 }
-                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "anyOf",
+                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                         "A provided JSON value failed to match any of the sub-schemas provided.");
             }
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "anyOf", e);
+            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName, e);
         }
     }
 
-    private void validateOneOf(JsonSchemaEnforcerPart currentPart) {
+    private void validateOneOf(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
         try {
-            if (currentPart.SCHEMA_SUBSET.getArrayAt("oneOf").size() == 0) {
-                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "oneOf",
+            if (partStructure.schema.getArray().size() == 0) {
+                throw valueUnexpected(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                         "Array must contain at least 1 sub-schema.");
             } else {
                 long schemasMatched = 0;
-                for (String arrayIndex : currentPart.SCHEMA_SUBSET.getKeysOf("oneOf")) {
+                for (String arrayIndex : partStructure.schema.getKeys()) {
                     try {
-                        subEnforce(currentPart, currentPart.SCHEMA_SUBSET.getAnyAt("oneOf[" + arrayIndex + "]"),
-                                currentPart.PATH_IN_SCHEMA + ".oneOf[" + arrayIndex + "]");
+                        subEnforce(currentPart, partStructure.schema.getAnyAt("[" + arrayIndex + "]"),
+                                partStructure.canonicalPath + ".oneOf[" + arrayIndex + "]");
                     } catch (SchemaException e) {
                         // Trapping exceptions as we won't necessarily match all of these.
                         schemasMatched--;
                     }
                     if (++schemasMatched > 1) {
-                        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "oneOf",
+                        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                                 "Json validated against more than one sub-schema.");
                     }
                 }
                 if (schemasMatched != 1) {
-                    throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "oneOf",
+                    throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                             "A provided JSON value failed to match any of the sub-schemas provided.");
                 }
             }
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "oneOf", e);
+            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName, e);
         }
     }
 
-    private void validateNot(JsonSchemaEnforcerPart currentPart) {
+    private void validateNot(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
         try {
-            subEnforce(currentPart, currentPart.SCHEMA_SUBSET.getAnyAt("not"), currentPart.PATH_IN_SCHEMA + ".not");
+            subEnforce(currentPart, partStructure.schema, partStructure.canonicalPath + ".not");
         } catch (SchemaException e) {
             // Ignore the failure - that's what we wanted!
             return;
         }
-        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "not",
+        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                 "Json successfully validated against the sub-schema, but a failure was required.");
     }
 
     private void validateIf(JsonSchemaEnforcerPart currentPart) {
         boolean validatedAgainstIf = false;
         try {
-            subEnforce(currentPart, currentPart.SCHEMA_SUBSET.getAnyAt("if"), currentPart.PATH_IN_SCHEMA + ".if");
+            subEnforce(currentPart, currentPart.resolvableConstraints.get("if").schema, currentPart.resolvableConstraints.get("if").canonicalPath + ".if");
             validatedAgainstIf = true;
         } catch (SchemaException e) {
             // The IF part of a schema shouldn't effect the result - just which of the then/else is relevant
         }
 
-        if (validatedAgainstIf && currentPart.SCHEMA_SUBSET.contains("then")) {
-            subEnforce(currentPart, currentPart.SCHEMA_SUBSET.getAnyAt("then"), currentPart.PATH_IN_SCHEMA + ".then");
-        } else if (!validatedAgainstIf && currentPart.SCHEMA_SUBSET.contains("else")) {
-            subEnforce(currentPart, currentPart.SCHEMA_SUBSET.getAnyAt("else"), currentPart.PATH_IN_SCHEMA + ".else");
+        if (validatedAgainstIf && currentPart.resolvableConstraints.containsKey("then")) {
+            subEnforce(currentPart, currentPart.resolvableConstraints.get("then").schema,
+                    currentPart.resolvableConstraints.get("then").canonicalPath + ".then");
+        } else if (!validatedAgainstIf && currentPart.resolvableConstraints.containsKey("else")) {
+            subEnforce(currentPart, currentPart.resolvableConstraints.get("else").schema,
+                    currentPart.resolvableConstraints.get("else").canonicalPath + ".else");
         }
     }
 
-    private void validateType(JsonSchemaEnforcerPart currentPart) {
-        IJson type = currentPart.SCHEMA_SUBSET.getAnyAt("type");
-        switch (type.getDataType()) {
+    private void validateType(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
+        switch (partStructure.schema.getDataType()) {
             case STRING:
                 ArrayList<String> allowedType = new ArrayList<>(1);
-                allowedType.add(currentPart.SCHEMA_SUBSET.getStringAt("type").toLowerCase());
-                validateType(currentPart, allowedType);
+                allowedType.add(partStructure.schema.getString().toLowerCase());
+                validateType(currentPart, partStructure, allowedType);
                 break;
             case ARRAY:
                 Set<String> distinctTypes = new HashSet<>(10);
-                for (IJson distinctType : currentPart.SCHEMA_SUBSET.getArrayAt("type")) {
+                for (IJson distinctType : partStructure.schema.getArray()) {
                     try {
                         distinctTypes.add(distinctType.getString());
                     } catch (KeyDifferentTypeException e) {
-                        throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "type",
+                        throw valueUnexpected(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                                 "All values in the (type) property MUST be a valid, distinct STRING.", e);
                     }
                 }
                 if (distinctTypes.size() == 0) {
-                    throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "type",
+                    throw valueUnexpected(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                             "You must provide at least one valid data type restriction.");
                 }
-                validateType(currentPart, new ArrayList<>(distinctTypes));
+                validateType(currentPart, partStructure, new ArrayList<>(distinctTypes));
                 break;
             default:
-                throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "type",
-                        "Expected one of " + Arrays.asList("STRING", "ARRAY") + ", got " + type.getDataType() + ".");
+                throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
+                        "Expected one of " + Arrays.asList("STRING", "ARRAY") + ", got " + partStructure.schema.getDataType() + ".");
         }
     }
 
-    private void validateType(JsonSchemaEnforcerPart currentPart, List<String> allowedTypes) {
+    private void validateType(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure, List<String> allowedTypes) {
         JSType currentDataType = currentPart.OBJECT_TO_VALIDATE.getDataType();
         for (String allowedType : allowedTypes) {
             switch (allowedType) {
@@ -388,84 +408,84 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 case "null":
                 case "undefined":
                 default:
-                    throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "type",
+                    throw valueUnexpected(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                             "Unrecognised/Unsupported type provided (" + allowedType + ").");
             }
         }
         allowedTypes.replaceAll(String::toUpperCase);
-        throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "type",
+        throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                 "Expected one of " + allowedTypes + ", got " + currentDataType + ".");
     }
 
-    private void validateEnum(JsonSchemaEnforcerPart currentPart) {
+    private void validateEnum(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
         try {
-            for (IJson instance : currentPart.SCHEMA_SUBSET.getArrayAt("enum")) {
+            for (IJson instance : partStructure.schema.getArray()) {
                 if (currentPart.OBJECT_TO_VALIDATE.equals(instance)) {
                     return;
                 }
             }
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "enum",
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "Object did not match any options provided by the enum.");
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "enum", e);
+            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName, e);
         }
     }
 
 
     /* NUMBERS */
-    private void validateMultipleOf(JsonSchemaEnforcerPart currentPart) {
-        BigDecimal numberFromSchema = getComparableNumber(currentPart, "multipleOf", true);
+    private void validateMultipleOf(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
+        BigDecimal numberFromSchema = getComparableNumber(currentPart, partStructure.propertyName, true);
         if (numberFromSchema.equals(BigDecimal.ZERO)) {
-            throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "multipleOf",
+            throw valueUnexpected(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                     "You cannot use a multiple of 0.");
         }
-        if ((getComparableNumber(currentPart, "multipleOf", false).remainder(numberFromSchema))
+        if ((getComparableNumber(currentPart, partStructure.propertyName, false).remainder(numberFromSchema))
                 .compareTo(BigDecimal.ZERO) != 0) {
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "multipleOf",
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "Value was not a multiple of schema value.");
         }
     }
 
-    private void validateMaximum(JsonSchemaEnforcerPart currentPart) {
-        if ((getComparableNumber(currentPart, "maximum", false)
-                .compareTo(getComparableNumber(currentPart, "maximum", true))) > 0) {
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maximum",
+    private void validateMaximum(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
+        if ((getComparableNumber(currentPart, partStructure.propertyName, false)
+                .compareTo(getComparableNumber(currentPart, partStructure.propertyName, true))) > 0) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "Value was greater than the upper bound.");
         }
     }
 
-    private void validateExclusiveMaximum(JsonSchemaEnforcerPart currentPart) {
-        if ((getComparableNumber(currentPart, "exclusiveMaximum", false)
-                .compareTo(getComparableNumber(currentPart, "exclusiveMaximum", true))) >= 0) {
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "exclusiveMaximum",
+    private void validateExclusiveMaximum(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
+        if ((getComparableNumber(currentPart, partStructure.propertyName, false)
+                .compareTo(getComparableNumber(currentPart, partStructure.propertyName, true))) >= 0) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "Value was greater than or equal to the upper bound.");
         }
     }
 
-    private void validateMinimum(JsonSchemaEnforcerPart currentPart) {
-        if ((getComparableNumber(currentPart, "minimum", false)
-                .compareTo(getComparableNumber(currentPart, "minimum", true))) < 0) {
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "minimum",
+    private void validateMinimum(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
+        if ((getComparableNumber(currentPart, partStructure.propertyName, false)
+                .compareTo(getComparableNumber(currentPart, partStructure.propertyName, true))) < 0) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "Value was lower than the lower bound.");
         }
     }
 
-    private void validateExclusiveMinimum(JsonSchemaEnforcerPart currentPart) {
-        if ((getComparableNumber(currentPart, "exclusiveMinimum", false)
-                .compareTo(getComparableNumber(currentPart, "exclusiveMinimum", true))) <= 0) {
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "exclusiveMinimum",
+    private void validateExclusiveMinimum(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
+        if ((getComparableNumber(currentPart, partStructure.propertyName, false)
+                .compareTo(getComparableNumber(currentPart, partStructure.propertyName, true))) <= 0) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "Value was lower than or equal to the lower bound.");
         }
     }
 
 
     /* OBJECTS */
-    private void validateProperties(JsonSchemaEnforcerPart currentPart) {
+    private void validateProperties(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
         IJson propertiesObject;
         try {
-            propertiesObject = currentPart.SCHEMA_SUBSET.getJSONObjectAt("properties");
+            propertiesObject = partStructure.schema.getJSONObject();
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "properties", e);
+            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName, e);
         }
         if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
             return;
@@ -475,73 +495,73 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 String keyInSchema = (key.contains(" ") || key.contains("\\")) ? "[`" + key + "`]" : "." + key;
                 try {
                     subEnforce(currentPart, currentPart.OBJECT_TO_VALIDATE.getAnyAt(key),
-                            currentPart.SCHEMA_SUBSET.getJSONObjectAt("properties" + keyInSchema),
-                            currentPart.PATH_IN_SCHEMA + ".properties" + keyInSchema);
+                            partStructure.schema.getJSONObjectAt(key),
+                            partStructure.canonicalPath + ".properties" + keyInSchema);
                 } catch (KeyDifferentTypeException e) {
-                    throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "properties" + keyInSchema, e);
+                    throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName + keyInSchema, e);
                 }
             }
         }
     }
 
-    private void validateRequired(JsonSchemaEnforcerPart currentPart) {
+    private void validateRequired(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
         List<String> requiredKeys = new ArrayList<>();
         try {
-            List<IJson> keysAsJson = currentPart.SCHEMA_REFERENCE.getArrayAt("required");
+            List<IJson> keysAsJson = partStructure.schema.getArray();
             if (keysAsJson.size() == 0) {
-                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "required",
+                throw valueUnexpected(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                         "Must provide at least one required property.");
             }
             for (IJson key : keysAsJson) {
                 requiredKeys.add(key.getString());
             }
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "required",
+            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                     "Required constraint must be a non-empty array of strings representing property names.", e);
         }
         if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
-            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "required",
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "Required constraint can only be applied to Object properties.");
         }
 
         for (String requiredKey : requiredKeys) {
             if (!currentPart.OBJECT_TO_VALIDATE.contains(requiredKey)) {
-                throw missingProperty(currentPart.PATH_IN_SCHEMA, "required",
+                throw missingProperty(partStructure.canonicalPath, partStructure.propertyName,
                         "Property (" + requiredKey + ") is mandatory, but couldn't be found.");
             }
         }
     }
 
-    private void validateMinProperties(JsonSchemaEnforcerPart currentPart) {
-        long minProperties = getNonNegativeInteger(currentPart, "minProperties");
+    private void validateMinProperties(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
+        long minProperties = getNonNegativeInteger(currentPart, partStructure.propertyName);
         if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
-            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "minProperties",
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "This constraint can only be used against an object.");
         }
         if (currentPart.OBJECT_TO_VALIDATE.getKeys().size() < minProperties) {
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "minProperties",
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "Object doesn't have enough properties to pass the constraint.");
         }
     }
 
-    private void validateMaxProperties(JsonSchemaEnforcerPart currentPart) {
-        long maxProperties = getNonNegativeInteger(currentPart, "maxProperties");
+    private void validateMaxProperties(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
+        long maxProperties = getNonNegativeInteger(currentPart, partStructure.propertyName);
         if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
-            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maxProperties",
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "This constraint can only be used against an object.");
         }
         if (currentPart.OBJECT_TO_VALIDATE.getKeys().size() > maxProperties) {
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maxProperties",
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "Object has more properties than the constraint allows.");
         }
     }
 
-    private void validatePropertyNames(JsonSchemaEnforcerPart currentPart) {
+    private void validatePropertyNames(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
         IJson subSchema;
         try {
-            subSchema = currentPart.SCHEMA_SUBSET.getJSONObjectAt("propertyNames");
+            subSchema = partStructure.schema.getJSONObject();
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "propertyNames",
+            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                     "Schema value must be a valid sub-schema.", e);
         }
         for (String key : currentPart.OBJECT_TO_VALIDATE.getKeys()) {
@@ -549,17 +569,17 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                     JsonParser.parse("\""
                             + key.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"")
                             + "\""),
-                    subSchema, currentPart.PATH_IN_SCHEMA + ".propertyNames"
+                    subSchema, partStructure.canonicalPath + ".propertyNames"
             );
         }
     }
 
-    private void validatePatternProperties(JsonSchemaEnforcerPart currentPart) {
+    private void validatePatternProperties(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
         IJson propertiesObject;
         try {
-            propertiesObject = currentPart.SCHEMA_SUBSET.getJSONObjectAt("patternProperties");
+            propertiesObject = partStructure.schema.getJSONObject();
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "patternProperties", e);
+            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName, e);
         }
         if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
             return;
@@ -569,7 +589,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
             try {
                 regexPattern = Pattern.compile(regexKey);
             } catch (Exception e) {
-                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "patternProperties",
+                throw valueUnexpected(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                         "Key in patternProperties (" + regexKey + ") was not a valid regex.", e);
             }
             for (String objectKey : currentPart.OBJECT_TO_VALIDATE.getKeys()) {
@@ -577,23 +597,22 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                     String keyInSchema = "[`" + regexKey + "`]";
                     try {
                         subEnforce(currentPart, currentPart.OBJECT_TO_VALIDATE.getAnyAt(objectKey),
-                                currentPart.SCHEMA_SUBSET.getJSONObjectAt("patternProperties" + keyInSchema),
-                                currentPart.PATH_IN_SCHEMA + ".patternProperties" + keyInSchema);
+                                partStructure.schema.getJSONObjectAt(keyInSchema),
+                                partStructure.canonicalPath + ".patternProperties" + keyInSchema);
                     } catch (KeyDifferentTypeException e) {
-                        throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA,
-                                "patternProperties" + keyInSchema, e);
+                        throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName + keyInSchema, e);
                     }
                 }
             }
         }
     }
 
-    private void validateDependentRequired(JsonSchemaEnforcerPart currentPart) {
+    private void validateDependentRequired(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
         IJson dependentDefinitions;
         try {
-            dependentDefinitions = currentPart.SCHEMA_SUBSET.getJSONObjectAt("dependentRequired");
+            dependentDefinitions = partStructure.schema.getJSONObject();
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "dependentRequired", e);
+            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName, e);
         }
         if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
             return;
@@ -602,106 +621,147 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         for (String key : dependentDefinitions.getKeys()) {
             String keyInSchema = (key.contains(" ") || key.contains("\\")) ? "[`" + key + "`]" : "." + key;
             try {
-                dependentDefinition = currentPart.SCHEMA_SUBSET.getArrayAt("dependentRequired" + keyInSchema);
+                dependentDefinition = partStructure.schema.getArrayAt(key);
             } catch (KeyDifferentTypeException e) {
-                throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "dependentRequired" + keyInSchema,
+                throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName + keyInSchema,
                         "Dependents can only be specified in an ARRAY.", e);
             }
             if (currentPart.OBJECT_TO_VALIDATE.contains(key)) {
                 try {
                     for (int index = 0; index < dependentDefinition.size(); index++) {
                         if (!currentPart.OBJECT_TO_VALIDATE.contains(dependentDefinition.get(index).getString())) {
-                            throw missingProperty(currentPart.PATH_IN_SCHEMA,
-                                    "dependentRequired" + keyInSchema + "[" + index + "]",
+                            throw missingProperty(partStructure.canonicalPath,
+                                    partStructure.propertyName + keyInSchema + "[" + index + "]",
                                     "Missing dependent property (" + dependentDefinition.get(index).getString()
                                             + ") required because property (" + key + ") present.");
                         }
                     }
                 } catch (KeyDifferentTypeException e) {
-                    throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "dependentRequired" + keyInSchema,
+                    throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName + keyInSchema,
                             "Constraint must be the keys of dependent properties.", e);
                 }
             }
         }
     }
 
+    private void validateAdditionalProperties(JsonSchemaEnforcerPart currentPart) {
+//        boolean shouldAllowAdditional = false;
+//        try {
+//            shouldAllowAdditional = partStructure.schema.getBooleanAt("additionalProperties");
+//        } catch (KeyDifferentTypeException e) {
+//            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, "additionalProperties",
+//                    "", e);
+//        }
+//        if (!shouldAllowAdditional) {
+//            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, "additionalProperties",
+//                    "Found properties " + unCheckedProperties.toString() + " but unchecked properties are prohibited.");
+//        }
+//        JSType schemaType = partStructure.schema.getDataTypeOf("additionalProperties");
+//        if (schemaType != JSType.BOOLEAN && schemaType != JSType.OBJECT) {
+//            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, "additionalProperties",
+//                    "Expected one of " + Arrays.asList("BOOLEAN", "ARRAY") + ", got " + schemaType + ".");
+//        } else {
+//            if (schemaType == JSType.BOOLEAN && partStructure.schema.getBoolean()) {
+//                return;
+//            } else {
+//                List<String> unCheckedProperties = new ArrayList<>();
+//                // TODO findTheUncheckedProperties
+//                if (schemaType == JSType.BOOLEAN && unCheckedProperties.size() > 0) {
+//                    throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, "additionalProperties",
+//                            "Found properties " + unCheckedProperties.toString() + " but unchecked properties are prohibited.");
+//                } else {
+//                    for (String key : unCheckedProperties) {
+//                        subEnforce(currentPart, currentPart.OBJECT_TO_VALIDATE.getAnyAt(key),
+//                                partStructure.schema.getAnyAt("additionalProperties"),
+//                                partStructure.canonicalPath + ".additionalProperties"
+//                        );
+//                    }
+//                }
+//            }
+//        }
+    }
+
+    private void validateUnevaluatedProperties(JsonSchemaEnforcerPart currentPart) {
+        //todo
+    }
+
 
     /* ARRAYS */
-    private void validateContains(JsonSchemaEnforcerPart currentPart) {
+    private void validateContains(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
         IJson subSchema;
         try {
-            subSchema = currentPart.SCHEMA_SUBSET.getJSONObjectAt("contains");
+            subSchema = partStructure.schema.getJSONObject();
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "contains", e);
+            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName, e);
         }
         if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.ARRAY) {
-            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "contains",
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "This constraint can only be used against an array.");
         }
         for (IJson element : currentPart.OBJECT_TO_VALIDATE.getArray()) {
             try {
-                subEnforce(currentPart, element, subSchema, currentPart.PATH_IN_SCHEMA + ".contains");
+                subEnforce(currentPart, element, subSchema, partStructure.canonicalPath + ".contains");
                 return;
             } catch (SchemaException e) {
                 // Ignore, we wont necessarily match everything
             }
         }
-        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "contains",
+        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                 "Found no match against the contains property in the value array.");
     }
 
-    private void validateItems(JsonSchemaEnforcerPart currentPart) {
-        JSType schemaType = currentPart.SCHEMA_SUBSET.getDataTypeOf("items");
+    private void validateItems(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
+        JSType schemaType = partStructure.schema.getDataType();
         if (schemaType != JSType.OBJECT && schemaType != JSType.ARRAY) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "items",
+            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                     "Expected one of " + Arrays.asList("OBJECT", "ARRAY") + ", got " + schemaType + ".");
         }
         if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.ARRAY) {
-            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "items",
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "This constraint can only be used against an array.");
         }
         if (schemaType == JSType.OBJECT) {
             for (IJson element : currentPart.OBJECT_TO_VALIDATE.getArray()) {
                 try {
-                    subEnforce(currentPart, element, currentPart.SCHEMA_SUBSET.getJSONObjectAt("items"), currentPart.PATH_IN_SCHEMA + ".items");
+                    subEnforce(currentPart, element, partStructure.schema.getJSONObject(), partStructure.canonicalPath + ".items");
                 } catch (SchemaException e) {
-                    throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "items",
+                    throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                             "An element in the value array did not match against the constraint.");
                 }
             }
         } else {
             int maxSizeToEvaluate = Math.min(currentPart.OBJECT_TO_VALIDATE.getArray().size(),
-                    currentPart.SCHEMA_SUBSET.getArrayAt("items").size());
+                    partStructure.schema.getArray().size());
             String key;
             for (int index = 0; index < maxSizeToEvaluate; index++) {
-                key = "items[" + index + "]";
+                key = "[" + index + "]";
                 try {
-                    currentPart.SCHEMA_SUBSET.getJSONObjectAt(key);
+                    partStructure.schema.getJSONObjectAt(key);
                 } catch (KeyDifferentTypeException e) {
-                    throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, key, e);
+                    throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName + key, e);
                 }
                 try {
                     subEnforce(currentPart, currentPart.OBJECT_TO_VALIDATE.getAnyAt("[" + index + "]"),
-                            currentPart.SCHEMA_SUBSET.getJSONObjectAt(key), currentPart.PATH_IN_SCHEMA + "." + key);
+                            partStructure.schema.getJSONObjectAt(key), partStructure.canonicalPath + ".items" + key);
                 } catch (SchemaException e) {
-                    throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, key,
+                    throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName + key,
                             "Element in value array did not match against matching index in sub-schema.");
                 }
             }
         }
     }
 
-    private void validateUniqueItems(JsonSchemaEnforcerPart currentPart) {
+    private void validateUniqueItems(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
         boolean shouldValidate;
         try {
-            shouldValidate = currentPart.SCHEMA_SUBSET.getBooleanAt("uniqueItems");
+            shouldValidate = partStructure.schema.getBoolean();
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "uniqueItems", e);
+            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName, e);
         }
         try {
             currentPart.OBJECT_TO_VALIDATE.getArray();
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "uniqueItems", e);
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName, e);
         }
         if (shouldValidate) {
             IJson outerObject;
@@ -709,7 +769,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 outerObject = currentPart.OBJECT_TO_VALIDATE.getAnyAt("[" + outer + "]");
                 for (int inner = outer + 1; inner < currentPart.OBJECT_TO_VALIDATE.getArray().size(); inner++) {
                     if (outerObject.equals(currentPart.OBJECT_TO_VALIDATE.getAnyAt("[" + inner + "]"))) {
-                        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "uniqueItems",
+                        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                                 "Index [" + outer + "] in value to verify was not unique.");
                     }
                 }
@@ -717,26 +777,26 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private void validateMinItems(JsonSchemaEnforcerPart currentPart) {
-        long minProperties = getNonNegativeInteger(currentPart, "minItems");
+    private void validateMinItems(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
+        long minProperties = getNonNegativeInteger(currentPart, partStructure.propertyName);
         if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.ARRAY) {
-            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "minItems",
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "This constraint can only be used against an array.");
         }
         if (currentPart.OBJECT_TO_VALIDATE.getArray().size() < minProperties) {
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "minItems",
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "Array doesn't have enough elements to pass the constraint.");
         }
     }
 
-    private void validateMaxItems(JsonSchemaEnforcerPart currentPart) {
-        long maxProperties = getNonNegativeInteger(currentPart, "maxItems");
+    private void validateMaxItems(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
+        long maxProperties = getNonNegativeInteger(currentPart, partStructure.propertyName);
         if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.ARRAY) {
-            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maxItems",
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "This constraint can only be used against an array.");
         }
         if (currentPart.OBJECT_TO_VALIDATE.getArray().size() > maxProperties) {
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maxItems",
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "Array has more elements than the constraint allows.");
         }
     }
@@ -759,85 +819,67 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
 
     /* STRINGS */
-    private void validatePattern(JsonSchemaEnforcerPart currentPart) {
+    private void validatePattern(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
         Pattern verifiedPattern;
         String objectToConstrain;
         try {
-            verifiedPattern = Pattern.compile(currentPart.SCHEMA_SUBSET.getStringAt("pattern"));
+            verifiedPattern = Pattern.compile(partStructure.schema.getString());
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "pattern", e);
+            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName, e);
         } catch (Exception e) {
-            throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "pattern",
+            throw valueUnexpected(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                     "Pattern provided was not a valid regex pattern.", e);
         }
         try {
             objectToConstrain = currentPart.OBJECT_TO_VALIDATE.getString();
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "pattern", e);
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName, e);
         }
         if (!verifiedPattern.matcher(objectToConstrain).find()) {
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "pattern",
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "Value did not match the provided pattern.");
         }
     }
 
-    private void validateMinLength(JsonSchemaEnforcerPart currentPart) {
-        long minLength;
+    private void validateMinLength(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
+        long minLength = getNonNegativeInteger(currentPart, partStructure.propertyName);
         String objectToConstrain;
-        try {
-            minLength = currentPart.SCHEMA_SUBSET.getLongAt("minLength");
-            if (minLength < 0) {
-                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "minLength",
-                        "Cannot constrain string length using a negative number.");
-            }
-        } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "minLength", e);
-        }
         try {
             objectToConstrain = currentPart.OBJECT_TO_VALIDATE.getString();
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "minLength", e);
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName, e);
         }
         if (objectToConstrain.length() < minLength) {
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "minLength",
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "String length was shorter than the minimum bound.");
         }
     }
 
-    private void validateMaxLength(JsonSchemaEnforcerPart currentPart) {
-        long maxLength;
+    private void validateMaxLength(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
+        long maxLength = getNonNegativeInteger(currentPart, partStructure.propertyName);
         String objectToConstrain;
-        try {
-            maxLength = currentPart.SCHEMA_SUBSET.getLongAt("maxLength");
-            if (maxLength < 0) {
-                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "maxLength",
-                        "Cannot constrain string length using a negative number.");
-            }
-        } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "maxLength", e);
-        }
         try {
             objectToConstrain = currentPart.OBJECT_TO_VALIDATE.getString();
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maxLength", e);
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName, e);
         }
         if (objectToConstrain.length() > maxLength) {
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "maxLength",
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "String length was longer than the maximum bound.");
         }
     }
 
-    private void validateFormat(JsonSchemaEnforcerPart currentPart) {
+    private void validateFormat(JsonSchemaEnforcerPart currentPart, RefResolvedSchemaPart partStructure) {
         String formatToVerify, objectToConstrain;
         try {
-            formatToVerify = currentPart.SCHEMA_SUBSET.getStringAt("format");
+            formatToVerify = partStructure.schema.getString();
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "format", e);
+            throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName, e);
         }
         try {
             objectToConstrain = currentPart.OBJECT_TO_VALIDATE.getString();
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "format", e);
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName, e);
         }
 
         boolean matched = false;
@@ -923,13 +965,13 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                     matched = objectToConstrain.matches("^([0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12})$");
                     break;
                 default:
-                    throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "format",
+                    throw valueUnexpected(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                             "Unrecognised/Unsupported format provided (" + formatToVerify + ").");
             }
         } catch (Exception e) {/*Ignore as we will throw below*/}
 
         if (!matched) {
-            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, "format",
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "Value failed to match against the format (" + formatToVerify + ") constraint.");
         }
     }
@@ -937,13 +979,13 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
     /* Utils */
     private BigDecimal getComparableNumber(JsonSchemaEnforcerPart currentPart, String propertyKey, boolean isForSchema) {
-        IJson constraint = isForSchema ? currentPart.SCHEMA_SUBSET.getAnyAt(propertyKey) : currentPart.OBJECT_TO_VALIDATE;
+        IJson constraint = isForSchema ? currentPart.resolvableConstraints.get(propertyKey).schema : currentPart.OBJECT_TO_VALIDATE;
         JSType constraintType = constraint.getDataType();
         if (constraintType != JSType.DOUBLE && constraintType != JSType.LONG) {
             throw (isForSchema
-                    ? valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, propertyKey,
+                    ? valueDifferentType(SourceOfProblem.SCHEMA, currentPart.resolvableConstraints.get(propertyKey).canonicalPath, propertyKey,
                     "Expected NUMBER, got " + constraintType + ".")
-                    : valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.PATH_IN_SCHEMA, propertyKey,
+                    : valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, currentPart.resolvableConstraints.get(propertyKey).canonicalPath, propertyKey,
                     "Value to verify must be a number.")
             );
         }
@@ -954,20 +996,20 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
     private long getNonNegativeInteger(JsonSchemaEnforcerPart currentPart, String propertyKey) {
         try {
-            long value = currentPart.SCHEMA_REFERENCE.getLongAt(propertyKey);
+            long value = currentPart.resolvableConstraints.get(propertyKey).schema.getLong();
             if (value < 0) {
-                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, propertyKey,
+                throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.resolvableConstraints.get(propertyKey).canonicalPath, propertyKey,
                         "Value must be >= 0.");
             }
             return value;
         } catch (KeyDifferentTypeException e) {
-            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, propertyKey,
+            throw valueDifferentType(SourceOfProblem.SCHEMA, currentPart.resolvableConstraints.get(propertyKey).canonicalPath, propertyKey,
                     "Constraint must provide a non-negative integer.", e);
         }
     }
 
-    private String convert$RefToJsonKey(JsonSchemaEnforcerPart currentPart) {
-        String resolvedRef = currentPart.SCHEMA_SUBSET.getStringAt("$ref");
+    private String convert$RefToJsonKey(String canonicalPathing, String reference) {
+        String resolvedRef = reference;
         if (resolvedRef.equals("")) {
             return resolvedRef;
         }
@@ -980,7 +1022,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
         // Relative
         else {
-            throw valueUnexpected(SourceOfProblem.SCHEMA, currentPart.PATH_IN_SCHEMA, "$ref",
+            throw valueUnexpected(SourceOfProblem.SCHEMA, canonicalPathing, "$ref",
                     "Relative sub-schema keys are not supported in this implementation.");
         }
 
@@ -1019,24 +1061,12 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 currentPart.SCHEMA_REFERENCE,
                 updatedSubSchema,
                 updatedPathInSchema,
-                currentPart.SCHEMA_REFERENCES_SEEN,
-                new HashSet<>()
+                currentPart.SCHEMA_REFERENCES_SEEN
         ).enforce();
     }
 
     private void subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema) throws SchemaException {
-        subEnforce(currentPart, updatedSubSchema, updatedPathInSchema, new HashSet<>());
-    }
-
-    private void subEnforce(JsonSchemaEnforcerPart currentPart, IJson updatedSubSchema, String updatedPathInSchema, Set<String> constraintsSeen) throws SchemaException {
-        new JsonSchemaEnforcerPart(
-                currentPart.OBJECT_TO_VALIDATE,
-                currentPart.SCHEMA_REFERENCE,
-                updatedSubSchema,
-                updatedPathInSchema,
-                currentPart.SCHEMA_REFERENCES_SEEN,
-                constraintsSeen
-        ).enforce();
+        subEnforce(currentPart, currentPart.OBJECT_TO_VALIDATE, updatedSubSchema, updatedPathInSchema);
     }
 
     /* ERROR MANAGEMENT */
