@@ -1,7 +1,6 @@
 package core;
 
 import api.IJson;
-import api.IJsonAble;
 import exceptions.json.JsonParseException;
 import exceptions.json.KeyDifferentTypeException;
 import exceptions.json.KeyNotFoundException;
@@ -463,8 +462,7 @@ public class JSBooleanTest extends JsonTest {
     @Test
     @Override
     public void jsonIsConvertible() {
-        IJsonAble builder = JsonBuilder.builder().addString("key", "value");
-        assertEquals(builder.convertToJSON(), boolTrue.convertToJSON(builder));
-        assertEquals(builder.convertToJSON(), boolFalse.convertToJSON(builder));
+        assertEquals("true", boolTrue.convertToJSON().asString());
+        assertEquals("false", boolFalse.convertToJSON().asString());
     }
 }

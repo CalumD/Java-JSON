@@ -1,7 +1,6 @@
 package core;
 
 import api.IJson;
-import api.IJsonAble;
 import exceptions.json.JsonParseException;
 import exceptions.json.KeyDifferentTypeException;
 import exceptions.json.KeyNotFoundException;
@@ -446,8 +445,7 @@ public class JSStringTest extends JsonTest {
     @Test
     @Override
     public void jsonIsConvertible() {
-        IJsonAble builder = JsonBuilder.builder().addString("key", "value");
-        assertEquals(builder.convertToJSON(), string.convertToJSON(builder));
+        assertEquals("\"Hello World\"", string.convertToJSON().asString());
     }
 
     @Test

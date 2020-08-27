@@ -1,7 +1,6 @@
 package core;
 
 import api.IJson;
-import api.IJsonAble;
 import exceptions.json.JsonParseException;
 import exceptions.json.KeyDifferentTypeException;
 import exceptions.json.KeyNotFoundException;
@@ -533,8 +532,7 @@ public class JSNumberTest extends JsonTest {
     @Test
     @Override
     public void jsonIsConvertible() {
-        IJsonAble builder = JsonBuilder.builder().addString("key", "value");
-        assertEquals(builder.convertToJSON(), numberDouble.convertToJSON(builder));
-        assertEquals(builder.convertToJSON(), numberLong.convertToJSON(builder));
+        assertEquals("1.25", numberDouble.convertToJSON().asString());
+        assertEquals("321", numberLong.convertToJSON().asString());
     }
 }

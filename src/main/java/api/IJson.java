@@ -1,21 +1,20 @@
 package api;
 
 import core.JSType;
-import exceptions.JsonException;
+import exceptions.json.JsonKeyException;
 import exceptions.json.JsonParseException;
 import exceptions.json.KeyDifferentTypeException;
+import exceptions.json.KeyNotFoundException;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-public interface IJson extends Serializable {
+public interface IJson extends IJsonAble, Serializable {
 
     IJson createFromString(String jsonFragment) throws JsonParseException;
 
     IJson createFromMultilineString(List<String> jsonFragment) throws JsonParseException;
-
-    IJson convertToJSON(IJsonAble jsonable) throws JsonParseException;
 
 
     boolean contains(String key);
@@ -46,27 +45,27 @@ public interface IJson extends Serializable {
     IJson getAny();
 
 
-    Object getValueAt(String key) throws JsonException;
+    Object getValueAt(String key) throws JsonKeyException;
 
-    IJson getJSONObjectAt(String keys) throws JsonException;
+    IJson getJSONObjectAt(String keys) throws JsonKeyException;
 
-    JSType getDataTypeOf(String key) throws JsonException;
+    JSType getDataTypeOf(String key) throws KeyNotFoundException;
 
-    List<String> getKeysOf(String key) throws JsonException;
+    List<String> getKeysOf(String key) throws JsonKeyException;
 
-    List<IJson> getValuesOf(String key) throws JsonException;
+    List<IJson> getValuesOf(String key) throws JsonKeyException;
 
-    List<IJson> getArrayAt(String key) throws JsonException;
+    List<IJson> getArrayAt(String key) throws JsonKeyException;
 
-    boolean getBooleanAt(String key) throws JsonException;
+    boolean getBooleanAt(String key) throws JsonKeyException;
 
-    double getDoubleAt(String key) throws JsonException;
+    double getDoubleAt(String key) throws JsonKeyException;
 
-    long getLongAt(String key) throws JsonException;
+    long getLongAt(String key) throws JsonKeyException;
 
-    String getStringAt(String key) throws JsonException;
+    String getStringAt(String key) throws JsonKeyException;
 
-    IJson getAnyAt(String key) throws JsonException;
+    IJson getAnyAt(String key) throws KeyNotFoundException;
 
 
     /**

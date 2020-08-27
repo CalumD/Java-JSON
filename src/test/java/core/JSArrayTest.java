@@ -1,7 +1,6 @@
 package core;
 
 import api.IJson;
-import api.IJsonAble;
 import api.JsonParser;
 import exceptions.json.JsonParseException;
 import exceptions.json.KeyDifferentTypeException;
@@ -589,8 +588,7 @@ public class JSArrayTest extends JsonTest {
     @Test
     @Override
     public void jsonIsConvertible() {
-        IJsonAble builder = JsonBuilder.builder().addString("key", "value");
-        assertEquals(builder.convertToJSON(), array.convertToJSON(builder));
+        assertEquals("[[],0,0.1,\"\",true,{}]", array.convertToJSON().asString());
     }
 
     @Test
