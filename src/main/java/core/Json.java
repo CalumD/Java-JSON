@@ -1,7 +1,6 @@
 package core;
 
 import api.IJson;
-import api.IJsonAble;
 import exceptions.JsonException;
 import exceptions.json.JsonParseException;
 import exceptions.json.KeyDifferentTypeException;
@@ -35,8 +34,8 @@ public abstract class Json implements IJson {
     }
 
     @Override
-    public IJson convertToJSON(IJsonAble jsonable) throws JsonParseException {
-        return jsonable.convertToJSON();
+    public IJson convertToJSON() throws JsonParseException {
+        return this;
     }
 
     @Override
