@@ -24,6 +24,8 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
     private enum SourceOfProblem {SCHEMA, OBJECT_TO_VALIDATE}
 
+    private enum KeysRelevantTo {PROPERTIES, PATTERN_PROPERTIES, ADDITIONAL_PROPERTIES, ITEMS, ADDITIONAL_ITEMS}
+
     public static boolean validateStrict(IJson objectToValidate, IJson againstSchema) {
         return new JsonSchemaEnforcer().validateWithOutReasoning(objectToValidate, againstSchema);
     }
@@ -213,7 +215,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                         validateContains(this, constraint.getValue());
                         break;
                     case "unevaluatedItems":
-                        validateUnevaluatedItems(this);
+                        validateUnevaluatedItems();
                         break;
                     case "maxProperties":
                         validateMaxProperties(this, constraint.getValue());
@@ -240,7 +242,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                         validatePropertyNames(this, constraint.getValue());
                         break;
                     case "unevaluatedProperties":
-                        validateUnevaluatedProperties(this);
+                        validateUnevaluatedProperties();
                         break;
                 }
             }
@@ -456,11 +458,11 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
     /* OBJECTS */
     private void validateProperties(final JsonSchemaEnforcerPart currentPart, final RefResolvedSchemaPart partStructure) {
-        IJson propertiesObject = getNextSchemaAsObject(partStructure);
+        final Set<String> keysToValidate = getKeysRelevantToConstraint(currentPart, partStructure, KeysRelevantTo.PROPERTIES);
         if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.OBJECT) {
             return;
         }
-        for (String key : propertiesObject.getKeys()) {
+        for (String key : keysToValidate) {
             if (currentPart.OBJECT_TO_VALIDATE.contains(key)) {
                 String keyInSchema = (key.contains(" ") || key.contains("\\")) ? "[`" + key + "`]" : "." + key;
                 try {
@@ -545,13 +547,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
             return;
         }
         for (String regexKey : propertiesObject.getKeys()) {
-            Pattern regexPattern;
-            try {
-                regexPattern = Pattern.compile(regexKey);
-            } catch (Exception e) {
-                throw valueUnexpected(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
-                        "Key in patternProperties (" + regexKey + ") was not a valid regex.", e);
-            }
+            Pattern regexPattern = getRegexPattern(partStructure, regexKey);
             for (String objectKey : currentPart.OBJECT_TO_VALIDATE.getKeys()) {
                 if (regexPattern.matcher(objectKey).find()) {
                     String keyInSchema = "[`" + regexKey + "`]";
@@ -627,28 +623,33 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private void validateUnevaluatedProperties(final JsonSchemaEnforcerPart currentPart) {
-        //todo
+    private void validateUnevaluatedProperties() {
+        throw doThrow(SourceOfProblem.SCHEMA, "unevaluatedProperties constraint is not supported by " +
+                "this schema enforcer. Consider re-designing your schema to avoid it.");
     }
 
 
     /* ARRAYS */
-    private void validateContains(final JsonSchemaEnforcerPart currentPart, final RefResolvedSchemaPart partStructure) {
+    private long validateContains(final JsonSchemaEnforcerPart currentPart, final RefResolvedSchemaPart partStructure) {
         IJson subSchema = getNextSchemaAsObject(partStructure);
         if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.ARRAY) {
             throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
                     "This constraint can only be used against an array.");
         }
+        long timesMatched = 0;
         for (IJson element : currentPart.OBJECT_TO_VALIDATE.getArray()) {
             try {
                 subEnforce(currentPart, element, subSchema, partStructure.canonicalPath + ".contains");
-                return;
+                timesMatched++;
             } catch (SchemaException e) {
                 // Ignore, we wont necessarily match everything
             }
         }
-        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
-                "Found no match against the contains property in the value array.");
+        if (timesMatched == 0) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
+                    "Found no match against the contains property in the value array.");
+        }
+        return timesMatched;
     }
 
     private void validateItems(final JsonSchemaEnforcerPart currentPart, final RefResolvedSchemaPart partStructure) {
@@ -671,10 +672,8 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 }
             }
         } else {
-            int maxSizeToEvaluate = Math.min(currentPart.OBJECT_TO_VALIDATE.getArray().size(),
-                    partStructure.schema.getArray().size());
             String key;
-            for (int index = 0; index < maxSizeToEvaluate; index++) {
+            for (String index : getKeysRelevantToConstraint(currentPart, partStructure, KeysRelevantTo.ITEMS)) {
                 key = "[" + index + "]";
                 try {
                     partStructure.schema.getJSONObjectAt(key);
@@ -734,11 +733,16 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private void validateAdditionalItems(JsonSchemaEnforcerPart currentPart) {
+        if (currentPart.resolvableConstraints.containsKey("items")) {
+            // If there is also an 'items' constraint, then this constraint should be ignored.
+            return;
+        }
 
     }
 
-    private void validateUnevaluatedItems(final JsonSchemaEnforcerPart currentPart) {
-
+    private void validateUnevaluatedItems() {
+        throw doThrow(SourceOfProblem.SCHEMA, "unevaluatedItems constraint is not supported by " +
+                "this schema enforcer. Consider re-designing your schema to avoid it.");
     }
 
     private void validateMinContains(final JsonSchemaEnforcerPart currentPart) {
@@ -1034,6 +1038,60 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
             throw valueDifferentType(sourceOfProblem, partStructure.canonicalPath, partStructure.propertyName, e);
         }
         return returnValue;
+    }
+
+    private Set<String> getKeysRelevantToConstraint(final JsonSchemaEnforcerPart currentPart,
+                                                    final RefResolvedSchemaPart partStructure,
+                                                    final KeysRelevantTo constraint
+    ) {
+        Set<String> keysForConstraint = new HashSet<>();
+        switch (constraint) {
+            case PROPERTIES:
+                keysForConstraint.addAll(getNextSchemaAsObject(partStructure).getKeys());
+                break;
+            case PATTERN_PROPERTIES:
+                for (String regexKey : getNextSchemaAsObject(partStructure).getKeys()) {
+                    Pattern regexPattern = getRegexPattern(partStructure, regexKey);
+                    for (String objectKey : currentPart.OBJECT_TO_VALIDATE.getKeys()) {
+                        if (regexPattern.matcher(objectKey).find()) keysForConstraint.add(objectKey);
+                    }
+                }
+                break;
+            case ADDITIONAL_PROPERTIES:
+                keysForConstraint.addAll(getKeysRelevantToConstraint(currentPart, partStructure, KeysRelevantTo.PROPERTIES));
+                keysForConstraint.addAll(getKeysRelevantToConstraint(currentPart, partStructure, KeysRelevantTo.PATTERN_PROPERTIES));
+                break;
+            case ITEMS:
+                keysForConstraint.addAll(
+                        currentPart.OBJECT_TO_VALIDATE.getArray().size() < partStructure.schema.getArray().size()
+                                ? currentPart.OBJECT_TO_VALIDATE.getKeys()
+                                : partStructure.schema.getKeys()
+                );
+                break;
+            case ADDITIONAL_ITEMS:
+                boolean objectIsBigger = currentPart.OBJECT_TO_VALIDATE.getArray().size() > partStructure.schema.getArray().size();
+                keysForConstraint.addAll(
+                        objectIsBigger
+                                ? currentPart.OBJECT_TO_VALIDATE.getKeys()
+                                : partStructure.schema.getKeys()
+                );
+                keysForConstraint.removeAll(
+                        objectIsBigger
+                                ? partStructure.schema.getKeys()
+                                : currentPart.OBJECT_TO_VALIDATE.getKeys()
+                );
+                break;
+        }
+        return keysForConstraint;
+    }
+
+    private Pattern getRegexPattern(final RefResolvedSchemaPart partStructure, final String regexKey) {
+        try {
+            return Pattern.compile(regexKey);
+        } catch (Exception e) {
+            throw valueUnexpected(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
+                    "Key in patternProperties (" + regexKey + ") was not a valid regex.", e);
+        }
     }
 
     /* ERROR MANAGEMENT */
