@@ -446,6 +446,20 @@ public class ObjectTest {
     }
 
     @Test
+    public void patternPropertiesElementsMustAlsoBeObjects() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{'int-1':1}"),
+                    JsonParser.parse("{'patternProperties': {'^int':''}}"
+                    ));
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Wrong type for schema property: <base element>.patternProperties[`^int`]\n" +
+                    "Expected: OBJECT  ->  Received: STRING", e.getMessage());
+        }
+    }
+
+    @Test
     public void patternPropertiesShouldIgnoreNonObjects() {
         assertTrue(JsonSchemaEnforcer.validate(
                 JsonParser.parse("[]"),

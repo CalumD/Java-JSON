@@ -2454,4 +2454,18 @@ public class FormatTest {
                 JsonParser.parse("{'format': 'uuid'}")
         ));
     }
+
+    @Test
+    public void unsupportedFormatIsDisabled() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("''"),
+                    JsonParser.parse("{'format': 'blah'}")
+            );
+            fail("The previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Unexpected value for schema property: <base element>.format\n" +
+                    "Unrecognised/Unsupported format provided (blah).", e.getMessage());
+        }
+    }
 }

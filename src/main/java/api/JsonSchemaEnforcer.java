@@ -75,15 +75,15 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         private RefResolvedSchemaPart(String canonicalPath, IJson schema) {
             this(canonicalPath, null, schema);
         }
-
-        @Override
-        public String toString() {
-            return "{" +
-                    "path='" + canonicalPath + '\'' +
-                    ", prop='" + propertyName + '\'' +
-                    ", schema=" + schema +
-                    '}';
-        }
+//
+//        @Override
+//        public String toString() {
+//            return "{" +
+//                    "path='" + canonicalPath + '\'' +
+//                    ", prop='" + propertyName + '\'' +
+//                    ", schema=" + schema +
+//                    '}';
+//        }
     }
 
     private final class JsonSchemaEnforcerPart {
@@ -215,8 +215,8 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                         validateContains(this, constraint.getValue());
                         break;
                     case "unevaluatedItems":
-                        validateUnevaluatedItems();
-                        break;
+                        throw doThrow(SourceOfProblem.SCHEMA, "unevaluatedItems constraint is not supported by " +
+                                "this schema enforcer.\nConsider re-designing your schema to avoid it.");
                     case "maxProperties":
                         validateMaxProperties(this, constraint.getValue());
                         break;
@@ -242,8 +242,8 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                         validatePropertyNames(this, constraint.getValue());
                         break;
                     case "unevaluatedProperties":
-                        validateUnevaluatedProperties();
-                        break;
+                        throw doThrow(SourceOfProblem.SCHEMA, "unevaluatedProperties constraint is not supported by " +
+                                "this schema enforcer.\nConsider re-designing your schema to avoid it.");
                 }
             }
 
@@ -632,12 +632,6 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private void validateUnevaluatedProperties() {
-        throw doThrow(SourceOfProblem.SCHEMA, "unevaluatedProperties constraint is not supported by " +
-                "this schema enforcer.\nConsider re-designing your schema to avoid it.");
-    }
-
-
     /* ARRAYS */
     private long validateContains(final JsonSchemaEnforcerPart currentPart, final RefResolvedSchemaPart partStructure) {
         IJson subSchema = getNextSchemaAsObject(partStructure);
@@ -769,11 +763,6 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                         "Element " + key + " in value array did not satisfy.");
             }
         }
-    }
-
-    private void validateUnevaluatedItems() {
-        throw doThrow(SourceOfProblem.SCHEMA, "unevaluatedItems constraint is not supported by " +
-                "this schema enforcer.\nConsider re-designing your schema to avoid it.");
     }
 
     private void validateMinContains(final JsonSchemaEnforcerPart currentPart, final RefResolvedSchemaPart partStructure) {
@@ -937,6 +926,8 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                     throw valueUnexpected(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                             "Unrecognised/Unsupported format provided (" + formatToVerify + ").");
             }
+        } catch (InvalidSchemaException e) {
+            throw e;
         } catch (Exception e) {/*Ignore as we will throw below*/}
 
         if (!matched) {
@@ -1207,25 +1198,17 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
     }
 
     private SchemaException doThrow(SourceOfProblem source, String message) {
-        switch (source) {
-            case SCHEMA:
-                return new InvalidSchemaException(message);
-            case OBJECT_TO_VALIDATE:
-                return new SchemaViolationException(message);
-            default:
-                return new SchemaException(message);
+        if (source == SourceOfProblem.SCHEMA) {
+            return new InvalidSchemaException(message);
         }
+        return new SchemaViolationException(message);
     }
 
     private SchemaException doThrow(SourceOfProblem source, String message, Throwable cause) {
-        switch (source) {
-            case SCHEMA:
-                return new InvalidSchemaException(message, cause);
-            case OBJECT_TO_VALIDATE:
-                return new SchemaViolationException(message, cause);
-            default:
-                return new SchemaException(message, cause);
+        if (source == SourceOfProblem.SCHEMA) {
+            return new InvalidSchemaException(message, cause);
         }
+        return new SchemaViolationException(message, cause);
     }
 
     private String getErrorCauseMessage(Throwable cause) {
