@@ -685,4 +685,116 @@ public class ObjectTest {
                     "Expected one of [BOOLEAN, ARRAY], got STRING.", e.getMessage());
         }
     }
+
+    @Test
+    public void additionalPropertiesTrueThenAnythingGoes() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'a':1,'b':2,'c':3}"),
+                JsonParser.parse("{'additionalProperties': true}")
+        ));
+    }
+
+    @Test
+    public void additionalPropertiesFalseWithNoPropOrPatternPropThenBlock() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{'a':1,'b':2,'c':3}"),
+                    JsonParser.parse("{'additionalProperties': false}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.additionalProperties\n" +
+                    "Additional Properties prohibited, but found [a, b, c]", e.getMessage());
+        }
+    }
+
+    @Test
+    public void additionalPropertiesFalseButNoAdditional() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{}"),
+                JsonParser.parse("{'additionalProperties': false}")
+        ));
+    }
+
+    @Test
+    public void additionalPropertiesFalseButVerifiedByProperties() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'a':1,'b':2,'c':3}"),
+                JsonParser.parse("{'additionalProperties': false, 'properties': {'a':{},'b':{},'c':{}}}")
+        ));
+    }
+
+    @Test
+    public void additionalPropertiesFalseButVerifiedByPatternProperties() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'a':1,'b':2,'c':3}"),
+                JsonParser.parse("{'additionalProperties': false, 'patternProperties': {'^[a-c]$':{}}}")
+        ));
+    }
+
+    @Test
+    public void additionalPropertiesFalseButVerifiedByPropertiesAndPatternProperties() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'a':1,'b':2,'c':3}"),
+                JsonParser.parse("{'additionalProperties': false, 'properties': {'a':{}}, 'patternProperties': {'^[b-c]$':{}}}")
+        ));
+    }
+
+    @Test
+    public void additionalPropertiesObjectButNoAdditional() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{}"),
+                JsonParser.parse("{'additionalProperties': {'const':1}}")
+        ));
+    }
+
+    @Test
+    public void additionalPropertiesObjectButVerifiedByProperties() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'a':1,'b':2,'c':3}"),
+                JsonParser.parse("{'additionalProperties': {'const':5}, 'properties': {'a':{},'b':{},'c':{}}}")
+        ));
+    }
+
+    @Test
+    public void additionalPropertiesObjectButVerifiedByPatternProperties() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'a':1,'b':2,'c':3}"),
+                JsonParser.parse("{'additionalProperties': {'const':5}, 'patternProperties': {'^[a-c]$':{}}}")
+        ));
+    }
+
+    @Test
+    public void additionalPropertiesObjectButVerifiedByPropertiesAndPatternProperties() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'a':1,'b':2,'c':3}"),
+                JsonParser.parse("{'additionalProperties': {'const':5}, 'properties': {'a':{}}, 'patternProperties': {'^[b-c]$':{}}}")
+        ));
+    }
+
+    @Test
+    public void additionalPropertiesObjectMatchesAdditionalAndPasses() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'a':1,'b':2,'c':3,'d':5}"),
+                JsonParser.parse("{'additionalProperties': {'const':5}, 'patternProperties': {'^[a-c]$':{}}}")
+        ));
+    }
+
+    @Test
+    public void additionalPropertiesObjectMatchesAdditionalButFails() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{'a':1,'b':2,'c':3,'d':4}"),
+                    JsonParser.parse("{'additionalProperties': {'const':5}, 'patternProperties': {'^[a-c]$':{}}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.additionalProperties\n" +
+                    "Additional property (d) did not validate against schema.", e.getMessage());
+        }
+    }
+
+
 }

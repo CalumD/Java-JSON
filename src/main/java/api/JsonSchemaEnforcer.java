@@ -57,7 +57,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
             return (new JsonSchemaEnforcerPart(objectToValidate, schema, schema, "", subSchemaReferencesSeen)).enforce();
         } finally {
             // We make a lot of sub-objects when validating Schemas, we should probably clear them out here.
-            System.gc();
+//            System.gc();
         }
     }
 
@@ -236,7 +236,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                         validatePatternProperties(this, constraint.getValue());
                         break;
                     case "additionalProperties":
-                        validateAdditionalProperties(this);
+                        validateAdditionalProperties(this, constraint.getValue());
                         break;
                     case "propertyNames":
                         validatePropertyNames(this, constraint.getValue());
@@ -595,31 +595,40 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private void validateAdditionalProperties(final JsonSchemaEnforcerPart currentPart) {
-        RefResolvedSchemaPart partStructure = currentPart.resolvableConstraints.get("additionalProperties");
-
+    private void validateAdditionalProperties(final JsonSchemaEnforcerPart currentPart, final RefResolvedSchemaPart partStructure) {
         JSType schemaType = partStructure.schema.getDataType();
         if (schemaType != JSType.BOOLEAN && schemaType != JSType.OBJECT) {
             throw valueDifferentType(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
                     "Expected one of " + Arrays.asList("BOOLEAN", "ARRAY") + ", got " + schemaType + ".");
         } else {
-//            if (schemaType == JSType.BOOLEAN && partStructure.schema.getBoolean()) {
-//                return;
-//            } else {
-//                List<String> unCheckedProperties = new ArrayList<>();
-//                // TODO findTheUncheckedProperties
-//                if (schemaType == JSType.BOOLEAN && unCheckedProperties.size() > 0) {
-//                    throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath,  partStructure.propertyName,
-//                            "Found properties " + unCheckedProperties.toString() + " but unchecked properties are prohibited.");
-//                } else {
-//                    for (String key : unCheckedProperties) {
-//                        subEnforce(currentPart, currentPart.OBJECT_TO_VALIDATE.getAnyAt(key),
-//                                partStructure.schema.getAnyAt("additionalProperties"),
-//                                partStructure.canonicalPath + ".additionalProperties"
-//                        );
-//                    }
-//                }
-//            }
+            Set<String> otherwiseCheckedKeys = getKeysRelevantToConstraint(currentPart, null, KeysRelevantTo.ADDITIONAL_PROPERTIES);
+            if (schemaType == JSType.BOOLEAN) {
+                if (!partStructure.schema.getBoolean()) {
+                    ArrayList<String> disallowedKeys = new ArrayList<>();
+                    for (String key : currentPart.OBJECT_TO_VALIDATE.getKeys()) {
+                        if (!otherwiseCheckedKeys.contains(key)) {
+                            disallowedKeys.add(key);
+                        }
+                    }
+                    if (disallowedKeys.size() > 0) {
+                        throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
+                                "Additional Properties prohibited, but found " + disallowedKeys);
+                    }
+                }
+            } else {
+                for (String key : currentPart.OBJECT_TO_VALIDATE.getKeys()) {
+                    if (!otherwiseCheckedKeys.contains(key)) {
+                        try {
+                            subEnforce(currentPart, currentPart.OBJECT_TO_VALIDATE.getAnyAt(key), partStructure.schema,
+                                    partStructure.canonicalPath + ".additionalProperties"
+                            );
+                        } catch (SchemaException e) {
+                            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
+                                    "Additional property (" + key + ") did not validate against schema.");
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -1058,8 +1067,12 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 }
                 break;
             case ADDITIONAL_PROPERTIES:
-                keysForConstraint.addAll(getKeysRelevantToConstraint(currentPart, partStructure, KeysRelevantTo.PROPERTIES));
-                keysForConstraint.addAll(getKeysRelevantToConstraint(currentPart, partStructure, KeysRelevantTo.PATTERN_PROPERTIES));
+                if (currentPart.resolvableConstraints.containsKey("properties")) {
+                    keysForConstraint.addAll(getKeysRelevantToConstraint(currentPart, currentPart.resolvableConstraints.get("properties"), KeysRelevantTo.PROPERTIES));
+                }
+                if (currentPart.resolvableConstraints.containsKey("patternProperties")) {
+                    keysForConstraint.addAll(getKeysRelevantToConstraint(currentPart, currentPart.resolvableConstraints.get("patternProperties"), KeysRelevantTo.PATTERN_PROPERTIES));
+                }
                 break;
             case ITEMS:
                 keysForConstraint.addAll(
