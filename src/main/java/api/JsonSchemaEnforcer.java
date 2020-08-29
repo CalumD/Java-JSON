@@ -57,7 +57,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
             return (new JsonSchemaEnforcerPart(objectToValidate, schema, schema, "", subSchemaReferencesSeen)).enforce();
         } finally {
             // We make a lot of sub-objects when validating Schemas, we should probably clear them out here.
-//            System.gc();
+            System.gc();
         }
     }
 
