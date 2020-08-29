@@ -347,4 +347,18 @@ public class ArrayTest {
                 JsonParser.parse("{'items': [{'const':1}]}")
         ));
     }
+
+    @Test
+    public void unevaluatedItemsAlwaysThrows() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{}"),
+                    JsonParser.parse("{'unevaluatedItems':{}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("unevaluatedItems constraint is not supported by this schema enforcer." +
+                    "\nConsider re-designing your schema to avoid it.", e.getMessage());
+        }
+    }
 }

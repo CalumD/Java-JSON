@@ -796,5 +796,17 @@ public class ObjectTest {
         }
     }
 
-
+    @Test
+    public void unevaluatedPropertiesAlwaysThrows() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{}"),
+                    JsonParser.parse("{'unevaluatedProperties':{}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("unevaluatedProperties constraint is not supported by this schema enforcer." +
+                    "\nConsider re-designing your schema to avoid it.", e.getMessage());
+        }
+    }
 }

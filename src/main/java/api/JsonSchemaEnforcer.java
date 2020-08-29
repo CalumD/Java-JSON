@@ -634,7 +634,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
     private void validateUnevaluatedProperties() {
         throw doThrow(SourceOfProblem.SCHEMA, "unevaluatedProperties constraint is not supported by " +
-                "this schema enforcer. Consider re-designing your schema to avoid it.");
+                "this schema enforcer.\nConsider re-designing your schema to avoid it.");
     }
 
 
@@ -751,7 +751,7 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
 
     private void validateUnevaluatedItems() {
         throw doThrow(SourceOfProblem.SCHEMA, "unevaluatedItems constraint is not supported by " +
-                "this schema enforcer. Consider re-designing your schema to avoid it.");
+                "this schema enforcer.\nConsider re-designing your schema to avoid it.");
     }
 
     private void validateMinContains(final JsonSchemaEnforcerPart currentPart) {
