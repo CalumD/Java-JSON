@@ -361,4 +361,201 @@ public class ArrayTest {
                     "\nConsider re-designing your schema to avoid it.", e.getMessage());
         }
     }
+
+    @Test
+    public void additionalItemsIsIgnoredIfItemsIsAnObject() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[2]"),
+                JsonParser.parse("{'additionalItems':{'const':1},'items': {}}")
+        ));
+    }
+
+    @Test
+    public void additionalItemsMustBeUsedAgainstArray() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{}"),
+                    JsonParser.parse("{'additionalItems':{'const':1}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Mismatched data type.\n" +
+                    "Schema constraint violated: <base element>.additionalItems\n" +
+                    "This constraint can only be used against an array.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void additionalItemsPasses() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[1]"),
+                JsonParser.parse("{'additionalItems':{'const':1}}")
+        ));
+    }
+
+    @Test
+    public void additionalItemsFails() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("[1]"),
+                    JsonParser.parse("{'additionalItems':{'const':2}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.additionalItems\n" +
+                    "Element [0] in value array did not satisfy.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void additionalItemsPassesWhenSomeMatchItems() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[3,2,1]"),
+                JsonParser.parse("{'additionalItems':{'const':1},'items':[{'const':3},{'const':2}]}")
+        ));
+    }
+
+    @Test
+    public void additionalItemsDoesntNeedToVerifyAnything() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[3,2]"),
+                JsonParser.parse("{'additionalItems':{'const':1},'items':[{'const':3},{'const':2}]}")
+        ));
+    }
+
+    @Test
+    public void additionalItemsFailsWhenSomeMatchItems() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("[1,2,3]"),
+                    JsonParser.parse("{'additionalItems':{'const':1},'items':[{'const':1},{'const':2}]}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.additionalItems\n" +
+                    "Element [2] in value array did not satisfy.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void minContainsRequiresContains() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{}"),
+                    JsonParser.parse("{'minContains':5}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Missing property in schema at: <base element>.minContains\n" +
+                    "minContains requires the (contains) constraint to run.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void minContainsMustBeUsedAgainstArray() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{}"),
+                    JsonParser.parse("{'minContains':5, 'contains':{'type':'long'}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Mismatched data type.\n" +
+                    "Schema constraint violated: <base element>.contains\n" +
+                    "This constraint can only be used against an array.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void minContainsTooSmall() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("[1]"),
+                    JsonParser.parse("{'minContains':2, 'contains':{'type':'long'}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Missing property.\n" +
+                    "Schema constraint violated: <base element>.minContains\n" +
+                    "Minimum quantity of matches against the contains constraint not satisfied.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void minContainsEquals() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[1,2]"),
+                JsonParser.parse("{'minContains':2, 'contains':{'type':'long'}}")
+        ));
+    }
+
+    @Test
+    public void minContainsMore() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[1,2,3]"),
+                JsonParser.parse("{'minContains':2, 'contains':{'type':'long'}}")
+        ));
+    }
+
+    @Test
+    public void maxContainsRequiresContains() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{}"),
+                    JsonParser.parse("{'maxContains':5}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (InvalidSchemaException e) {
+            assertEquals("Missing property in schema at: <base element>.maxContains\n" +
+                    "maxContains requires the (contains) constraint to run.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void maxContainsMustBeUsedAgainstArray() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{}"),
+                    JsonParser.parse("{'maxContains':5, 'contains':{'type':'long'}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Mismatched data type.\n" +
+                    "Schema constraint violated: <base element>.contains\n" +
+                    "This constraint can only be used against an array.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void maxContainsSmallEnough() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[1]"),
+                JsonParser.parse("{'maxContains':2, 'contains':{'type':'long'}}")
+        ));
+    }
+
+    @Test
+    public void maxContainsEquals() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("[1,2]"),
+                JsonParser.parse("{'maxContains':2, 'contains':{'type':'long'}}")
+        ));
+    }
+
+    @Test
+    public void maxContainsTooMany() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("[1,2,3]"),
+                    JsonParser.parse("{'maxContains':2, 'contains':{'type':'long'}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.maxContains\n" +
+                    "Maximum quantity of matches against the contains constraint was exceeded.", e.getMessage());
+        }
+    }
 }

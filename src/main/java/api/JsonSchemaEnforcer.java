@@ -200,16 +200,16 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                         validateUniqueItems(this, constraint.getValue());
                         break;
                     case "maxContains":
-                        validateMaxContains(this);
+                        validateMaxContains(this, constraint.getValue());
                         break;
                     case "minContains":
-                        validateMinContains(this);
+                        validateMinContains(this, constraint.getValue());
                         break;
                     case "items":
                         validateItems(this, constraint.getValue());
                         break;
                     case "additionalItems":
-                        validateAdditionalItems(this);
+                        validateAdditionalItems(this, constraint.getValue());
                         break;
                     case "contains":
                         validateContains(this, constraint.getValue());
@@ -741,12 +741,34 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
         }
     }
 
-    private void validateAdditionalItems(JsonSchemaEnforcerPart currentPart) {
-        if (currentPart.resolvableConstraints.containsKey("items")) {
-            // If there is also an 'items' constraint, then this constraint should be ignored.
+    private void validateAdditionalItems(JsonSchemaEnforcerPart currentPart, final RefResolvedSchemaPart partStructure) {
+        if (currentPart.resolvableConstraints.containsKey("items")
+                && currentPart.resolvableConstraints.get("items").schema.getDataType() != JSType.ARRAY
+        ) {
+            // If there is also an 'items' constraint which is anything other
+            // than an array, then this constraint should be ignored.
             return;
         }
-
+        if (currentPart.OBJECT_TO_VALIDATE.getDataType() != JSType.ARRAY) {
+            throw valueDifferentType(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
+                    "This constraint can only be used against an array.");
+        }
+        Set<String> keysToCheck;
+        if (currentPart.resolvableConstraints.containsKey("items")) {
+            keysToCheck = getKeysRelevantToConstraint(currentPart, currentPart.resolvableConstraints.get("items"), KeysRelevantTo.ADDITIONAL_ITEMS);
+        } else {
+            keysToCheck = new HashSet<>(currentPart.OBJECT_TO_VALIDATE.getKeys());
+        }
+        for (String key : keysToCheck) {
+            key = "[" + key + "]";
+            try {
+                subEnforce(currentPart, currentPart.OBJECT_TO_VALIDATE.getAnyAt(key),
+                        partStructure.schema, partStructure.canonicalPath + ".additionalItems");
+            } catch (SchemaException e) {
+                throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
+                        "Element " + key + " in value array did not satisfy.");
+            }
+        }
     }
 
     private void validateUnevaluatedItems() {
@@ -754,12 +776,20 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 "this schema enforcer.\nConsider re-designing your schema to avoid it.");
     }
 
-    private void validateMinContains(final JsonSchemaEnforcerPart currentPart) {
-
+    private void validateMinContains(final JsonSchemaEnforcerPart currentPart, final RefResolvedSchemaPart partStructure) {
+        if (countContains(currentPart, partStructure) <
+                tryForSchema(currentPart.resolvableConstraints.get("contains"), partStructure.schema::getLong)) {
+            throw missingProperty(partStructure.canonicalPath, partStructure.propertyName,
+                    "Minimum quantity of matches against the contains constraint not satisfied.");
+        }
     }
 
-    private void validateMaxContains(final JsonSchemaEnforcerPart currentPart) {
-
+    private void validateMaxContains(final JsonSchemaEnforcerPart currentPart, final RefResolvedSchemaPart partStructure) {
+        if (countContains(currentPart, partStructure) >
+                tryForSchema(currentPart.resolvableConstraints.get("contains"), partStructure.schema::getLong)) {
+            throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
+                    "Maximum quantity of matches against the contains constraint was exceeded.");
+        }
     }
 
 
@@ -1083,19 +1113,21 @@ public final class JsonSchemaEnforcer implements IJsonSchemaEnforcer {
                 break;
             case ADDITIONAL_ITEMS:
                 boolean objectIsBigger = currentPart.OBJECT_TO_VALIDATE.getArray().size() > partStructure.schema.getArray().size();
-                keysForConstraint.addAll(
-                        objectIsBigger
-                                ? currentPart.OBJECT_TO_VALIDATE.getKeys()
-                                : partStructure.schema.getKeys()
-                );
-                keysForConstraint.removeAll(
-                        objectIsBigger
-                                ? partStructure.schema.getKeys()
-                                : currentPart.OBJECT_TO_VALIDATE.getKeys()
-                );
+                if (objectIsBigger) {
+                    keysForConstraint.addAll(currentPart.OBJECT_TO_VALIDATE.getKeys());
+                    keysForConstraint.removeAll(partStructure.schema.getKeys());
+                }
                 break;
         }
         return keysForConstraint;
+    }
+
+    private long countContains(final JsonSchemaEnforcerPart currentPart, final RefResolvedSchemaPart partStructure) {
+        if (!currentPart.resolvableConstraints.containsKey("contains")) {
+            throw missingProperty(SourceOfProblem.SCHEMA, partStructure.canonicalPath, partStructure.propertyName,
+                    partStructure.propertyName + " requires the (contains) constraint to run.", null);
+        }
+        return validateContains(currentPart, currentPart.resolvableConstraints.get("contains"));
     }
 
     private Pattern getRegexPattern(final RefResolvedSchemaPart partStructure, final String regexKey) {
