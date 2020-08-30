@@ -1,6 +1,6 @@
 package api;
 
-import core.JsonBuilder;
+import core.BasicJsonBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -23,8 +23,8 @@ public class JsonParserTest {
             "\"double\": 1.23,\n" +
             "\"boolean\": true\n" +
             "}";
-    private static final JsonGenerator jsonObjectAsJSONAble = JsonBuilder
-            .builder()
+    private static final JsonGenerator jsonObjectAsJSONAble = BasicJsonBuilder
+            .getBuilder()
             .addLong("array[]", 1)
             .addDouble("array[]", 1.0)
             .addString("array[]", "abc")

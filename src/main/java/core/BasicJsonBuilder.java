@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
+public final class BasicJsonBuilder implements api.JsonBuilder, JsonGenerator {
 
     private class NewValueIdentifier {
         final JsonKey keyChain;
@@ -34,21 +34,25 @@ public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
     private final HashMap<String, String> strings = new HashMap<>();
     private final HashMap<String, Double> doubles = new HashMap<>();
     private final HashMap<String, Long> longs = new HashMap<>();
-    private final HashMap<String, JsonBuilder> objects = new HashMap<>();
+    private final HashMap<String, BasicJsonBuilder> objects = new HashMap<>();
     private final ArrayList<Object> array = new ArrayList<>();
 
     private JSType type = JSType.OBJECT;
 
 
-    public JsonBuilder() {
+    public BasicJsonBuilder() {
     }
 
-    private JsonBuilder(JSType objectType) {
+    private BasicJsonBuilder(JSType objectType) {
         type = objectType;
     }
 
-    public static JsonBuilder builder() {
-        return new JsonBuilder();
+    public static BasicJsonBuilder getBuilder() {
+        return new BasicJsonBuilder();
+    }
+
+    public BasicJsonBuilder builder() {
+        return new BasicJsonBuilder();
     }
 
     @Override
@@ -64,7 +68,7 @@ public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
     @Override
     public api.JsonBuilder addBoolean(String path, boolean value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
-        JsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
+        BasicJsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
             finalObjectInKeyChain.booleans.put(valueIdentifier.finalKey.substring(1), value);
         }
@@ -74,7 +78,7 @@ public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
     @Override
     public api.JsonBuilder addLong(String path, long value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
-        JsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
+        BasicJsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
             finalObjectInKeyChain.longs.put(valueIdentifier.finalKey.substring(1), value);
         }
@@ -84,7 +88,7 @@ public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
     @Override
     public api.JsonBuilder addDouble(String path, double value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
-        JsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
+        BasicJsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
             finalObjectInKeyChain.doubles.put(valueIdentifier.finalKey.substring(1), value);
         }
@@ -94,7 +98,7 @@ public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
     @Override
     public api.JsonBuilder addString(String path, String value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
-        JsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
+        BasicJsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
             finalObjectInKeyChain.strings.put(valueIdentifier.finalKey.substring(1), value);
         }
@@ -103,13 +107,13 @@ public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
 
     @Override
     public api.JsonBuilder addBuilderBlock(String path, api.JsonBuilder value) throws BuildException {
-        if (!(value instanceof JsonBuilder)) {
+        if (!(value instanceof BasicJsonBuilder)) {
             throw new BuildException("This implementation of an IJSONBuilder only accepts JSONBuilder as a builder block value.");
         }
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
-        JsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
+        BasicJsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
-            finalObjectInKeyChain.objects.put(valueIdentifier.finalKey.substring(1), (JsonBuilder) value);
+            finalObjectInKeyChain.objects.put(valueIdentifier.finalKey.substring(1), (BasicJsonBuilder) value);
         }
         return this;
     }
@@ -133,10 +137,10 @@ public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
                 : lastActionableKey;
     }
 
-    private JsonBuilder findObject(NewValueIdentifier valueIdentifier) {
+    private BasicJsonBuilder findObject(NewValueIdentifier valueIdentifier) {
 
         // Start from the current object, since this is what the method was called on
-        JsonBuilder objectStepInKey = this;
+        BasicJsonBuilder objectStepInKey = this;
         List<String> allKeys = valueIdentifier.keyChain.getAllKeys();
 
         // Loop through the whole key chain, getting, or creating new objects as required
@@ -170,7 +174,7 @@ public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
         return objectStepInKey;
     }
 
-    private JsonBuilder getOrCreateIfNotExists(JsonBuilder currentObject, String currentKey, String nextKey) {
+    private BasicJsonBuilder getOrCreateIfNotExists(BasicJsonBuilder currentObject, String currentKey, String nextKey) {
 
         boolean keyIsForArray = (currentKey.charAt(0) == '[');
         currentKey = currentKey.substring(1);
@@ -182,7 +186,7 @@ public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
             if (currentKey.equals("append") || (Integer.parseInt(currentKey) == currentObject.array.size())) {
                 // If we are not at the end of the keychain, add new typed child object we need to create.
                 if (!nextKey.equals("")) {
-                    JsonBuilder nextBuilder = new JsonBuilder(determineNewChildType(nextKey));
+                    BasicJsonBuilder nextBuilder = new BasicJsonBuilder(determineNewChildType(nextKey));
                     currentObject.array.add(nextBuilder);
                     currentObject = nextBuilder;
                 }
@@ -193,8 +197,8 @@ public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
                     throw new KeyNotFoundException("");
                 }
                 Object arrayElement = currentObject.array.get(index);
-                if (arrayElement instanceof JsonBuilder) {
-                    currentObject = (JsonBuilder) arrayElement;
+                if (arrayElement instanceof BasicJsonBuilder) {
+                    currentObject = (BasicJsonBuilder) arrayElement;
                 } else {
                     throw new KeyDifferentTypeException("");
                 }
@@ -203,7 +207,7 @@ public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
             if (currentObject.objects.containsKey(currentKey)) {
                 currentObject = currentObject.objects.get(currentKey);
             } else {
-                JsonBuilder nextBuilder = new JsonBuilder(determineNewChildType(nextKey));
+                BasicJsonBuilder nextBuilder = new BasicJsonBuilder(determineNewChildType(nextKey));
                 currentObject.objects.put(currentKey, nextBuilder);
                 currentObject = nextBuilder;
             }
@@ -220,17 +224,17 @@ public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
     public api.JsonBuilder convertFromJSON(Json json) {
         switch (json.getDataType()) {
             case BOOLEAN:
-                return new JsonBuilder().addBoolean("value", json.getBoolean());
+                return new BasicJsonBuilder().addBoolean("value", json.getBoolean());
             case DOUBLE:
-                return new JsonBuilder().addDouble("value", json.getDouble());
+                return new BasicJsonBuilder().addDouble("value", json.getDouble());
             case LONG:
-                return new JsonBuilder().addLong("value", json.getLong());
+                return new BasicJsonBuilder().addLong("value", json.getLong());
             case STRING:
-                return new JsonBuilder().addString("value", json.getString());
+                return new BasicJsonBuilder().addString("value", json.getString());
             case ARRAY:
-                return core.JsonBuilder.builder().addBuilderBlock("value", (JsonBuilder) convertNonPrimitive(json));
+                return BasicJsonBuilder.getBuilder().addBuilderBlock("value", (BasicJsonBuilder) convertNonPrimitive(json));
             default:
-                JsonBuilder returnObject = new JsonBuilder(JSType.OBJECT);
+                BasicJsonBuilder returnObject = new BasicJsonBuilder(JSType.OBJECT);
                 for (String key : json.getKeys()) {
                     Object child = convertNonPrimitive(json.getAnyAt(key));
                     if (child instanceof Boolean) {
@@ -241,8 +245,8 @@ public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
                         returnObject.addLong(key, (long) child);
                     } else if (child instanceof String) {
                         returnObject.addString(key, (String) child);
-                    } else if (child instanceof JsonBuilder) {
-                        returnObject.objects.put(key, (JsonBuilder) child);
+                    } else if (child instanceof BasicJsonBuilder) {
+                        returnObject.objects.put(key, (BasicJsonBuilder) child);
                     }
                 }
                 return returnObject;
@@ -260,7 +264,7 @@ public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
             case STRING:
                 return json.getString();
             case ARRAY:
-                JsonBuilder values = new JsonBuilder(JSType.ARRAY);
+                BasicJsonBuilder values = new BasicJsonBuilder(JSType.ARRAY);
                 for (Json element : json.getValues()) {
                     values.array.add(convertNonPrimitive(element));
                 }

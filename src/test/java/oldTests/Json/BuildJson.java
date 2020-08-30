@@ -2,6 +2,7 @@ package oldTests.Json;
 
 import api.Json;
 import api.JsonBuilder;
+import core.BasicJsonBuilder;
 import exceptions.BuildException;
 import exceptions.json.KeyDifferentTypeException;
 import exceptions.json.KeyNotFoundException;
@@ -17,7 +18,7 @@ public class BuildJson {
     private static Json getter;
 
     private static void resetGets() {
-        JsonBuilder pre = new core.JsonBuilder(), last = new core.JsonBuilder();
+        JsonBuilder pre = new BasicJsonBuilder(), last = new BasicJsonBuilder();
 
         try {
             last.addBoolean("bools.bool1", false);
@@ -47,7 +48,7 @@ public class BuildJson {
 
     @BeforeEach
     public void clear() {
-        builder = new core.JsonBuilder();
+        builder = new BasicJsonBuilder();
     }
 
 

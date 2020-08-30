@@ -4,6 +4,8 @@ import exceptions.BuildException;
 
 public interface JsonBuilder extends JsonGenerator {
 
+    JsonBuilder builder();
+
     JsonBuilder addBoolean(String path, boolean value) throws BuildException;
 
     JsonBuilder addLong(String path, long value) throws BuildException;
