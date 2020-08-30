@@ -94,7 +94,7 @@ If you find a problem or think of an improvement, please feel free to raise an i
 ## Usage examples
 - A lot of the actual implementation details for this package should (hopefully) be very self-explanatory. Please take a
 good look at all of the interfaces 
-[in the api package](https://github.com/CalumD/Java-JSON/tree/master/src/main/java/api).
+[in the api package](src/main/java/api).
 
 - As mentioned in the [Features](#Features) section, **'Javascript style key-based access to data'** is considered very
 important in this project.
@@ -120,12 +120,12 @@ important in this project.
         ```
         If you don't know / care the type of the value at that location, you can use `getAnyAt("")`.
         For the listing of all the other methods available on a JSON Object, please see 
-        [the specific interface file here](https://github.com/CalumD/Java-JSON/tree/master/src/main/java/api/Json.java)!
+        [the specific interface file here](src/main/java/api/Json.java)!
 
 - Specific Exception Handling
     - One common use case I could see for a user of this package is to react differently based on the type of exception.
     Shown below is the exception hierarchy:
-    ![Exception Hierarchy](resources/Exception Hierarchy.png)
+    ![Exception Hierarchy](resources/Exception_Hierarchy.png)
     - If you just want to catch anything, then you could just catch `JsonException`. However, for more fine-grained
     control, you can catch just `KeyDifferentTypeException` for example, which is thrown when a value is found at the 
     provided key, but it did not match the requested type. You could use this to implement some default behaviour or to 
