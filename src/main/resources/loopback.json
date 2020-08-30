@@ -1,8 +1,0 @@
-{
-  "classification": "Student",
-  "email": {
-    "domain": ".com",
-    "address": "blah",
-    "something else": 123
-  }
-}
