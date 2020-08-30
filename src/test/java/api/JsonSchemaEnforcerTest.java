@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class JsonSchemaEnforcerTest {
 
-    private static IJson EMPTY_OBJECT;
+    private static Json EMPTY_OBJECT;
 
     @BeforeAll
     public static void setStatics() {

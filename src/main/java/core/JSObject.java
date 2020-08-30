@@ -1,6 +1,6 @@
 package core;
 
-import api.IJson;
+import api.Json;
 import exceptions.json.JsonParseException;
 import exceptions.json.KeyNotFoundException;
 
@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public final class JSObject extends Json {
+public final class JSObject extends core.Json {
 
-    private final HashMap<String, IJson> json;
+    private final HashMap<String, Json> json;
 
     JSObject(JsonTape parsingTape) throws JsonParseException {
         super(parsingTape);
@@ -53,7 +53,7 @@ public final class JSObject extends Json {
             }
 
             // Parse value
-            IJson nextChild = parsingTape.parseNextElement();
+            Json nextChild = parsingTape.parseNextElement();
             json.put(key, nextChild);
 
             // Check delimiters.
@@ -91,7 +91,7 @@ public final class JSObject extends Json {
     }
 
     @Override
-    public IJson getValue() {
+    public Json getValue() {
         return this;
     }
 
@@ -106,7 +106,7 @@ public final class JSObject extends Json {
     }
 
     @Override
-    protected IJson getInternal(JsonKey keySequence) throws KeyNotFoundException {
+    protected Json getInternal(JsonKey keySequence) throws KeyNotFoundException {
         String nextKey = keySequence.getNextKey();
         if (nextKey.equals("")) {
             return this;
@@ -114,7 +114,7 @@ public final class JSObject extends Json {
         if (!nextKey.startsWith("{") && !nextKey.startsWith("<")) {
             throw keySequence.createKeyDifferentTypeException();
         }
-        Json childElement = (Json) json.get(nextKey.substring(1));
+        core.Json childElement = (core.Json) json.get(nextKey.substring(1));
         if (childElement == null) {
             throw keySequence.createKeyNotFoundException();
         }
@@ -127,7 +127,7 @@ public final class JSObject extends Json {
     }
 
     @Override
-    public List<IJson> getValues() {
+    public List<Json> getValues() {
         return new ArrayList<>(json.values());
     }
 
@@ -189,7 +189,7 @@ public final class JSObject extends Json {
                         .append('"').append(
                         key.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\""))
                         .append("\": ");
-                ((Json) value).asPrettyString(indent, tabSize, result, depth - 1);
+                ((core.Json) value).asPrettyString(indent, tabSize, result, depth - 1);
                 result.append(",\n").append(indent);
             });
             result.delete(result.length() - 2 - indent.length(), result.length() - 1);

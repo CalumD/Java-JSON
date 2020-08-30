@@ -1,7 +1,7 @@
 package core;
 
-import api.IJson;
-import api.IJsonBuilder;
+import api.Json;
+import api.JsonBuilder;
 import api.JsonParser;
 import exceptions.BuildException;
 import org.junit.jupiter.api.Test;
@@ -13,42 +13,42 @@ class JsonBuilderTest {
 
     @Test
     public void shouldCreateWithStandardConstructor() {
-        JsonBuilder builder = new JsonBuilder();
+        core.JsonBuilder builder = new core.JsonBuilder();
         assertEquals("{}", builder.toString());
     }
 
     @Test
     public void addBoolean() {
-        assertEquals("{\"value\":true}", new JsonBuilder().addBoolean("value", true).toString());
+        assertEquals("{\"value\":true}", new core.JsonBuilder().addBoolean("value", true).toString());
     }
 
     @Test
     public void addLong() {
-        assertEquals("{\"value\":1}", new JsonBuilder().addLong("value", 1L).toString());
+        assertEquals("{\"value\":1}", new core.JsonBuilder().addLong("value", 1L).toString());
     }
 
     @Test
     public void addDouble() {
-        assertEquals("{\"value\":1.0}", new JsonBuilder().addDouble("value", 1.0).toString());
+        assertEquals("{\"value\":1.0}", new core.JsonBuilder().addDouble("value", 1.0).toString());
     }
 
     @Test
     public void addString() {
-        assertEquals("{\"value\":\"str\"}", new JsonBuilder().addString("value", "str").toString());
+        assertEquals("{\"value\":\"str\"}", new core.JsonBuilder().addString("value", "str").toString());
     }
 
     @Test
     public void addObject() {
-        IJsonBuilder subObject = new JsonBuilder();
+        JsonBuilder subObject = new core.JsonBuilder();
         subObject.addLong("subKey", 5L);
-        assertEquals("{\"value\":{\"subKey\":5}}", new JsonBuilder().addBuilderBlock("value", subObject).toString());
+        assertEquals("{\"value\":{\"subKey\":5}}", new core.JsonBuilder().addBuilderBlock("value", subObject).toString());
     }
 
     @Test
     public void addArray() {
         assertEquals(
                 "{\"value\":[1,2]}",
-                new JsonBuilder()
+                new core.JsonBuilder()
                         .addLong("value[]", 1)
                         .addLong("value[]", 2)
                         .toString());
@@ -58,7 +58,7 @@ class JsonBuilderTest {
     public void stringInAnArrayToStringsCorrectly() {
         assertEquals(
                 "{\"key\":[\"value\"]}",
-                new JsonBuilder()
+                new core.JsonBuilder()
                         .addString("key[]", "value")
                         .toString());
     }
@@ -66,7 +66,7 @@ class JsonBuilderTest {
     @Test
     public void cannotAddWithEmptyKey() {
         try {
-            new JsonBuilder().addBoolean("", false);
+            new core.JsonBuilder().addBoolean("", false);
             fail("The previous method call should have thrown an exception.");
         } catch (BuildException exception) {
             assertEquals("The minimum wrapper for this IJsonBuilder is a JSON object," +
@@ -77,7 +77,7 @@ class JsonBuilderTest {
     @Test
     public void tryToMakeTheBaseValueANonObject() {
         try {
-            new JsonBuilder().addBoolean("obj..key2", false);
+            new core.JsonBuilder().addBoolean("obj..key2", false);
             fail("The previous method call should have thrown an exception.");
         } catch (BuildException exception) {
             assertEquals("Cannot add new value with invalid key.", exception.getMessage());
@@ -87,7 +87,7 @@ class JsonBuilderTest {
     @Test
     public void addingANonJSONBuilderAsABlockShouldFail() {
         try {
-            new JsonBuilder().addBuilderBlock("obj", (JsonBuilder) null);
+            new core.JsonBuilder().addBuilderBlock("obj", (core.JsonBuilder) null);
             fail("The previous method call should have thrown an exception.");
         } catch (BuildException exception) {
             assertEquals(
@@ -100,26 +100,26 @@ class JsonBuilderTest {
 
     @Test
     public void addWithBasicName() {
-        assertEquals("{\"key\":1}", JsonBuilder.builder().addLong("key", 1).toString());
+        assertEquals("{\"key\":1}", core.JsonBuilder.builder().addLong("key", 1).toString());
     }
 
     @Test
     public void addToArrayWithAnonReference() {
         assertEquals("{\"key\":[1,2]}",
-                JsonBuilder.builder()
+                core.JsonBuilder.builder()
                         .addLong("key[]", 1)
                         .addLong("key[]", 2).toString());
     }
 
     @Test
     public void addToRegularObject() {
-        assertEquals("{\"key\":{\"obj\":1}}", JsonBuilder.builder().addLong("key.obj", 1).toString());
+        assertEquals("{\"key\":{\"obj\":1}}", core.JsonBuilder.builder().addLong("key.obj", 1).toString());
     }
 
     @Test
     public void addToNamedEndOfArray() {
         assertEquals("{\"key\":[1,2]}",
-                JsonBuilder.builder()
+                core.JsonBuilder.builder()
                         .addLong("key[0]", 1)
                         .addLong("key[1]", 2).toString());
     }
@@ -127,7 +127,7 @@ class JsonBuilderTest {
     @Test
     public void tryToAddBeyondEndOfNamedArray() {
         try {
-            JsonBuilder.builder()
+            core.JsonBuilder.builder()
                     .addLong("key[0]", 1)
                     .addLong("key[4]", 1);
             fail("The previous method call should have thrown an exception.");
@@ -139,7 +139,7 @@ class JsonBuilderTest {
     @Test
     public void ensureWhenAddingBeyondTheArrayAndWeHaveAnAnonArrayTheErrorMessageDoesntPrintAppend() {
         try {
-            JsonBuilder.builder()
+            core.JsonBuilder.builder()
                     .addLong("key[][8]", 1);
             fail("The previous method call should have thrown an exception.");
         } catch (BuildException e) {
@@ -149,12 +149,12 @@ class JsonBuilderTest {
 
     @Test
     public void addUsingFancyObjectName() {
-        assertEquals("{\"k ..e.. y\":1}", JsonBuilder.builder().addLong("['k ..e.. y']", 1).toString());
+        assertEquals("{\"k ..e.. y\":1}", core.JsonBuilder.builder().addLong("['k ..e.. y']", 1).toString());
     }
 
     @Test
     public void addUsingAnonThenNamedArray() {
-        assertEquals("{\"key\":[[1],[1]]}", JsonBuilder.builder()
+        assertEquals("{\"key\":[[1],[1]]}", core.JsonBuilder.builder()
                 .addLong("key[][0]", 1)
                 .addLong("key[][0]", 1)
                 .toString());
@@ -162,7 +162,7 @@ class JsonBuilderTest {
 
     @Test
     public void addUsingAnonThenAnonArray() {
-        assertEquals("{\"key\":[[1],[2],[3]]}", JsonBuilder.builder()
+        assertEquals("{\"key\":[[1],[2],[3]]}", core.JsonBuilder.builder()
                 .addLong("key[][]", 1)
                 .addLong("key[][]", 2)
                 .addLong("key[][]", 3)
@@ -171,7 +171,7 @@ class JsonBuilderTest {
 
     @Test
     public void addUsingNamedThenAnonArray() {
-        assertEquals("{\"key\":[[1,2,3]]}", JsonBuilder.builder()
+        assertEquals("{\"key\":[[1,2,3]]}", core.JsonBuilder.builder()
                 .addLong("key[0][]", 1)
                 .addLong("key[0][]", 2)
                 .addLong("key[0][]", 3)
@@ -181,7 +181,7 @@ class JsonBuilderTest {
     @Test
     public void tryToAddMoreButPartIsAPrimitive() {
         try {
-            JsonBuilder.builder()
+            core.JsonBuilder.builder()
                     .addLong("key[]", 1)
                     .addLong("key[0].SubObject", 2);
             fail("The previous method call should have thrown an exception.");
@@ -193,8 +193,8 @@ class JsonBuilderTest {
     @Test
     public void tryToAppendToANamedArrayElementButThatArrayElementIsAnObject() {
         try {
-            JsonBuilder.builder()
-                    .addBuilderBlock("key[]", new JsonBuilder().addString("key", "Im an Object"))
+            core.JsonBuilder.builder()
+                    .addBuilderBlock("key[]", new core.JsonBuilder().addString("key", "Im an Object"))
                     .addString("key[0]", "hey");
             fail("The previous method call should have thrown an exception.");
         } catch (BuildException e) {
@@ -205,7 +205,7 @@ class JsonBuilderTest {
     @Test
     public void addingToAnExistingKeyWillOverwrite() {
         assertEquals("{\"key\":15}",
-                JsonBuilder.builder()
+                core.JsonBuilder.builder()
                         .addLong("key", 1)
                         .addLong("key", 15)
                         .toString());
@@ -214,20 +214,20 @@ class JsonBuilderTest {
     @Test
     public void tryToAddToDeepObjectPath() {
         assertEquals("{\"would\":{\"you\":{\"look\":[[[{\"at\":{\"this\":{\"w i l d\":{\"path\":{\"though\":1}}}}}]]]}}}",
-                JsonBuilder.builder()
+                core.JsonBuilder.builder()
                         .addLong("would.you.look[][0][].at.this['w i l d'][\"path\"].though", 1).toString()
         );
     }
 
     @Test
     public void testBuilderPatternWithSubBuilderObject() {
-        IJson builder = JsonBuilder.builder()
+        Json builder = core.JsonBuilder.builder()
                 .addBoolean("bool", true)
                 .addLong("long", 1L)
                 .addDouble("dub", 1.0D)
                 .addString("string", "String")
                 .addBuilderBlock("subBuilder",
-                        JsonBuilder.builder()
+                        core.JsonBuilder.builder()
                                 .addString("string", "I am in a sub Builder")
                                 .addDouble("dub2", 1.1)
                 )
@@ -250,14 +250,14 @@ class JsonBuilderTest {
 
     @Test
     public void testBuilderPatternWithCorrectKeyMapping() {
-        IJson builder = JsonBuilder.builder()
+        Json builder = core.JsonBuilder.builder()
                 .addBoolean("bool", true)
                 .addLong("long", 1L)
                 .addDouble("dub", 1.0D)
                 .addString("string", "String")
 
                 .addBuilderBlock("subBuilder",
-                        JsonBuilder.builder()
+                        core.JsonBuilder.builder()
                                 .addString("string", "I am in a sub Builder")
                                 .addDouble("dub2", 1.1)
                 )
@@ -280,37 +280,37 @@ class JsonBuilderTest {
 
     @Test
     public void convertFromJSONBoolean() {
-        assertEquals("{\"value\":true}", new JsonBuilder().convertFromJSON(JsonParser.parse("true")).toString());
+        assertEquals("{\"value\":true}", new core.JsonBuilder().convertFromJSON(JsonParser.parse("true")).toString());
     }
 
     @Test
     public void convertFromJSONLong() {
-        assertEquals("{\"value\":1}", new JsonBuilder().convertFromJSON(JsonParser.parse("1")).toString());
+        assertEquals("{\"value\":1}", new core.JsonBuilder().convertFromJSON(JsonParser.parse("1")).toString());
     }
 
     @Test
     public void convertFromJSONDouble() {
-        assertEquals("{\"value\":1.0}", new JsonBuilder().convertFromJSON(JsonParser.parse("1.0")).toString());
+        assertEquals("{\"value\":1.0}", new core.JsonBuilder().convertFromJSON(JsonParser.parse("1.0")).toString());
     }
 
     @Test
     public void convertFromJSONString() {
-        assertEquals("{\"value\":\"str\"}", new JsonBuilder().convertFromJSON(JsonParser.parse("\"str\"")).toString());
+        assertEquals("{\"value\":\"str\"}", new core.JsonBuilder().convertFromJSON(JsonParser.parse("\"str\"")).toString());
     }
 
     @Test
     public void convertFromJSONArray() {
-        assertEquals("{\"value\":[1,2]}", new JsonBuilder().convertFromJSON(JsonParser.parse("[1,2]")).toString());
+        assertEquals("{\"value\":[1,2]}", new core.JsonBuilder().convertFromJSON(JsonParser.parse("[1,2]")).toString());
     }
 
     @Test
     public void convertFromJSONObject() {
-        assertEquals("{\"key\":true}", new JsonBuilder().convertFromJSON(JsonParser.parse("{'key':true}")).toString());
+        assertEquals("{\"key\":true}", new core.JsonBuilder().convertFromJSON(JsonParser.parse("{'key':true}")).toString());
     }
 
     @Test
     public void convertFromComplexJSONObject() {
-        IJsonBuilder builder = new JsonBuilder().convertFromJSON(JsonParser.parse(
+        JsonBuilder builder = new core.JsonBuilder().convertFromJSON(JsonParser.parse(
                 "{\"dub\":1.0," +
                         "\"I used to be Json\":true," +
                         "\"bool\":true," +
@@ -509,10 +509,10 @@ class JsonBuilderTest {
                 "  }\n" +
                 "}";
 
-        IJson parsedJSON = JsonParser.parse(jsonContent);
+        Json parsedJSON = JsonParser.parse(jsonContent);
         assertEquals(
-                JsonBuilder.builder().convertFromJSON(
-                        JsonBuilder.builder().convertFromJSON(parsedJSON).convertToJSON()
+                core.JsonBuilder.builder().convertFromJSON(
+                        core.JsonBuilder.builder().convertFromJSON(parsedJSON).convertToJSON()
                 ).convertToJSON(),
                 parsedJSON
         );
@@ -521,7 +521,7 @@ class JsonBuilderTest {
     @Test
     public void checkWeCantAddToAnonymousBaseArray() {
         try {
-            JsonBuilder.builder().addLong("[]", 1L).build();
+            core.JsonBuilder.builder().addLong("[]", 1L).build();
             fail("The previous method should have thrown an exception.");
         } catch (BuildException e) {
             assertEquals("<Anonymous Key> is not a valid accessor on element: []", e.getMessage());
@@ -530,6 +530,6 @@ class JsonBuilderTest {
 
     @Test
     public void addAnonymousKeyNameButProperlyEscaped() {
-        assertEquals("{\"[]\":1}", JsonBuilder.builder().addLong("['[]']", 1L).toString());
+        assertEquals("{\"[]\":1}", core.JsonBuilder.builder().addLong("['[]']", 1L).toString());
     }
 }

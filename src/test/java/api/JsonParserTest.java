@@ -23,7 +23,7 @@ public class JsonParserTest {
             "\"double\": 1.23,\n" +
             "\"boolean\": true\n" +
             "}";
-    private static final IJsonAble jsonObjectAsJSONAble = JsonBuilder
+    private static final JsonGenerator jsonObjectAsJSONAble = JsonBuilder
             .builder()
             .addLong("array[]", 1)
             .addDouble("array[]", 1.0)
@@ -63,7 +63,7 @@ public class JsonParserTest {
         List<String> objects = new ArrayList<>(2);
         objects.add(jsonObject);
         objects.add(jsonObject);
-        List<IJson> jsons = JsonParser.parseMultipleStrings(objects);
+        List<Json> jsons = JsonParser.parseMultipleStrings(objects);
         assertEquals(2, jsons.size(), 0);
         assertEquals(jsonObjectConvertedAsString, jsons.get(0).asString());
         assertEquals(jsonObjectConvertedAsString, jsons.get(1).asString());
@@ -71,10 +71,10 @@ public class JsonParserTest {
 
     @Test
     public void multipleJSONablesParse() {
-        List<IJsonAble> objects = new ArrayList<>(2);
+        List<JsonGenerator> objects = new ArrayList<>(2);
         objects.add(jsonObjectAsJSONAble);
         objects.add(jsonObjectAsJSONAble);
-        List<IJson> jsons = JsonParser.parseMultipleJSONables(objects);
+        List<Json> jsons = JsonParser.parseMultipleJSONables(objects);
         assertEquals(2, jsons.size(), 0);
         assertEquals(jsonObjectConvertedAsString, jsons.get(0).asString());
         assertEquals(jsonObjectConvertedAsString, jsons.get(1).asString());
@@ -82,11 +82,11 @@ public class JsonParserTest {
 
     @Test
     public void multipleJSONablesForDistinctParse() {
-        List<IJsonAble> objects = new ArrayList<>(2);
+        List<JsonGenerator> objects = new ArrayList<>(2);
         objects.add(jsonObjectAsJSONAble);
         objects.add(jsonObjectAsJSONAble);
         objects.add(jsonObjectAsJSONAble);
-        Set<IJson> jsons = JsonParser.parseMultipleJSONablesForDistinct(objects);
+        Set<Json> jsons = JsonParser.parseMultipleJSONablesForDistinct(objects);
         assertEquals(1, jsons.size(), 0);
         jsons.forEach(json -> assertEquals(jsonObjectConvertedAsString, json.asString()));
     }
@@ -97,7 +97,7 @@ public class JsonParserTest {
         objects.add(jsonObject);
         objects.add(jsonObject);
         objects.add(jsonObject);
-        Set<IJson> jsons = JsonParser.parseMultipleStringsForDistinct(objects);
+        Set<Json> jsons = JsonParser.parseMultipleStringsForDistinct(objects);
         assertEquals(1, jsons.size(), 0);
         jsons.forEach(json -> assertEquals(jsonObjectConvertedAsString, json.asString()));
     }

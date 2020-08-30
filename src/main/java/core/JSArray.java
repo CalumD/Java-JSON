@@ -1,15 +1,15 @@
 package core;
 
-import api.IJson;
+import api.Json;
 import exceptions.json.JsonParseException;
 import exceptions.json.KeyNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class JSArray extends Json {
+public final class JSArray extends core.Json {
 
-    private final List<IJson> myValue;
+    private final List<Json> myValue;
 
     JSArray(JsonTape parsingTape) throws JsonParseException {
         super(parsingTape);
@@ -61,7 +61,7 @@ public final class JSArray extends Json {
     }
 
     @Override
-    public List<IJson> getValue() {
+    public List<Json> getValue() {
         return myValue;
     }
 
@@ -77,7 +77,7 @@ public final class JSArray extends Json {
     }
 
     @Override
-    protected IJson getInternal(JsonKey keySequence) throws KeyNotFoundException {
+    protected Json getInternal(JsonKey keySequence) throws KeyNotFoundException {
         String nextKey = keySequence.getNextKey();
         if (nextKey.equals("")) {
             return this;
@@ -85,9 +85,9 @@ public final class JSArray extends Json {
         if (!nextKey.startsWith("[")) {
             throw keySequence.createKeyDifferentTypeException();
         }
-        Json childElement;
+        core.Json childElement;
         try {
-            childElement = (Json) myValue.get(Integer.parseInt(nextKey.substring(1)));
+            childElement = (core.Json) myValue.get(Integer.parseInt(nextKey.substring(1)));
         } catch (IndexOutOfBoundsException e) {
             throw keySequence.createKeyNotFoundException();
         }
@@ -104,7 +104,7 @@ public final class JSArray extends Json {
     }
 
     @Override
-    public List<IJson> getValues() {
+    public List<Json> getValues() {
         return getValue();
     }
 
@@ -123,7 +123,7 @@ public final class JSArray extends Json {
         }
         //pass down the next value of depth to all children and get their strings
         else {
-            for (IJson value : myValue) {
+            for (Json value : myValue) {
                 ret.append(value.asString(depth - 1)).append(",");
             }
             if (ret.charAt(ret.length() - 1) == ',') {
@@ -146,7 +146,7 @@ public final class JSArray extends Json {
             result.append("<").append(myValue.size()).append(">");
         } else {
             myValue.forEach(value -> {
-                ((Json) value).asPrettyString(indent, tabSize, result, depth - 1);
+                ((core.Json) value).asPrettyString(indent, tabSize, result, depth - 1);
                 result.append(",\n").append(indent);
             });
             result.delete(result.length() - 2 - indent.length(), result.length() - 1);

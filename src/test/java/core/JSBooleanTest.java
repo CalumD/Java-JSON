@@ -1,6 +1,6 @@
 package core;
 
-import api.IJson;
+import api.Json;
 import exceptions.json.JsonParseException;
 import exceptions.json.KeyDifferentTypeException;
 import exceptions.json.KeyNotFoundException;
@@ -148,7 +148,7 @@ public class JSBooleanTest extends JsonTest {
     @Test
     @Override
     public void getValues() {
-        List<IJson> toEqual = new ArrayList<>();
+        List<Json> toEqual = new ArrayList<>();
         toEqual.add(boolTrue);
         assertEquals(toEqual, boolTrue.getValues());
     }

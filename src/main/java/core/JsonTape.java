@@ -1,9 +1,9 @@
 package core;
 
-import api.IJson;
+import api.Json;
 import exceptions.json.JsonParseException;
 
-public final class JsonTape extends Tape<IJson, JsonParseException> {
+public final class JsonTape extends Tape<Json, JsonParseException> {
 
     static final String VALID_JSON = "{ / [ / \" / <number> / <boolean> ";
 
@@ -11,13 +11,13 @@ public final class JsonTape extends Tape<IJson, JsonParseException> {
         super(fullInput);
     }
 
-    public IJson parseNextElement() {
+    public Json parseNextElement() {
 
         // Reach the first legitimate character.
         consumeWhiteSpace();
 
         // Figure out the next JSON type
-        Json nextElement = null;
+        core.Json nextElement = null;
         switch (checkCurrentChar()) {
             case 't':
             case 'T':

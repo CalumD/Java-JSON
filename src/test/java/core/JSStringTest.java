@@ -1,6 +1,6 @@
 package core;
 
-import api.IJson;
+import api.Json;
 import exceptions.json.JsonParseException;
 import exceptions.json.KeyDifferentTypeException;
 import exceptions.json.KeyNotFoundException;
@@ -156,14 +156,14 @@ public class JSStringTest extends JsonTest {
     @Test
     @Override
     public void getValues() {
-        List<IJson> toEqual = new ArrayList<>();
+        List<Json> toEqual = new ArrayList<>();
         toEqual.add(string);
         assertEquals(toEqual, string.getValues());
     }
 
     @Test
     public void getValuesNotEqual() {
-        List<IJson> toEqual = new ArrayList<>();
+        List<Json> toEqual = new ArrayList<>();
         toEqual.add(new JSString(new JsonTape("\"Goodbye World\"")));
         assertNotEquals(toEqual, string.getValues());
     }

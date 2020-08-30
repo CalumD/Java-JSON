@@ -1,8 +1,7 @@
 package oldTests.Json;
 
-import api.IJson;
-import api.IJsonBuilder;
-import core.JsonBuilder;
+import api.Json;
+import api.JsonBuilder;
 import exceptions.BuildException;
 import exceptions.json.KeyDifferentTypeException;
 import exceptions.json.KeyNotFoundException;
@@ -14,11 +13,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BuildJson {
 
-    private static IJsonBuilder builder;
-    private static IJson getter;
+    private static JsonBuilder builder;
+    private static Json getter;
 
     private static void resetGets() {
-        IJsonBuilder pre = new JsonBuilder(), last = new JsonBuilder();
+        JsonBuilder pre = new core.JsonBuilder(), last = new core.JsonBuilder();
 
         try {
             last.addBoolean("bools.bool1", false);
@@ -48,7 +47,7 @@ public class BuildJson {
 
     @BeforeEach
     public void clear() {
-        builder = new JsonBuilder();
+        builder = new core.JsonBuilder();
     }
 
 

@@ -1,6 +1,5 @@
 package core;
 
-import api.IJson;
 import exceptions.JsonException;
 import exceptions.json.JsonParseException;
 import exceptions.json.KeyDifferentTypeException;
@@ -10,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class Json implements IJson {
+public abstract class Json implements api.Json {
 
     public static final int DEFAULT_PRETTY_JSON_INDENT_WIDTH = 2;
 
@@ -24,17 +23,17 @@ public abstract class Json implements IJson {
     }
 
     @Override
-    public IJson createFromString(String jsonFragment) throws JsonParseException {
+    public api.Json createFromString(String jsonFragment) throws JsonParseException {
         return parseSelf(jsonFragment);
     }
 
     @Override
-    public IJson createFromMultilineString(List<String> jsonFragment) throws JsonParseException {
+    public api.Json createFromMultilineString(List<String> jsonFragment) throws JsonParseException {
         return parseSelf(jsonFragment);
     }
 
     @Override
-    public IJson convertToJSON() throws JsonParseException {
+    public api.Json convertToJSON() throws JsonParseException {
         return this;
     }
 
@@ -43,11 +42,11 @@ public abstract class Json implements IJson {
         return "".equals(key);
     }
 
-    private IJson parseSelf(String jsonFragment) {
+    private api.Json parseSelf(String jsonFragment) {
         return new JsonTape(jsonFragment).parseNextElement();
     }
 
-    private IJson parseSelf(List<String> jsonFragment) {
+    private api.Json parseSelf(List<String> jsonFragment) {
         StringBuilder concater = new StringBuilder();
         jsonFragment.forEach(line -> {
             concater.append(line);
@@ -84,14 +83,14 @@ public abstract class Json implements IJson {
     }
 
     @Override
-    public List<IJson> getValues() {
-        List<IJson> result = new ArrayList<>(1);
+    public List<api.Json> getValues() {
+        List<api.Json> result = new ArrayList<>(1);
         result.add(this);
         return result;
     }
 
     @Override
-    public List<IJson> getArray() throws KeyDifferentTypeException {
+    public List<api.Json> getArray() throws KeyDifferentTypeException {
         return getArrayAt("");
     }
 
@@ -116,12 +115,12 @@ public abstract class Json implements IJson {
     }
 
     @Override
-    public IJson getJSONObject() throws KeyDifferentTypeException {
+    public api.Json getJSONObject() throws KeyDifferentTypeException {
         return getJSONObjectAt("");
     }
 
     @Override
-    public IJson getAny() {
+    public api.Json getAny() {
         return getAnyAt("");
     }
 
@@ -143,17 +142,17 @@ public abstract class Json implements IJson {
     }
 
     @Override
-    public List<IJson> getValuesOf(String key) throws JsonException {
+    public List<api.Json> getValuesOf(String key) throws JsonException {
         return getMatching(key).getValues();
     }
 
     @Override
-    public IJson getJSONObjectAt(String key) throws JsonException {
+    public api.Json getJSONObjectAt(String key) throws JsonException {
         return ((JSObject) getMatching(key, JSType.OBJECT)).getValue();
     }
 
     @Override
-    public List<IJson> getArrayAt(String key) throws JsonException {
+    public List<api.Json> getArrayAt(String key) throws JsonException {
         return ((JSArray) getMatching(key, JSType.ARRAY)).getValue();
     }
 
@@ -178,16 +177,16 @@ public abstract class Json implements IJson {
     }
 
     @Override
-    public IJson getAnyAt(String key) throws JsonException {
+    public api.Json getAnyAt(String key) throws JsonException {
         return getMatching(key);
     }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
-    private IJson getMatching(String key, JSType requiredType) {
+    private api.Json getMatching(String key, JSType requiredType) {
 
         // Acquire accurate typing
-        IJson ret = getMatching(key);
+        api.Json ret = getMatching(key);
         JSType actualTyping = ret.getDataType();
 
         // check cast to asked typing
@@ -201,7 +200,7 @@ public abstract class Json implements IJson {
         return ret;
     }
 
-    private IJson getMatching(String key) {
+    private api.Json getMatching(String key) {
 
         // Sanity Check
         if (key == null) {
@@ -217,7 +216,7 @@ public abstract class Json implements IJson {
         return getInternal(new JsonKey(key, false));
     }
 
-    protected IJson getInternal(JsonKey keySequence) throws KeyNotFoundException {
+    protected api.Json getInternal(JsonKey keySequence) throws KeyNotFoundException {
         if (keySequence.getNextKey().equals("")) {
             return this;
         }

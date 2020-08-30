@@ -1,4 +1,4 @@
-import api.IJson;
+import api.Json;
 import api.JsonParser;
 import api.JsonSchemaEnforcer;
 import exceptions.JsonException;
@@ -29,17 +29,17 @@ public class OfficialSchemaTests {
             System.out.println("TESTING FOLDER: " + folderName);
             files.forEach(file -> {
                 System.out.println("    FILE: " + file.getName());
-                IJson testContent;
+                Json testContent;
                 try {
                     testContent = JsonParser.parse(getFileContents(file, builder));
                 } catch (JsonException | IOException e) {
                     System.err.println("        File failed to parse: " + file.getName());
                     return;
                 }
-                for (IJson scenario : testContent.getArray()) {
+                for (Json scenario : testContent.getArray()) {
                     System.out.println("            SCENARIO: " + scenario.getStringAt("description"));
-                    IJson schemaForScenario = scenario.getJSONObjectAt("schema");
-                    for (IJson individualTest : scenario.getArrayAt("tests")) {
+                    Json schemaForScenario = scenario.getJSONObjectAt("schema");
+                    for (Json individualTest : scenario.getArrayAt("tests")) {
                         boolean passed = JsonSchemaEnforcer.validateStrict(individualTest.getAnyAt("data"), schemaForScenario);
                         if (passed == individualTest.getBooleanAt("valid")) {
                             System.out.println("                TEST: " + individualTest.getStringAt("description") + " PASSED.");

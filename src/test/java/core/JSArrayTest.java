@@ -1,6 +1,6 @@
 package core;
 
-import api.IJson;
+import api.Json;
 import api.JsonParser;
 import exceptions.json.JsonParseException;
 import exceptions.json.KeyDifferentTypeException;
@@ -211,7 +211,7 @@ public class JSArrayTest extends JsonTest {
     @Test
     @Override
     public void getValue() {
-        List<IJson> values = new ArrayList<>(3);
+        List<Json> values = new ArrayList<>(3);
         values.add(new JSArray(new JsonTape("[]")));
         values.add(new JSNumber(new JsonTape("0")));
         values.add(new JSNumber(new JsonTape("0.1")));
@@ -225,7 +225,7 @@ public class JSArrayTest extends JsonTest {
     @Test
     @Override
     public void getValues() {
-        List<IJson> values = new ArrayList<>(3);
+        List<Json> values = new ArrayList<>(3);
         values.add(new JSArray(new JsonTape("[]")));
         values.add(new JSNumber(new JsonTape("0")));
         values.add(new JSNumber(new JsonTape("0.1")));
@@ -238,7 +238,7 @@ public class JSArrayTest extends JsonTest {
 
     @Test
     public void getValuesNotEqual() {
-        List<IJson> values = new ArrayList<>(3);
+        List<Json> values = new ArrayList<>(3);
         values.add(new JSArray(new JsonTape("[]")));
         values.add(new JSNumber(new JsonTape("0")));
         values.add(new JSNumber(new JsonTape("0.1")));
@@ -252,7 +252,7 @@ public class JSArrayTest extends JsonTest {
     @Test
     @Override
     public void getArray() {
-        List<IJson> values = new ArrayList<>(3);
+        List<Json> values = new ArrayList<>(3);
         values.add(new JSArray(new JsonTape("[]")));
         values.add(new JSNumber(new JsonTape("0")));
         values.add(new JSNumber(new JsonTape("0.1")));
@@ -399,7 +399,7 @@ public class JSArrayTest extends JsonTest {
 
     @Test
     public void getArrayAtMe() {
-        List<IJson> values = new ArrayList<>(3);
+        List<Json> values = new ArrayList<>(3);
         values.add(new JSArray(new JsonTape("[]")));
         values.add(new JSNumber(new JsonTape("0")));
         values.add(new JSNumber(new JsonTape("0.1")));
@@ -574,7 +574,7 @@ public class JSArrayTest extends JsonTest {
     @Test
     @Override
     public void getHashCode() {
-        ArrayList<IJson> check = new ArrayList<>();
+        ArrayList<Json> check = new ArrayList<>();
         check.add(new JSArray(new JsonTape("[]")));
         check.add(new JSNumber(new JsonTape("0")));
         check.add(new JSNumber(new JsonTape("0.1")));

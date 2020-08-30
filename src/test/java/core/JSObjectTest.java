@@ -1,6 +1,6 @@
 package core;
 
-import api.IJson;
+import api.Json;
 import api.JsonParser;
 import exceptions.json.JsonParseException;
 import exceptions.json.KeyDifferentTypeException;
@@ -192,7 +192,7 @@ public class JSObjectTest extends JsonTest {
     @Test
     public void keysWithSpacesAreOkay() {
         try {
-            IJson obj = object.createFromString("{\"I have spaces\": 1}");
+            Json obj = object.createFromString("{\"I have spaces\": 1}");
             assertEquals(1, obj.getLongAt("['I have spaces']"));
         } catch (JsonParseException e) {
             fail("Create from string should not throw an exception for valid input.", e);
@@ -307,7 +307,7 @@ public class JSObjectTest extends JsonTest {
     @Test
     @Override
     public void getValues() {
-        List<IJson> values = new ArrayList<>(3);
+        List<Json> values = new ArrayList<>(3);
         values.add(new JSArray(new JsonTape("[]")));
         values.add(new JSNumber(new JsonTape("0")));
         values.add(new JSNumber(new JsonTape("0.1")));
@@ -321,7 +321,7 @@ public class JSObjectTest extends JsonTest {
 
     @Test
     public void getValuesNotEqual() {
-        List<IJson> values = new ArrayList<>(3);
+        List<Json> values = new ArrayList<>(3);
         values.add(new JSArray(new JsonTape("[]")));
         values.add(new JSNumber(new JsonTape("0")));
         values.add(new JSNumber(new JsonTape("0.1")));
@@ -621,7 +621,7 @@ public class JSObjectTest extends JsonTest {
     @Test
     @Override
     public void getHashCode() {
-        HashMap<String, IJson> check = new HashMap<>();
+        HashMap<String, Json> check = new HashMap<>();
         check.put("array", new JSArray(new JsonTape("[]")));
         check.put("long", new JSNumber(new JsonTape("0")));
         check.put("double", new JSNumber(new JsonTape("0.1")));

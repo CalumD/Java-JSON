@@ -1,8 +1,7 @@
 package core;
 
-import api.IJson;
-import api.IJsonAble;
-import api.IJsonBuilder;
+import api.Json;
+import api.JsonGenerator;
 import api.JsonParser;
 import exceptions.BuildException;
 import exceptions.json.KeyDifferentTypeException;
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public final class JsonBuilder implements IJsonBuilder, IJsonAble {
+public final class JsonBuilder implements api.JsonBuilder, JsonGenerator {
 
     private class NewValueIdentifier {
         final JsonKey keyChain;
@@ -53,17 +52,17 @@ public final class JsonBuilder implements IJsonBuilder, IJsonAble {
     }
 
     @Override
-    public IJson build() throws BuildException {
+    public Json build() throws BuildException {
         return convertToJSON();
     }
 
     @Override
-    public IJson convertToJSON() throws BuildException {
+    public Json convertToJSON() throws BuildException {
         return JsonParser.parse(this.toString());
     }
 
     @Override
-    public IJsonBuilder addBoolean(String path, boolean value) throws BuildException {
+    public api.JsonBuilder addBoolean(String path, boolean value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
         JsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
@@ -73,7 +72,7 @@ public final class JsonBuilder implements IJsonBuilder, IJsonAble {
     }
 
     @Override
-    public IJsonBuilder addLong(String path, long value) throws BuildException {
+    public api.JsonBuilder addLong(String path, long value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
         JsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
@@ -83,7 +82,7 @@ public final class JsonBuilder implements IJsonBuilder, IJsonAble {
     }
 
     @Override
-    public IJsonBuilder addDouble(String path, double value) throws BuildException {
+    public api.JsonBuilder addDouble(String path, double value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
         JsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
@@ -93,7 +92,7 @@ public final class JsonBuilder implements IJsonBuilder, IJsonAble {
     }
 
     @Override
-    public IJsonBuilder addString(String path, String value) throws BuildException {
+    public api.JsonBuilder addString(String path, String value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
         JsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
@@ -103,7 +102,7 @@ public final class JsonBuilder implements IJsonBuilder, IJsonAble {
     }
 
     @Override
-    public IJsonBuilder addBuilderBlock(String path, IJsonBuilder value) throws BuildException {
+    public api.JsonBuilder addBuilderBlock(String path, api.JsonBuilder value) throws BuildException {
         if (!(value instanceof JsonBuilder)) {
             throw new BuildException("This implementation of an IJSONBuilder only accepts JSONBuilder as a builder block value.");
         }
@@ -116,7 +115,7 @@ public final class JsonBuilder implements IJsonBuilder, IJsonAble {
     }
 
     @Override
-    public IJsonBuilder addBuilderBlock(String path, IJson value) throws BuildException {
+    public api.JsonBuilder addBuilderBlock(String path, Json value) throws BuildException {
         return addBuilderBlock(path, convertFromJSON(value));
     }
 
@@ -218,7 +217,7 @@ public final class JsonBuilder implements IJsonBuilder, IJsonAble {
     }
 
     @Override
-    public IJsonBuilder convertFromJSON(IJson json) {
+    public api.JsonBuilder convertFromJSON(Json json) {
         switch (json.getDataType()) {
             case BOOLEAN:
                 return new JsonBuilder().addBoolean("value", json.getBoolean());
@@ -229,7 +228,7 @@ public final class JsonBuilder implements IJsonBuilder, IJsonAble {
             case STRING:
                 return new JsonBuilder().addString("value", json.getString());
             case ARRAY:
-                return JsonBuilder.builder().addBuilderBlock("value", (JsonBuilder) convertNonPrimitive(json));
+                return core.JsonBuilder.builder().addBuilderBlock("value", (JsonBuilder) convertNonPrimitive(json));
             default:
                 JsonBuilder returnObject = new JsonBuilder(JSType.OBJECT);
                 for (String key : json.getKeys()) {
@@ -250,7 +249,7 @@ public final class JsonBuilder implements IJsonBuilder, IJsonAble {
         }
     }
 
-    private Object convertNonPrimitive(IJson json) {
+    private Object convertNonPrimitive(Json json) {
         switch (json.getDataType()) {
             case BOOLEAN:
                 return json.getBoolean();
@@ -262,7 +261,7 @@ public final class JsonBuilder implements IJsonBuilder, IJsonAble {
                 return json.getString();
             case ARRAY:
                 JsonBuilder values = new JsonBuilder(JSType.ARRAY);
-                for (IJson element : json.getValues()) {
+                for (Json element : json.getValues()) {
                     values.array.add(convertNonPrimitive(element));
                 }
                 return values;
