@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class Json implements api.Json {
+abstract class Json implements api.Json {
 
     public static final int DEFAULT_PRETTY_JSON_INDENT_WIDTH = 2;
 

@@ -2,7 +2,7 @@ package core;
 
 import exceptions.json.JsonParseException;
 
-public final class JSString extends Json {
+final class JSString extends Json {
 
     private final String myValue;
 

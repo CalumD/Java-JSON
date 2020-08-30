@@ -7,7 +7,7 @@ import exceptions.json.KeyNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class JSArray extends core.Json {
+final class JSArray extends core.Json {
 
     private final List<Json> myValue;
 

@@ -2,7 +2,7 @@ package core;
 
 import exceptions.JsonException;
 
-public abstract class Tape<T, E extends JsonException> {
+abstract class Tape<T, E extends JsonException> {
 
     private static final int DEFAULT_PARSE_ERROR_CONTEXT_SIZE = 30;
     private static final String DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL = "_";
