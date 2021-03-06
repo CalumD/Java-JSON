@@ -3,6 +3,9 @@ package api;
 import exceptions.JsonException;
 import exceptions.SchemaException;
 
+/**
+ * Used to define all the methods required to verify that a given JSON object satisfies a given JSON Schema.
+ */
 public interface JsonSchemaEnforceable {
 
     /**

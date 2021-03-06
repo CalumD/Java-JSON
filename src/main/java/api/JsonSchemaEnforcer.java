@@ -20,16 +20,34 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Default implementation of {@link JsonSchemaEnforceable},
+ * to verify whether a given JSON object satisfies a given JSON schema.
+ */
 public final class JsonSchemaEnforcer implements JsonSchemaEnforceable {
 
     private enum SourceOfProblem {SCHEMA, OBJECT_TO_VALIDATE}
 
     private enum KeysRelevantTo {PROPERTIES, PATTERN_PROPERTIES, ADDITIONAL_PROPERTIES, ITEMS, ADDITIONAL_ITEMS}
 
+    /**
+     * A static equivalent of {@link #validateWithOutReasoning(Json, Json)}.
+     *
+     * @param objectToValidate The JSON object to be evaluated.
+     * @param againstSchema    The JSON Schema to verify the object against.
+     * @return True if the JSON object satisfies the Schema, False if there is any exception.
+     */
     public static boolean validateStrict(Json objectToValidate, Json againstSchema) {
         return new JsonSchemaEnforcer().validateWithOutReasoning(objectToValidate, againstSchema);
     }
 
+    /**
+     * A static equivalent of {@link #validateWithReasoning(Json, Json)}.
+     *
+     * @param objectToValidate The JSON object to be evaluated.
+     * @param againstSchema    The JSON Schema to verify the object against.
+     * @return True if the JSON object satisfies the Schema. If False, an exception will be thrown with the reason why.
+     */
     public static boolean validate(Json objectToValidate, Json againstSchema) {
         return new JsonSchemaEnforcer().validateWithReasoning(objectToValidate, againstSchema);
     }
