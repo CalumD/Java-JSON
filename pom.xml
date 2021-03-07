@@ -7,7 +7,7 @@
     <!--  Top level metadata / coordinates  -->
     <groupId>com.clumd.projects</groupId>
     <artifactId>Java-JSON</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <packaging>jar</packaging>
 
     <!--  Basic application info  -->
@@ -52,6 +52,7 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.6.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
