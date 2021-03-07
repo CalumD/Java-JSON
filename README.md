@@ -1,9 +1,10 @@
 # Java-Json
 [![Build](https://github.com/CalumD/Java-JSON/workflows/tests/badge.svg)](https://github.com/CalumD/Java-JSON)
 [![Dependencies](https://img.shields.io/badge/Dependencies-None-brightgreen)](https://github.com/CalumD/Java-JSON)
-[![JDK used](https://img.shields.io/badge/JDK--Used-11-green)](https://github.com/CalumD/Java-JSON)
+[![JDK used](https://img.shields.io/badge/JDK--Used-13-green)](https://github.com/CalumD/Java-JSON)
 [![Junit](https://img.shields.io/badge/JUnit-v5-green)](https://github.com/CalumD/Java-JSON)
 [![GitHub release](https://img.shields.io/github/v/release/CalumD/Java-JSON)](https://github.com/CalumD/Java-JSON/releases)
+[![Maven release](https://maven-badges.herokuapp.com/maven-central/com.clumd.projects/java-json/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.clumd.projects/java-json)
 
 This project attempts to fulfill a very specific niche with json-in-java environments.
 > "The use of JSON, primarily as a read-only dictionary of information within your Java application."

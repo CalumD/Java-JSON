@@ -4,38 +4,165 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!--  Top level metadata / coordinates  -->
     <groupId>com.clumd.projects</groupId>
     <artifactId>Java-JSON</artifactId>
-    <version>1.0</version>
+    <version>1.0.2</version>
+    <packaging>jar</packaging>
 
+    <!--  Basic application info  -->
+    <name>Java-JSON</name>
+    <description>A JSON &lt;-&gt; Java library with a focus on ease of JSON value access within Java.</description>
+    <url>https://github.com/CalumD/Java-JSON</url>
+
+    <!--  Distribution licences  -->
+    <licenses>
+        <license>
+            <distribution>repo</distribution>
+            <name>GNU General Public License v3.0</name>
+            <url>https://spdx.org/licenses/GPL-3.0-or-later.html</url>
+        </license>
+    </licenses>
+
+    <!--  Developer Details  -->
+    <developers>
+        <developer>
+            <name>Calum D</name>
+            <email>calum.maven@clumd.com</email>
+            <organization>com.github.CalumD</organization>
+            <organizationUrl>https://github.com/CalumD/</organizationUrl>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git://github.com/CalumD/Java-JSON.git</connection>
+        <developerConnection>scm:git:ssh://github.com:CalumD/Java-JSON.git</developerConnection>
+        <url>https://github.com/CalumD/Java-JSON</url>
+    </scm>
+
+    <!--  Useful properties for this POM  -->
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>13</maven.compiler.source>
+        <maven.compiler.target>13</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>5.6.2</junit.version>
     </properties>
 
+    <!--  Dependencies on other projects  -->
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
+            <version>5.6.2</version>
         </dependency>
     </dependencies>
 
+    <!--  Stages for Maven goals to call against  -->
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.0</version>
+                <version>2.22.2</version>
                 <configuration>
                     <includes>
                         <include>**/*.java</include>
                     </includes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/Main.java</exclude>
+                    </excludes>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+            <!--  The following are required for pushing the code to Maven Central.  -->
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>**/Main.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>**/Main.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <useAgent>true</useAgent>
+                    <executable>${gpg.executable}</executable>
+                    <passphrase>${gpg.passphrase}</passphrase>
+                    <gpgArguments>
+                        <gpgArgument>--pinentry-mode=loopback</gpgArgument>
+                    </gpgArguments>
+                    <keyname>${gpg.keyname}</keyname>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <!--  Where should the final, built artifact, be sent  -->
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 </project>
