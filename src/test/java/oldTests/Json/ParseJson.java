@@ -1,7 +1,7 @@
 package oldTests.Json;
 
-import api.JsonParser;
-import exceptions.json.JsonParseException;
+import com.clumd.projects.javajson.api.JsonParser;
+import com.clumd.projects.javajson.exceptions.json.JsonParseException;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

@@ -1,11 +1,11 @@
 package oldTests.Json;
 
-import api.Json;
-import api.JsonParser;
-import exceptions.json.JsonParseException;
-import exceptions.json.KeyDifferentTypeException;
-import exceptions.json.KeyInvalidException;
-import exceptions.json.KeyNotFoundException;
+import com.clumd.projects.javajson.api.Json;
+import com.clumd.projects.javajson.api.JsonParser;
+import com.clumd.projects.javajson.exceptions.json.JsonParseException;
+import com.clumd.projects.javajson.exceptions.json.KeyDifferentTypeException;
+import com.clumd.projects.javajson.exceptions.json.KeyInvalidException;
+import com.clumd.projects.javajson.exceptions.json.KeyNotFoundException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

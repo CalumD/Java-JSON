@@ -93,8 +93,8 @@ If you find a problem or think of an improvement, please feel free to raise an i
 
 ## Usage examples
 - A lot of the actual implementation details for this package should (hopefully) be very self-explanatory. Please take a
-good look at all of the interfaces 
-[in the api package](src/main/java/api).
+  good look at all of the interfaces
+  [in the api package](src/main/java/com/clumd/projects/javajson/api).
 
 - As mentioned in the [Features](#Features) section, **'Javascript style key-based access to data'** is considered very
 important in this project.
@@ -118,9 +118,9 @@ important in this project.
         ```java
         me.getBooleanAt("obj1.obj2[3]");
         ```
-        If you don't know / care the type of the value at that location, you can use `getAnyAt("")`.
-        For the listing of all the other methods available on a JSON Object, please see 
-        [the specific interface file here](src/main/java/api/Json.java)!
+      If you don't know / care the type of the value at that location, you can use `getAnyAt("")`. For the listing of
+      all the other methods available on a JSON Object, please see
+      [the specific interface file here](src/main/java/com/clumd/projects/javajson/api/Json.java)!
 
 - Specific Exception Handling
     - One common use case I could see for a user of this package is to react differently based on the type of exception.
