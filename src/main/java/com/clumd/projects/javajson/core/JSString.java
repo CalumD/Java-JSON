@@ -1,6 +1,6 @@
-package core;
+package com.clumd.projects.javajson.core;
 
-import exceptions.json.JsonParseException;
+import com.clumd.projects.javajson.exceptions.json.JsonParseException;
 
 final class JSString extends Json {
 

@@ -1,7 +1,7 @@
-package core;
+package com.clumd.projects.javajson.core;
 
-import exceptions.json.JsonParseException;
-import exceptions.json.KeyDifferentTypeException;
+import com.clumd.projects.javajson.exceptions.json.JsonParseException;
+import com.clumd.projects.javajson.exceptions.json.KeyDifferentTypeException;
 
 final class JSNumber extends Json {
 

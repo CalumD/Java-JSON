@@ -1,8 +1,8 @@
-package core;
+package com.clumd.projects.javajson.core;
 
-import exceptions.json.KeyDifferentTypeException;
-import exceptions.json.KeyInvalidException;
-import exceptions.json.KeyNotFoundException;
+import com.clumd.projects.javajson.exceptions.json.KeyDifferentTypeException;
+import com.clumd.projects.javajson.exceptions.json.KeyInvalidException;
+import com.clumd.projects.javajson.exceptions.json.KeyNotFoundException;
 
 import java.util.ArrayList;
 import java.util.Arrays;

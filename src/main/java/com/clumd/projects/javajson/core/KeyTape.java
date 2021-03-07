@@ -1,7 +1,7 @@
-package core;
+package com.clumd.projects.javajson.core;
 
-import exceptions.json.JsonKeyException;
-import exceptions.json.KeyInvalidException;
+import com.clumd.projects.javajson.exceptions.json.JsonKeyException;
+import com.clumd.projects.javajson.exceptions.json.KeyInvalidException;
 
 import java.util.ArrayList;
 import java.util.List;

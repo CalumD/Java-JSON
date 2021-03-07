@@ -1,9 +1,9 @@
-package core;
+package com.clumd.projects.javajson.core;
 
-import api.Json;
-import exceptions.json.JsonParseException;
-import exceptions.json.KeyDifferentTypeException;
-import exceptions.json.KeyNotFoundException;
+import com.clumd.projects.javajson.api.Json;
+import com.clumd.projects.javajson.exceptions.json.JsonParseException;
+import com.clumd.projects.javajson.exceptions.json.KeyDifferentTypeException;
+import com.clumd.projects.javajson.exceptions.json.KeyNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

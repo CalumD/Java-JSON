@@ -1,6 +1,6 @@
-package core;
+package com.clumd.projects.javajson.core;
 
-import exceptions.JsonException;
+import com.clumd.projects.javajson.exceptions.JsonException;
 
 abstract class Tape<T, E extends JsonException> {
 

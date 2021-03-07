@@ -1,9 +1,9 @@
-package core;
+package com.clumd.projects.javajson.core;
 
-import api.Json;
-import api.JsonBuilder;
-import api.JsonParser;
-import exceptions.BuildException;
+import com.clumd.projects.javajson.api.Json;
+import com.clumd.projects.javajson.api.JsonBuilder;
+import com.clumd.projects.javajson.api.JsonParser;
+import com.clumd.projects.javajson.exceptions.BuildException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

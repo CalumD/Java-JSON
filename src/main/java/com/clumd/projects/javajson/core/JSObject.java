@@ -1,14 +1,14 @@
-package core;
+package com.clumd.projects.javajson.core;
 
-import api.Json;
-import exceptions.json.JsonParseException;
-import exceptions.json.KeyNotFoundException;
+import com.clumd.projects.javajson.api.Json;
+import com.clumd.projects.javajson.exceptions.json.JsonParseException;
+import com.clumd.projects.javajson.exceptions.json.KeyNotFoundException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-final class JSObject extends core.Json {
+final class JSObject extends com.clumd.projects.javajson.core.Json {
 
     private final HashMap<String, Json> json;
 
@@ -114,7 +114,7 @@ final class JSObject extends core.Json {
         if (!nextKey.startsWith("{") && !nextKey.startsWith("<")) {
             throw keySequence.createKeyDifferentTypeException();
         }
-        core.Json childElement = (core.Json) json.get(nextKey.substring(1));
+        com.clumd.projects.javajson.core.Json childElement = (com.clumd.projects.javajson.core.Json) json.get(nextKey.substring(1));
         if (childElement == null) {
             throw keySequence.createKeyNotFoundException();
         }
@@ -189,7 +189,7 @@ final class JSObject extends core.Json {
                         .append('"').append(
                         key.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\""))
                         .append("\": ");
-                ((core.Json) value).asPrettyString(indent, tabSize, result, depth - 1);
+                ((com.clumd.projects.javajson.core.Json) value).asPrettyString(indent, tabSize, result, depth - 1);
                 result.append(",\n").append(indent);
             });
             result.delete(result.length() - 2 - indent.length(), result.length() - 1);

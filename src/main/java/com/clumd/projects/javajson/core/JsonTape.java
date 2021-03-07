@@ -1,7 +1,6 @@
-package core;
+package com.clumd.projects.javajson.core;
 
-import api.Json;
-import exceptions.json.JsonParseException;
+import com.clumd.projects.javajson.exceptions.json.JsonParseException;
 
 public final class JsonTape extends Tape<Json, JsonParseException> {
 
@@ -17,7 +16,7 @@ public final class JsonTape extends Tape<Json, JsonParseException> {
         consumeWhiteSpace();
 
         // Figure out the next JSON type
-        core.Json nextElement = null;
+        Json nextElement = null;
         switch (checkCurrentChar()) {
             case 't':
             case 'T':

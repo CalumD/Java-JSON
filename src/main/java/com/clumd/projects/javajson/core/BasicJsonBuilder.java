@@ -1,18 +1,19 @@
-package core;
+package com.clumd.projects.javajson.core;
 
-import api.Json;
-import api.JsonGenerator;
-import api.JsonParser;
-import exceptions.BuildException;
-import exceptions.json.KeyDifferentTypeException;
-import exceptions.json.KeyInvalidException;
-import exceptions.json.KeyNotFoundException;
+import com.clumd.projects.javajson.api.Json;
+import com.clumd.projects.javajson.api.JsonBuilder;
+import com.clumd.projects.javajson.api.JsonGenerator;
+import com.clumd.projects.javajson.api.JsonParser;
+import com.clumd.projects.javajson.exceptions.BuildException;
+import com.clumd.projects.javajson.exceptions.json.KeyDifferentTypeException;
+import com.clumd.projects.javajson.exceptions.json.KeyInvalidException;
+import com.clumd.projects.javajson.exceptions.json.KeyNotFoundException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public final class BasicJsonBuilder implements api.JsonBuilder, JsonGenerator {
+public final class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
 
     private class NewValueIdentifier {
         final JsonKey keyChain;
@@ -66,7 +67,7 @@ public final class BasicJsonBuilder implements api.JsonBuilder, JsonGenerator {
     }
 
     @Override
-    public api.JsonBuilder addBoolean(String path, boolean value) throws BuildException {
+    public JsonBuilder addBoolean(String path, boolean value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
         BasicJsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
@@ -76,7 +77,7 @@ public final class BasicJsonBuilder implements api.JsonBuilder, JsonGenerator {
     }
 
     @Override
-    public api.JsonBuilder addLong(String path, long value) throws BuildException {
+    public JsonBuilder addLong(String path, long value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
         BasicJsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
@@ -86,7 +87,7 @@ public final class BasicJsonBuilder implements api.JsonBuilder, JsonGenerator {
     }
 
     @Override
-    public api.JsonBuilder addDouble(String path, double value) throws BuildException {
+    public JsonBuilder addDouble(String path, double value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
         BasicJsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
@@ -96,7 +97,7 @@ public final class BasicJsonBuilder implements api.JsonBuilder, JsonGenerator {
     }
 
     @Override
-    public api.JsonBuilder addString(String path, String value) throws BuildException {
+    public JsonBuilder addString(String path, String value) throws BuildException {
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
         BasicJsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
@@ -106,7 +107,7 @@ public final class BasicJsonBuilder implements api.JsonBuilder, JsonGenerator {
     }
 
     @Override
-    public api.JsonBuilder addBuilderBlock(String path, api.JsonBuilder value) throws BuildException {
+    public JsonBuilder addBuilderBlock(String path, JsonBuilder value) throws BuildException {
         if (!(value instanceof BasicJsonBuilder)) {
             throw new BuildException("This implementation of an IJSONBuilder only accepts JSONBuilder as a builder block value.");
         }
@@ -119,7 +120,7 @@ public final class BasicJsonBuilder implements api.JsonBuilder, JsonGenerator {
     }
 
     @Override
-    public api.JsonBuilder addBuilderBlock(String path, Json value) throws BuildException {
+    public JsonBuilder addBuilderBlock(String path, Json value) throws BuildException {
         return addBuilderBlock(path, convertFromJSON(value));
     }
 
@@ -221,7 +222,7 @@ public final class BasicJsonBuilder implements api.JsonBuilder, JsonGenerator {
     }
 
     @Override
-    public api.JsonBuilder convertFromJSON(Json json) {
+    public JsonBuilder convertFromJSON(Json json) {
         switch (json.getDataType()) {
             case BOOLEAN:
                 return new BasicJsonBuilder().addBoolean("value", json.getBoolean());

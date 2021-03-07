@@ -1,4 +1,4 @@
-package core;
+package com.clumd.projects.javajson.core;
 
 import org.junit.jupiter.api.Test;
 

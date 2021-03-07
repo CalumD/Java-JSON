@@ -1,6 +1,6 @@
-package core;
+package com.clumd.projects.javajson.core;
 
-import exceptions.json.KeyInvalidException;
+import com.clumd.projects.javajson.exceptions.json.KeyInvalidException;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

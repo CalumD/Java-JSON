@@ -1,15 +1,15 @@
-package core;
+package com.clumd.projects.javajson.core;
 
-import exceptions.JsonException;
-import exceptions.json.JsonParseException;
-import exceptions.json.KeyDifferentTypeException;
-import exceptions.json.KeyNotFoundException;
+import com.clumd.projects.javajson.exceptions.JsonException;
+import com.clumd.projects.javajson.exceptions.json.JsonParseException;
+import com.clumd.projects.javajson.exceptions.json.KeyDifferentTypeException;
+import com.clumd.projects.javajson.exceptions.json.KeyNotFoundException;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-abstract class Json implements api.Json {
+abstract class Json implements com.clumd.projects.javajson.api.Json {
 
     public static final int DEFAULT_PRETTY_JSON_INDENT_WIDTH = 2;
 
@@ -23,17 +23,17 @@ abstract class Json implements api.Json {
     }
 
     @Override
-    public api.Json createFromString(String jsonFragment) throws JsonParseException {
+    public com.clumd.projects.javajson.api.Json createFromString(String jsonFragment) throws JsonParseException {
         return parseSelf(jsonFragment);
     }
 
     @Override
-    public api.Json createFromMultilineString(List<String> jsonFragment) throws JsonParseException {
+    public com.clumd.projects.javajson.api.Json createFromMultilineString(List<String> jsonFragment) throws JsonParseException {
         return parseSelf(jsonFragment);
     }
 
     @Override
-    public api.Json convertToJSON() throws JsonParseException {
+    public com.clumd.projects.javajson.api.Json convertToJSON() throws JsonParseException {
         return this;
     }
 
@@ -42,11 +42,11 @@ abstract class Json implements api.Json {
         return "".equals(key);
     }
 
-    private api.Json parseSelf(String jsonFragment) {
+    private com.clumd.projects.javajson.api.Json parseSelf(String jsonFragment) {
         return new JsonTape(jsonFragment).parseNextElement();
     }
 
-    private api.Json parseSelf(List<String> jsonFragment) {
+    private com.clumd.projects.javajson.api.Json parseSelf(List<String> jsonFragment) {
         StringBuilder concater = new StringBuilder();
         jsonFragment.forEach(line -> {
             concater.append(line);
@@ -83,14 +83,14 @@ abstract class Json implements api.Json {
     }
 
     @Override
-    public List<api.Json> getValues() {
-        List<api.Json> result = new ArrayList<>(1);
+    public List<com.clumd.projects.javajson.api.Json> getValues() {
+        List<com.clumd.projects.javajson.api.Json> result = new ArrayList<>(1);
         result.add(this);
         return result;
     }
 
     @Override
-    public List<api.Json> getArray() throws KeyDifferentTypeException {
+    public List<com.clumd.projects.javajson.api.Json> getArray() throws KeyDifferentTypeException {
         return getArrayAt("");
     }
 
@@ -115,12 +115,12 @@ abstract class Json implements api.Json {
     }
 
     @Override
-    public api.Json getJSONObject() throws KeyDifferentTypeException {
+    public com.clumd.projects.javajson.api.Json getJSONObject() throws KeyDifferentTypeException {
         return getJSONObjectAt("");
     }
 
     @Override
-    public api.Json getAny() {
+    public com.clumd.projects.javajson.api.Json getAny() {
         return getAnyAt("");
     }
 
@@ -142,17 +142,17 @@ abstract class Json implements api.Json {
     }
 
     @Override
-    public List<api.Json> getValuesOf(String key) throws JsonException {
+    public List<com.clumd.projects.javajson.api.Json> getValuesOf(String key) throws JsonException {
         return getMatching(key).getValues();
     }
 
     @Override
-    public api.Json getJSONObjectAt(String key) throws JsonException {
+    public com.clumd.projects.javajson.api.Json getJSONObjectAt(String key) throws JsonException {
         return ((JSObject) getMatching(key, JSType.OBJECT)).getValue();
     }
 
     @Override
-    public List<api.Json> getArrayAt(String key) throws JsonException {
+    public List<com.clumd.projects.javajson.api.Json> getArrayAt(String key) throws JsonException {
         return ((JSArray) getMatching(key, JSType.ARRAY)).getValue();
     }
 
@@ -177,16 +177,16 @@ abstract class Json implements api.Json {
     }
 
     @Override
-    public api.Json getAnyAt(String key) throws JsonException {
+    public com.clumd.projects.javajson.api.Json getAnyAt(String key) throws JsonException {
         return getMatching(key);
     }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
-    private api.Json getMatching(String key, JSType requiredType) {
+    private com.clumd.projects.javajson.api.Json getMatching(String key, JSType requiredType) {
 
         // Acquire accurate typing
-        api.Json ret = getMatching(key);
+        com.clumd.projects.javajson.api.Json ret = getMatching(key);
         JSType actualTyping = ret.getDataType();
 
         // check cast to asked typing
@@ -200,7 +200,7 @@ abstract class Json implements api.Json {
         return ret;
     }
 
-    private api.Json getMatching(String key) {
+    private com.clumd.projects.javajson.api.Json getMatching(String key) {
 
         // Sanity Check
         if (key == null) {
@@ -216,7 +216,7 @@ abstract class Json implements api.Json {
         return getInternal(new JsonKey(key, false));
     }
 
-    protected api.Json getInternal(JsonKey keySequence) throws KeyNotFoundException {
+    protected com.clumd.projects.javajson.api.Json getInternal(JsonKey keySequence) throws KeyNotFoundException {
         if (keySequence.getNextKey().equals("")) {
             return this;
         }
