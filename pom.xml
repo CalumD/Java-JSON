@@ -6,7 +6,7 @@
 
     <!--  Top level metadata / coordinates  -->
     <groupId>com.clumd.projects</groupId>
-    <artifactId>Java-JSON</artifactId>
+    <artifactId>java-json</artifactId>
     <version>1.0.3</version>
     <packaging>jar</packaging>
 
