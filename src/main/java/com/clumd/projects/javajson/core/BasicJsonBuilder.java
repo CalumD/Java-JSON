@@ -109,7 +109,7 @@ public final class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
     @Override
     public JsonBuilder addBuilderBlock(String path, JsonBuilder value) throws BuildException {
         if (!(value instanceof BasicJsonBuilder)) {
-            throw new BuildException("This implementation of an IJSONBuilder only accepts JSONBuilder as a builder block value.");
+            throw new BuildException("This implementation of a JSONBuilder only accepts JSONBuilder as a builder block value.");
         }
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
         BasicJsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
@@ -127,7 +127,7 @@ public final class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
     private String identifyFinalKey(JsonKey keyChain) {
         List<String> chainAsListOfKeys = keyChain.getAllKeys();
         if (chainAsListOfKeys.size() == 1) {
-            KeyInvalidException invalidException = new KeyInvalidException("The minimum wrapper for this IJsonBuilder is a JSON object, " +
+            KeyInvalidException invalidException = new KeyInvalidException("The minimum wrapper for this JsonBuilder is a JSON object, " +
                     "you must provide at least one valid key for your value.");
             throw new BuildException(invalidException.getMessage(), invalidException);
         }

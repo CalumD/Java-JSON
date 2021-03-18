@@ -1071,14 +1071,14 @@ public final class JsonSchemaEnforcer implements JsonSchemaEnforceable {
     }
 
     private <E> E tryForSchema(RefResolvedSchemaPart partStructure, Lambda<E> worker) {
-        return unwrapIJsonType(partStructure, worker, SourceOfProblem.SCHEMA);
+        return unwrapJsonType(partStructure, worker, SourceOfProblem.SCHEMA);
     }
 
     private <E> E tryForObject(RefResolvedSchemaPart partStructure, Lambda<E> worker) {
-        return unwrapIJsonType(partStructure, worker, SourceOfProblem.OBJECT_TO_VALIDATE);
+        return unwrapJsonType(partStructure, worker, SourceOfProblem.OBJECT_TO_VALIDATE);
     }
 
-    private <E> E unwrapIJsonType(RefResolvedSchemaPart partStructure, Lambda<E> worker, SourceOfProblem sourceOfProblem) {
+    private <E> E unwrapJsonType(RefResolvedSchemaPart partStructure, Lambda<E> worker, SourceOfProblem sourceOfProblem) {
         final E returnValue;
         try {
             returnValue = worker.doWork();

@@ -223,7 +223,7 @@ public class BuildJson {
     }
 
 
-    //GETS This portion checks that the Core.IJsonBuilder creates a json string with the values in the right place//////////
+    //GETS This portion checks that the Core.JsonBuilder creates a json string with the values in the right place//////////
     @Test
     public void get_1() throws KeyDifferentTypeException, KeyNotFoundException {
         resetGets();

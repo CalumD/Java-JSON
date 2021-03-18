@@ -69,7 +69,7 @@ class BasicJsonBuilderTest {
             new BasicJsonBuilder().addBoolean("", false);
             fail("The previous method call should have thrown an exception.");
         } catch (BuildException exception) {
-            assertEquals("The minimum wrapper for this IJsonBuilder is a JSON object," +
+            assertEquals("The minimum wrapper for this JsonBuilder is a JSON object," +
                     " you must provide at least one valid key for your value.", exception.getMessage());
         }
     }
@@ -91,7 +91,7 @@ class BasicJsonBuilderTest {
             fail("The previous method call should have thrown an exception.");
         } catch (BuildException exception) {
             assertEquals(
-                    "This implementation of an IJSONBuilder only accepts JSONBuilder as a builder block value.",
+                    "This implementation of a JSONBuilder only accepts JSONBuilder as a builder block value.",
                     exception.getMessage()
             );
         }
