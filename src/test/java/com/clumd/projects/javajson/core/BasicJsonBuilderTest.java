@@ -532,4 +532,34 @@ class BasicJsonBuilderTest {
     public void addAnonymousKeyNameButProperlyEscaped() {
         assertEquals("{\"[]\":1}", BasicJsonBuilder.getBuilder().addLong("['[]']", 1L).toString());
     }
+
+    @Test
+    public void addJsonNullBlock() {
+        try {
+            BasicJsonBuilder.getBuilder().addBuilderBlock("nope", (Json) null);
+            fail("The previous method should have thrown an exception.");
+        } catch (BuildException e) {
+            assertEquals("This implementation of a JSONBuilder does not accept null values for Json builder blocks.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void addJsonBuilderNullBlock() {
+        try {
+            BasicJsonBuilder.getBuilder().addBuilderBlock("nope", (JsonBuilder) null);
+            fail("The previous method should have thrown an exception.");
+        } catch (BuildException e) {
+            assertEquals("This implementation of a JSONBuilder only accepts JSONBuilder as a builder block value.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void addStringNull() {
+        try {
+            BasicJsonBuilder.getBuilder().addString("nope", null);
+            fail("The previous method should have thrown an exception.");
+        } catch (BuildException e) {
+            assertEquals("This implementation of a JSONBuilder does not accept null values for strings.", e.getMessage());
+        }
+    }
 }

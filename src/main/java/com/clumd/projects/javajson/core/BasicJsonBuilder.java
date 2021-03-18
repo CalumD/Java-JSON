@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public final class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
+public class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
 
     private class NewValueIdentifier {
         final JsonKey keyChain;
@@ -98,6 +98,9 @@ public final class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
 
     @Override
     public JsonBuilder addString(String path, String value) throws BuildException {
+        if (value == null) {
+            throw new BuildException("This implementation of a JSONBuilder does not accept null values for strings.");
+        }
         NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, value);
         BasicJsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
         if (finalObjectInKeyChain != null) {
@@ -121,6 +124,9 @@ public final class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
 
     @Override
     public JsonBuilder addBuilderBlock(String path, Json value) throws BuildException {
+        if (value == null) {
+            throw new BuildException("This implementation of a JSONBuilder does not accept null values for Json builder blocks.");
+        }
         return addBuilderBlock(path, convertFromJSON(value));
     }
 
