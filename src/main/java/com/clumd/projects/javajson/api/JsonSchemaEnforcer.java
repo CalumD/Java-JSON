@@ -814,7 +814,7 @@ public final class JsonSchemaEnforcer implements JsonSchemaEnforceable {
         String objectToConstrain = tryForObject(partStructure, currentPart.OBJECT_TO_VALIDATE::getString);
         if (!verifiedPattern.matcher(objectToConstrain).find()) {
             throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
-                    "Value did not match the provided pattern.");
+                    "Value did not match the provided pattern: " + verifiedPattern);
         }
     }
 
@@ -823,7 +823,7 @@ public final class JsonSchemaEnforcer implements JsonSchemaEnforceable {
         String objectToConstrain = tryForObject(partStructure, currentPart.OBJECT_TO_VALIDATE::getString);
         if (objectToConstrain.length() < minLength) {
             throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
-                    "String length was shorter than the minimum bound.");
+                    "String length was shorter than the minimum bound: " + minLength);
         }
     }
 
@@ -832,7 +832,7 @@ public final class JsonSchemaEnforcer implements JsonSchemaEnforceable {
         String objectToConstrain = tryForObject(partStructure, currentPart.OBJECT_TO_VALIDATE::getString);
         if (objectToConstrain.length() > maxLength) {
             throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
-                    "String length was longer than the maximum bound.");
+                    "String length was longer than the maximum bound: " + maxLength);
         }
     }
 

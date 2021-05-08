@@ -67,7 +67,7 @@ public class StringTest {
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value.\n" +
                     "Schema constraint violated: <base element>.minLength\n" +
-                    "String length was shorter than the minimum bound.", e.getMessage());
+                    "String length was shorter than the minimum bound: 5", e.getMessage());
         }
     }
 
@@ -143,7 +143,7 @@ public class StringTest {
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value.\n" +
                     "Schema constraint violated: <base element>.maxLength\n" +
-                    "String length was longer than the maximum bound.", e.getMessage());
+                    "String length was longer than the maximum bound: 4", e.getMessage());
         }
     }
 
@@ -219,7 +219,52 @@ public class StringTest {
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value.\n" +
                     "Schema constraint violated: <base element>.pattern\n" +
-                    "Value did not match the provided pattern.", e.getMessage());
+                    "Value did not match the provided pattern: abc+", e.getMessage());
+        }
+    }
+
+    @Test
+    public void valueDoesntMatchPattern_2() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("'.'"),
+                    JsonParser.parse("{'pattern': '^/(.+)/$'}")
+            );
+            fail("The previous method should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.pattern\n" +
+                    "Value did not match the provided pattern: ^/(.+)/$", e.getMessage());
+        }
+    }
+
+    @Test
+    public void valueDoesntMatchPattern_3() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("'some text/'"),
+                    JsonParser.parse("{'pattern': '^/(.+)/$'}")
+            );
+            fail("The previous method should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.pattern\n" +
+                    "Value did not match the provided pattern: ^/(.+)/$", e.getMessage());
+        }
+    }
+
+    @Test
+    public void valueDoesntMatchPattern_4() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("'/some text'"),
+                    JsonParser.parse("{'pattern': '^/(.+)/$'}")
+            );
+            fail("The previous method should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.pattern\n" +
+                    "Value did not match the provided pattern: ^/(.+)/$", e.getMessage());
         }
     }
 
@@ -239,6 +284,16 @@ public class StringTest {
                 JsonSchemaEnforcer.validate(
                         JsonParser.parse("'abccccc'"),
                         JsonParser.parse("{'pattern': 'abc+'}")
+                )
+        );
+    }
+
+    @Test
+    public void valueDoesMatchPattern_v3() {
+        assertTrue(
+                JsonSchemaEnforcer.validate(
+                        JsonParser.parse("'/some/full/path/'"),
+                        JsonParser.parse("{'pattern': '^/(.+)/$'}")
                 )
         );
     }
