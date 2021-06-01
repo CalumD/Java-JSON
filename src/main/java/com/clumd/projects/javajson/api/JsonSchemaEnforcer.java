@@ -1124,7 +1124,7 @@ public final class JsonSchemaEnforcer implements JsonSchemaEnforceable {
                 boolean objectIsBigger = currentPart.OBJECT_TO_VALIDATE.getArray().size() > partStructure.schema.getArray().size();
                 if (objectIsBigger) {
                     keysForConstraint.addAll(currentPart.OBJECT_TO_VALIDATE.getKeys());
-                    keysForConstraint.removeAll(partStructure.schema.getKeys());
+                    partStructure.schema.getKeys().forEach(keysForConstraint::remove);
                 }
                 break;
         }
