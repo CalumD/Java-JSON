@@ -188,8 +188,8 @@ public class StringTest {
             fail("The previous method should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for schema property: <base element>.pattern\n" +
-                    "Pattern provided was not a valid regex pattern.\n" +
-                    "(Unclosed character class near index 4)", e.getMessage());
+                    "Pattern provided was not a valid regex pattern.\n\n" +
+                    "Caused By:\nUnclosed character class near index 4\n[0-9+\n    ^", e.getMessage());
         }
     }
 

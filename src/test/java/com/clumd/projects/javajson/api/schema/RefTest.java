@@ -36,8 +36,8 @@ public class RefTest {
             );
             fail("The previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
-            assertEquals("Missing property in schema at: <base element>.$ref\n" +
-                    "(thisDoesntExist not found on element: <base element>)", e.getMessage());
+            assertEquals("Missing property in schema at: <base element>.$ref\n\n" +
+                    "Caused By:\nthisDoesntExist not found on element: <base element>", e.getMessage());
         }
     }
 
@@ -165,8 +165,8 @@ public class RefTest {
             );
             fail("The previous method call should have thrown an exception");
         } catch (InvalidSchemaException e) {
-            assertEquals("Missing property in schema at: <base element>.$ref\n" +
-                    "(one not found on element: <base element>)", e.getMessage());
+            assertEquals("Missing property in schema at: <base element>.$ref\n\n" +
+                    "Caused By:\none not found on element: <base element>", e.getMessage());
         }
     }
 

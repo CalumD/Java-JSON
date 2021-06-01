@@ -477,8 +477,8 @@ public class ObjectTest {
             fail("Previous method call should have thrown an exception.");
         } catch (InvalidSchemaException e) {
             assertEquals("Unexpected value for schema property: <base element>.patternProperties\n" +
-                    "Key in patternProperties (^[) was not a valid regex.\n" +
-                    "(Unclosed character class near index 1)", e.getMessage());
+                    "Key in patternProperties (^[) was not a valid regex.\n\n" +
+                    "Caused By:\nUnclosed character class near index 1\n^[\n ^", e.getMessage());
         }
     }
 

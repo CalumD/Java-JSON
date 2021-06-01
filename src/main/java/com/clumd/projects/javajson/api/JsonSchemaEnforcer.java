@@ -689,7 +689,7 @@ public final class JsonSchemaEnforcer implements JsonSchemaEnforceable {
                     subEnforce(currentPart, element, partStructure.schema.getJSONObject(), partStructure.canonicalPath + ".items");
                 } catch (SchemaException e) {
                     throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
-                            "An element in the value array did not match against the constraint.");
+                            "An element in the value array did not match against the constraint.", e);
                 }
             }
         } else {
@@ -1237,7 +1237,12 @@ public final class JsonSchemaEnforcer implements JsonSchemaEnforceable {
                     return "\n" + causeMessage[1];
                 }
             }
-            return "\n(" + cause.getMessage().split("\\r?\\n")[0] + ")";
+            return "\n\nCaused By:\n"
+                    + cause
+                    .getMessage()
+                    .replaceAll("\\r?", "")
+                    .replaceFirst("Unexpected value\\.(\\n?)", "")
+                    .stripTrailing();
         }
         return "";
     }

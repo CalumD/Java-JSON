@@ -289,9 +289,10 @@ public class ArrayTest {
             );
             fail("Previous method call should have thrown an exception.");
         } catch (SchemaViolationException e) {
-            assertEquals("Unexpected value.\n" +
-                    "Schema constraint violated: <base element>.items\n" +
-                    "An element in the value array did not match against the constraint.", e.getMessage());
+            assertEquals("Unexpected value.\nSchema constraint violated: <base element>.items\n" +
+                    "An element in the value array did not match against the constraint.\n\n" +
+                    "Caused By:\nSchema constraint violated: items.const\n" +
+                    "Value MUST match the schema's constant.", e.getMessage());
         }
     }
 
