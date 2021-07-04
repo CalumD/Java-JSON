@@ -562,4 +562,12 @@ class BasicJsonBuilderTest {
             assertEquals("This implementation of a JSONBuilder does not accept null values for strings.", e.getMessage());
         }
     }
+
+    @Test
+    public void getNewBasicBuilder() {
+        BasicJsonBuilder basicJsonBuilder = new BasicJsonBuilder().builder();
+        basicJsonBuilder.addLong("long", 1);
+
+        assertEquals("{\"long\":1}", basicJsonBuilder.toString());
+    }
 }
