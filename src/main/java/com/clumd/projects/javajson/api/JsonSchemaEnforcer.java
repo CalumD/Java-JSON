@@ -1210,9 +1210,7 @@ public final class JsonSchemaEnforcer implements JsonSchemaEnforceable {
     private SchemaException enhanceErrorMessageReasoning(SourceOfProblem source, String message, String reason, Throwable cause) {
         message += (reason.equals("") ? "" : "\n" + reason);
         message += getErrorCauseMessage(cause);
-        return cause == null
-                ? doThrow(source, message)
-                : doThrow(source, message, cause);
+        return doThrow(source, message);
     }
 
     private SchemaException doThrow(SourceOfProblem source, String message) {
@@ -1220,13 +1218,6 @@ public final class JsonSchemaEnforcer implements JsonSchemaEnforceable {
             return new InvalidSchemaException(message);
         }
         return new SchemaViolationException(message);
-    }
-
-    private SchemaException doThrow(SourceOfProblem source, String message, Throwable cause) {
-        if (source == SourceOfProblem.SCHEMA) {
-            return new InvalidSchemaException(message, cause);
-        }
-        return new SchemaViolationException(message, cause);
     }
 
     private String getErrorCauseMessage(Throwable cause) {
