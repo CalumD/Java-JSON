@@ -121,6 +121,44 @@ public class RefTest {
     }
 
     @Test
+    public void schemaShouldBeAbleToReReferenceNonCyclicallyOnANewBranchOfSchemaContent() {
+        assertTrue(
+                JsonSchemaEnforcer.validate(
+                        JsonParser.parse("{\n" +
+                                "  'values': [\n" +
+                                "    {\n" +
+                                "      'name': 1\n" +
+                                "    },\n" +
+                                "    {\n" +
+                                "      'name': 2\n" +
+                                "    },\n" +
+                                "    {\n" +
+                                "      'name': 2\n" +
+                                "    }\n" +
+                                "  ]\n" +
+                                "}"),
+                        JsonParser.parse("{\n" +
+                                "  'properties': {\n" +
+                                "    'values': {\n" +
+                                "      'type': 'array',\n" +
+                                "      'items': {\n" +
+                                "        '$ref': '#defs/named item'\n" +
+                                "      }\n" +
+                                "    }\n" +
+                                "  },\n" +
+                                "  'defs': {\n" +
+                                "    'named item': {\n" +
+                                "      'required': [\n" +
+                                "        \"name\"\n" +
+                                "      ]\n" +
+                                "    }\n" +
+                                "  }\n" +
+                                "}")
+                )
+        );
+    }
+
+    @Test
     public void refDoesNotApplyAlreadySeenConstraints() {
         assertTrue(JsonSchemaEnforcer.validate(
                 JsonParser.parse("1"),

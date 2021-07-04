@@ -114,7 +114,7 @@ public final class JsonSchemaEnforcer implements JsonSchemaEnforceable {
         private JsonSchemaEnforcerPart(Json objectToValidate, Json fullSchema, Json currentSchemaFragment, String schemaKeySoFar, Set<String> schemaReferencesSeen) {
             this.OBJECT_TO_VALIDATE = objectToValidate;
             this.SCHEMA_REFERENCE = fullSchema;
-            this.SCHEMA_REFERENCES_SEEN = schemaReferencesSeen;
+            this.SCHEMA_REFERENCES_SEEN = new HashSet<>(schemaReferencesSeen);
             pullUp$RefsToTopLevel(new RefResolvedSchemaPart(schemaKeySoFar, currentSchemaFragment));
         }
 
