@@ -642,7 +642,7 @@ public final class JsonSchemaEnforcer implements JsonSchemaEnforceable {
                             );
                         } catch (SchemaException e) {
                             throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
-                                    "Additional property (" + key + ") did not validate against schema.");
+                                    "Additional property (" + key + ") did not validate against schema.", e);
                         }
                     }
                 }
@@ -706,7 +706,7 @@ public final class JsonSchemaEnforcer implements JsonSchemaEnforceable {
                             partStructure.schema.getJSONObjectAt(key), partStructure.canonicalPath + ".items" + key);
                 } catch (SchemaException e) {
                     throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName + key,
-                            "Element in value array did not match against matching index in sub-schema.");
+                            "Element in value array did not match against matching index in sub-schema.", e);
                 }
             }
         }
@@ -778,7 +778,7 @@ public final class JsonSchemaEnforcer implements JsonSchemaEnforceable {
                         partStructure.schema, partStructure.canonicalPath + ".additionalItems");
             } catch (SchemaException e) {
                 throw valueUnexpected(SourceOfProblem.OBJECT_TO_VALIDATE, partStructure.canonicalPath, partStructure.propertyName,
-                        "Element " + key + " in value array did not satisfy.");
+                        "Element " + key + " in value array did not satisfy.", e);
             }
         }
     }

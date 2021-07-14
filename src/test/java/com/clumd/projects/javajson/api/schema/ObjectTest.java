@@ -806,7 +806,37 @@ public class ObjectTest {
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value.\n" +
                     "Schema constraint violated: <base element>.additionalProperties\n" +
-                    "Additional property (d) did not validate against schema.", e.getMessage());
+                    "Additional property (d) did not validate against schema.\n\n" +
+                    "Caused By:\n" +
+                    "Schema constraint violated: additionalProperties.const\n" +
+                    "Value MUST match the schema's constant.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void additionalPropertiesAllChildrenMustBeObjectsPass() {
+        assertTrue(JsonSchemaEnforcer.validate(
+                JsonParser.parse("{'a':{},'b':{},'c':{}}"),
+                JsonParser.parse("{'additionalProperties': {'type': 'object'}}")
+        ));
+    }
+
+    @Test
+    public void additionalPropertiesAllChildrenMustBeObjectsFails() {
+        try {
+            JsonSchemaEnforcer.validate(
+                    JsonParser.parse("{'a':{},'b':'abc','c':{}}"),
+                    JsonParser.parse("{'additionalProperties': {'type': 'object'}}")
+            );
+            fail("Previous method call should have thrown an exception.");
+        } catch (SchemaViolationException e) {
+            assertEquals("Unexpected value.\n" +
+                    "Schema constraint violated: <base element>.additionalProperties\n" +
+                    "Additional property (b) did not validate against schema.\n\n" +
+                    "Caused By:\n" +
+                    "Mismatched data type.\n" +
+                    "Schema constraint violated: additionalProperties.type\n" +
+                    "Expected one of [OBJECT], got STRING.", e.getMessage());
         }
     }
 

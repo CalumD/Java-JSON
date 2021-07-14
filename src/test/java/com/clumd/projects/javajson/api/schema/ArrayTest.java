@@ -329,7 +329,10 @@ public class ArrayTest {
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value.\n" +
                     "Schema constraint violated: <base element>.items[2]\n" +
-                    "Element in value array did not match against matching index in sub-schema.", e.getMessage());
+                    "Element in value array did not match against matching index in sub-schema.\n\n" +
+                    "Caused By:\n" +
+                    "Schema constraint violated: items[2].const\n" +
+                    "Value MUST match the schema's constant.", e.getMessage());
         }
     }
 
@@ -405,7 +408,10 @@ public class ArrayTest {
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value.\n" +
                     "Schema constraint violated: <base element>.additionalItems\n" +
-                    "Element [0] in value array did not satisfy.", e.getMessage());
+                    "Element [0] in value array did not satisfy.\n\n" +
+                    "Caused By:\n" +
+                    "Schema constraint violated: additionalItems.const\n" +
+                    "Value MUST match the schema's constant.", e.getMessage());
         }
     }
 
@@ -436,7 +442,10 @@ public class ArrayTest {
         } catch (SchemaViolationException e) {
             assertEquals("Unexpected value.\n" +
                     "Schema constraint violated: <base element>.additionalItems\n" +
-                    "Element [2] in value array did not satisfy.", e.getMessage());
+                    "Element [2] in value array did not satisfy.\n\n" +
+                    "Caused By:\n" +
+                    "Schema constraint violated: additionalItems.const\n" +
+                    "Value MUST match the schema's constant.", e.getMessage());
         }
     }
 
