@@ -5,6 +5,7 @@
 [![Junit](https://img.shields.io/badge/JUnit-v5-green)](https://junit.org/junit5/docs/current/user-guide/)
 [![GitHub release](https://img.shields.io/github/v/release/CalumD/Java-JSON)](https://github.com/CalumD/Java-JSON/releases)
 [![Maven release](https://maven-badges.herokuapp.com/maven-central/com.clumd.projects/java-json/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.clumd.projects/java-json)
+[![CodeQL](https://github.com/CalumD/Java-JSON/actions/workflows/CodeQL.yml/badge.svg)](https://github.com/CalumD/Java-JSON/actions/workflows/CodeQL.yml)
 
 This project attempts to fulfill a very specific niche with json-in-java environments.
 > "The use of JSON, primarily as a read-only dictionary of information within your Java application."
