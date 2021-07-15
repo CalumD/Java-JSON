@@ -5,6 +5,7 @@ import com.clumd.projects.javajson.api.JsonBuilder;
 import com.clumd.projects.javajson.api.JsonGenerator;
 import com.clumd.projects.javajson.api.JsonParser;
 import com.clumd.projects.javajson.exceptions.BuildException;
+import com.clumd.projects.javajson.exceptions.json.JsonParseException;
 import com.clumd.projects.javajson.exceptions.json.KeyDifferentTypeException;
 import com.clumd.projects.javajson.exceptions.json.KeyInvalidException;
 import com.clumd.projects.javajson.exceptions.json.KeyNotFoundException;
@@ -63,7 +64,11 @@ public class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
 
     @Override
     public Json convertToJSON() throws BuildException {
-        return JsonParser.parse(this.toString());
+        try {
+            return JsonParser.parse(this.toString());
+        } catch (JsonParseException e) {
+            throw new BuildException("Failed to convert JsonBuilder to Json.", e);
+        }
     }
 
     @Override
@@ -128,6 +133,62 @@ public class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
             throw new BuildException("This implementation of a JSONBuilder does not accept null values for Json builder blocks.");
         }
         return addBuilderBlock(path, convertFromJSON(value));
+    }
+
+    @Override
+    public JsonBuilder mergeExistingObject(Json objectToMerge) throws BuildException {
+        if (objectToMerge == null) {
+            throw new BuildException("Input object was Null.");
+        }
+        if (objectToMerge.getDataType() != JSType.OBJECT) {
+            throw new BuildException("Invalid Input", new IllegalArgumentException("This method can only " +
+                    "be used with Objects, you provided {" + objectToMerge.getDataType() + "}, " +
+                    "for other data types, please try method addBuilderBlock()"));
+        }
+
+        for (String key : objectToMerge.getKeys()) {
+            overridePrimitives(key, objectToMerge.getAnyAt(key));
+        }
+
+        return this;
+    }
+
+    private void overridePrimitives(String path, Json data) throws BuildException {
+        switch (data.getDataType()) {
+            case BOOLEAN:
+                this.addBoolean(path, data.getBoolean());
+                break;
+            case DOUBLE:
+                this.addDouble(path, data.getDouble());
+                break;
+            case LONG:
+                this.addLong(path, data.getLong());
+                break;
+            case STRING:
+                this.addString(path, data.getString());
+                break;
+            case ARRAY:
+                truncateArray(path);
+                for (String index : data.getKeys()) {
+                    overridePrimitives(path + '[' + ']', data.getAnyAt('[' + index + ']'));
+                }
+                break;
+            case OBJECT:
+                for (String index : data.getKeys()) {
+                    overridePrimitives(path + "[`" + index + "`]", data.getAnyAt(index));
+                }
+                break;
+        }
+    }
+
+    private void truncateArray(String path) {
+        NewValueIdentifier valueIdentifier = new NewValueIdentifier(path, null);
+        BasicJsonBuilder finalObjectInKeyChain = findObject(valueIdentifier);
+        if (finalObjectInKeyChain != null) {
+            String indexingKey = valueIdentifier.finalKey.substring(1);
+            finalObjectInKeyChain.objects.remove(indexingKey);
+            finalObjectInKeyChain.objects.put(indexingKey, new BasicJsonBuilder(JSType.ARRAY));
+        }
     }
 
     private String identifyFinalKey(JsonKey keyChain) {

@@ -1,6 +1,7 @@
 package com.clumd.projects.javajson.api;
 
 import com.clumd.projects.javajson.exceptions.BuildException;
+import com.clumd.projects.javajson.exceptions.json.JsonParseException;
 
 /**
  * Defines the required methods to build a JSON object from Java in this framework.
@@ -82,6 +83,26 @@ public interface JsonBuilder extends JsonGenerator {
     JsonBuilder addBuilderBlock(String path, Json value) throws BuildException;
 
     /**
+     * Use an existing, compiled JSON OBJECT, attempt to retain all information from the current builder,
+     * and all new information from the object to merge.
+     * This method should treat the data to be merged with higher importance.
+     * (e.g. any data in the input Object which has a key already existing in the builder, should overwrite the builder.)
+     * </p>
+     * The key difference between this and the {@link #addBuilderBlock} methods, is that those are designed to insert
+     * a full piece of data at a predefined path, where as this is designed to dynamically select properties from
+     * the input object to use in the output of the builder.
+     * </p>
+     * N.B.  This method WILL NOT throw if you try to merge an object which contains properties of the same "key"
+     * pathing, but different data-types, however the .build() method used elsewhere to transform this
+     * {@link JsonBuilder} into a {@link Json} WILL throw with duplicate key warnings.
+     *
+     * @param value The JSON value to merge into the current builder.
+     * @return The current JSON builder, with the additional data merged in.
+     * @throws BuildException Thrown if there was something wrong with the input Json.
+     */
+    JsonBuilder mergeExistingObject(Json value);
+
+    /**
      * Break a full JSON object down into a builder representation of itself to be added to.
      *
      * @param json The JSON object to break into a builder representation.
@@ -93,6 +114,8 @@ public interface JsonBuilder extends JsonGenerator {
      * Used to finalise the current builder into a fully compiled Java-JSON object.
      *
      * @return The compiled JSON object with all values set through this builder.
+     * @throws JsonParseException Thrown in the rare circumstance of building up an object using the merge function
+     *                            where the object to merge contains the same key but of a different datatype.
      */
-    Json build();
+    Json build() throws BuildException;
 }
