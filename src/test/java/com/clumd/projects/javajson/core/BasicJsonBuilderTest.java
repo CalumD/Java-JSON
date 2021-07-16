@@ -523,7 +523,30 @@ class BasicJsonBuilderTest {
             BasicJsonBuilder.getBuilder().addLong("[]", 1L).build();
             fail("The previous method should have thrown an exception.");
         } catch (BuildException e) {
-            assertEquals("<Anonymous Key> is not a valid accessor on element: []", e.getMessage());
+            assertEquals("The base of a JsonBuilder must always be an object, " +
+                    "you are trying to assign a value as if it was an array.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void checkWeCantCreateAnObjectInAnArrayAtTheBaseLevelAnonymous() {
+        try {
+            BasicJsonBuilder.getBuilder().addString("[].id", "me").build();
+            fail("The previous method should have thrown an exception.");
+        } catch (BuildException e) {
+            assertEquals("The base of a JsonBuilder must always be an object, " +
+                    "you are trying to assign a value as if it was an array.", e.getMessage());
+        }
+    }
+
+    @Test
+    public void checkWeCantCreateAnArrayObjectInAnAtTheBaseLevelExplicit() {
+        try {
+            BasicJsonBuilder.getBuilder().addString("[0].id", "me").build();
+            fail("The previous method should have thrown an exception.");
+        } catch (BuildException e) {
+            assertEquals("The base of a JsonBuilder must always be an object, " +
+                    "you are trying to assign a value as if it was an array.", e.getMessage());
         }
     }
 

@@ -28,7 +28,29 @@ public class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
                 throw new BuildException("Cannot add new value with invalid key.", exception);
             }
             finalKey = identifyFinalKey(keyChain);
+            ensureFirstStepIsNotForArray();
             this.value = value;
+        }
+
+        private String identifyFinalKey(JsonKey keyChain) {
+            List<String> chainAsListOfKeys = keyChain.getAllKeys();
+            if (chainAsListOfKeys.size() == 1) {
+                KeyInvalidException invalidException = new KeyInvalidException("The minimum wrapper for this JsonBuilder is a JSON object, " +
+                        "you must provide at least one valid key for your value.");
+                throw new BuildException(invalidException.getMessage(), invalidException);
+            }
+            String lastActionableKey = chainAsListOfKeys.get(chainAsListOfKeys.size() - 2);
+
+            return (lastActionableKey.charAt(0) == '[')
+                    ? ""
+                    : lastActionableKey;
+        }
+
+        private void ensureFirstStepIsNotForArray() {
+            if (keyChain.getAllKeys().get(0).charAt(0) == '[') {
+                throw new BuildException("The base of a JsonBuilder must always be an object, " +
+                        "you are trying to assign a value as if it was an array.");
+            }
         }
     }
 
@@ -189,20 +211,6 @@ public class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
             finalObjectInKeyChain.objects.remove(indexingKey);
             finalObjectInKeyChain.objects.put(indexingKey, new BasicJsonBuilder(JSType.ARRAY));
         }
-    }
-
-    private String identifyFinalKey(JsonKey keyChain) {
-        List<String> chainAsListOfKeys = keyChain.getAllKeys();
-        if (chainAsListOfKeys.size() == 1) {
-            KeyInvalidException invalidException = new KeyInvalidException("The minimum wrapper for this JsonBuilder is a JSON object, " +
-                    "you must provide at least one valid key for your value.");
-            throw new BuildException(invalidException.getMessage(), invalidException);
-        }
-        String lastActionableKey = chainAsListOfKeys.get(chainAsListOfKeys.size() - 2);
-
-        return (lastActionableKey.charAt(0) == '[')
-                ? ""
-                : lastActionableKey;
     }
 
     private BasicJsonBuilder findObject(NewValueIdentifier valueIdentifier) {
