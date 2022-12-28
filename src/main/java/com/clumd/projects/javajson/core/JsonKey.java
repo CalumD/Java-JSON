@@ -25,7 +25,8 @@ final class JsonKey {
             final Set<Character> whitespaces = new HashSet<>(Arrays.asList(' ', '\n', '\r', '\t'));
 
             // Consume any leading/trailing spaces
-            int start = 0, stop = key.length() - 1;
+            int start = 0;
+            int stop = key.length() - 1;
             while (whitespaces.contains(key.charAt(start))) {
                 start++;
             }

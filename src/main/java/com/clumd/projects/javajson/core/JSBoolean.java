@@ -44,8 +44,8 @@ final class JSBoolean extends Json {
             return true;
         }
 
-        if (other instanceof Boolean) {
-            return myValue == (Boolean) other;
+        if (other instanceof Boolean bool) {
+            return myValue == bool;
         }
 
         if (getClass() != other.getClass()) {

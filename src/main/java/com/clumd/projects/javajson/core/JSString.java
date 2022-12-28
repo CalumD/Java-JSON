@@ -9,7 +9,7 @@ final class JSString extends Json {
     JSString(JsonTape parsingTape) throws JsonParseException {
         super(parsingTape);
 
-        // Setup tracking variables;
+        // Setup tracking variables
         final char stringDelimiter = parsingTape.checkCurrentChar();
         if (stringDelimiter != '"' && stringDelimiter != '\'' && stringDelimiter != '`') {
             throw parsingTape.createParseError("\" / ' / `", stringDelimiter + " is not a valid string delimiter.");
@@ -19,10 +19,10 @@ final class JSString extends Json {
         boolean endFound = false;
         char currentChar;
 
-        // Consume the initial delimiter;
+        // Consume the initial delimiter
         parsingTape.consumeOne();
 
-        // Parse the rest of the string;
+        // Parse the rest of the string
         while (!endFound) {
             try {
                 currentChar = parsingTape.consumeOne();

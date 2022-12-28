@@ -42,20 +42,17 @@ final class JSArray extends com.clumd.projects.javajson.core.Json {
             parsingTape.consumeWhiteSpace();
             checkingChar = parsingTape.consumeOne();
             switch (checkingChar) {
-                case ']':
-                    moreChildren = false;
-                    break;
-                case ',':
+                case ']' -> moreChildren = false;
+                case ',' -> {
                     // Validate if we see a comma, there are more children to come
                     parsingTape.consumeWhiteSpace();
                     if (parsingTape.checkCurrentChar() == ']') {
                         throw parsingTape.createParseError(JsonTape.VALID_JSON,
                                 "Comma suggests more array elements, but array terminates.");
                     }
-                    break;
-                default:
-                    throw parsingTape.createParseErrorFromOffset(-1, ", / ]",
-                            "Invalid array child delimiter.");
+                }
+                default -> throw parsingTape.createParseErrorFromOffset(-1, ", / ]",
+                        "Invalid array child delimiter.");
             }
         }
     }
@@ -165,8 +162,7 @@ final class JSArray extends com.clumd.projects.javajson.core.Json {
             return true;
         }
 
-        if (other instanceof List) {
-            List<?> o = (List<?>) other;
+        if (other instanceof List<?> o) {
 
             if (this.myValue.size() != o.size()) {
                 return false;

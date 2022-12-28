@@ -1,7 +1,7 @@
 # Java-Json
 [![Build](https://github.com/CalumD/Java-JSON/workflows/tests/badge.svg)](https://github.com/CalumD/Java-JSON)
 [![Dependencies](https://img.shields.io/badge/Dependencies-None-brightgreen)](https://github.com/CalumD/Java-JSON)
-[![JDK used](https://img.shields.io/badge/JDK--Used-13.0.2+8-green)](https://adoptopenjdk.net/installation.html?variant=openjdk13&jvmVariant=hotspot#archives)
+[![JDK used](https://img.shields.io/badge/JDK--Used-19.0.1+10-green)](https://www.azul.com/downloads/?version=java-19-sts&package=jdk)
 [![Junit](https://img.shields.io/badge/JUnit-v5-green)](https://junit.org/junit5/docs/current/user-guide/)
 [![GitHub release](https://img.shields.io/github/v/release/CalumD/Java-JSON)](https://github.com/CalumD/Java-JSON/releases)
 [![Maven release](https://maven-badges.herokuapp.com/maven-central/com.clumd.projects/java-json/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.clumd.projects/java-json)

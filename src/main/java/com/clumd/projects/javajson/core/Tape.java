@@ -2,11 +2,14 @@ package com.clumd.projects.javajson.core;
 
 import com.clumd.projects.javajson.exceptions.JsonException;
 
+import java.util.Set;
+
 abstract class Tape<T, E extends JsonException> {
 
     private static final int DEFAULT_PARSE_ERROR_CONTEXT_SIZE = 30;
     private static final String DEFAULT_PARSE_ERROR_CONTEXT_SYMBOL = "_";
     private static final String DEFAULT_PARSE_ERROR_MESSAGE = "Unexpected symbol found while parsing.";
+    private static final Set<Character> WHITE_SPACE_CHARS = Set.of(' ', '\n', '\r', '\t');
 
     protected final String fullInput;
     protected int currentIndex = 0;
@@ -94,15 +97,10 @@ abstract class Tape<T, E extends JsonException> {
     protected void consumeWhiteSpace() {
         try {
             while (true) {
-                switch (fullInput.charAt(currentIndex)) {
-                    case ' ':
-                    case '\n':
-                    case '\r':
-                    case '\t':
-                        currentIndex++;
-                        break;
-                    default:
-                        return;
+                if (WHITE_SPACE_CHARS.contains(fullInput.charAt(currentIndex))) {
+                    currentIndex++;
+                } else {
+                    return;
                 }
             }
         } catch (IndexOutOfBoundsException e) {
@@ -123,19 +121,15 @@ abstract class Tape<T, E extends JsonException> {
     private String getNonSpaceSnippetForException() {
         // Count back 20 'real' (non-space) characters to show a snippet of "up-to here" code.
         char currentChar;
-        int snippetIndex, snippetLength;
+        int snippetIndex;
+        int snippetLength;
         for (snippetIndex = currentIndex - 1, snippetLength = 0;
              ((snippetIndex > 0) && (snippetLength < DEFAULT_PARSE_ERROR_CONTEXT_SIZE));
              snippetIndex--, snippetLength++
         ) {
             currentChar = checkCharAt(snippetIndex);
-            switch (currentChar) {
-                case ' ':
-                case '\n':
-                case '\r':
-                case '\t':
-                    snippetLength--;
-                    break;
+            if (WHITE_SPACE_CHARS.contains(currentChar)) {
+                snippetLength--;
             }
         }
         return fullInput.substring(snippetIndex, currentIndex);

@@ -9,7 +9,9 @@ import java.util.List;
 class KeyTape extends Tape<String, JsonKeyException> {
 
     private static final String VALID_KEY_ACCESSOR = "[ / <Object Key>";
-    private int elementsInKeyWithSpaces = 0, elementsParsed = 0;
+    private static final String POSITIVE_INTEGER_TEXT = "<positive integer>";
+    private int elementsInKeyWithSpaces = 0;
+    private int elementsParsed = 0;
 
     public KeyTape(String fullInput) {
         super(fullInput);
@@ -49,22 +51,16 @@ class KeyTape extends Tape<String, JsonKeyException> {
         // Figure out the next JSON type
         String nextElement;
         switch (checkCurrentChar()) {
-            case '[':
+            case '[' -> {
                 currentIndex++;
                 try {
                     consumeWhiteSpace();
-                    switch (checkCurrentChar()) {
-                        case '\'':
-                        case '"':
-                        case '`':
+                    nextElement = switch (checkCurrentChar()) {
+                        case '\'', '"', '`' ->
                             // special object key accessor E.G. : "foo['bar bar']"
-                            nextElement = parseObjectAccess(true);
-                            break;
-                        default:
-                            nextElement = parseArrayAccess();
-                            break;
-                    }
-                    break;
+                                parseObjectAccess(true);
+                        default -> parseArrayAccess();
+                    };
                 } catch (IndexOutOfBoundsException e) {
                     throw createParseErrorFromOffset(
                             -1,
@@ -72,12 +68,11 @@ class KeyTape extends Tape<String, JsonKeyException> {
                             "Reached end of key before resolving all parts. Are you missing a delimiter?"
                     );
                 }
-            case '.':
+            }
+            case '.' ->
                 // In parsing, we should not start the key with a dot, despite it can follow other accessors.
-                throw createParseError(VALID_KEY_ACCESSOR, "Bad use of '.' separator in key");
-            default:
-                nextElement = parseObjectAccess(false);
-                break;
+                    throw createParseError(VALID_KEY_ACCESSOR, "Bad use of '.' separator in key");
+            default -> nextElement = parseObjectAccess(false);
         }
         return nextElement;
     }
@@ -97,7 +92,7 @@ class KeyTape extends Tape<String, JsonKeyException> {
         } catch (StringIndexOutOfBoundsException e) {
             throw createParseErrorFromOffset(
                     startingIndex - getCurrentIndex(),
-                    "<positive integer>",
+                    POSITIVE_INTEGER_TEXT,
                     "Failed to parse array accessor in key. Reached end of key before delimiter ']' was found.");
         }
 
@@ -112,7 +107,7 @@ class KeyTape extends Tape<String, JsonKeyException> {
         } catch (NumberFormatException e) {
             throw createParseErrorFromOffset(
                     startingIndex - getCurrentIndex(),
-                    "<positive integer>",
+                    POSITIVE_INTEGER_TEXT,
                     "Failed to parse array accessor in key. Element was not a valid integer."
             );
         }
@@ -121,7 +116,7 @@ class KeyTape extends Tape<String, JsonKeyException> {
         if (arrayIndex < 0) {
             throw createParseErrorFromOffset(
                     startingIndex - getCurrentIndex(),
-                    "<positive integer>",
+                    POSITIVE_INTEGER_TEXT,
                     "Array accessor in key was negative integer. Must be positive."
             );
         }
@@ -140,16 +135,13 @@ class KeyTape extends Tape<String, JsonKeyException> {
         int endOfAdvancedObjectAccess;
 
         switch (checkCurrentChar()) {
-            case '\'':
-                endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess(enteredAdvancedObjectAccessSafely, "'");
-                break;
-            case '"':
-                endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess(enteredAdvancedObjectAccessSafely, "\"");
-                break;
-            case '`':
-                endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess(enteredAdvancedObjectAccessSafely, "`");
-                break;
-            default:
+            case '\'' ->
+                    endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess(enteredAdvancedObjectAccessSafely, "'");
+            case '"' ->
+                    endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess(enteredAdvancedObjectAccessSafely, "\"");
+            case '`' ->
+                    endOfAdvancedObjectAccess = consumeUntilMatchEndOfAdvancedObjectAccess(enteredAdvancedObjectAccessSafely, "`");
+            default -> {
                 try {
                     while (true) {
                         switch (checkCurrentChar()) {
@@ -179,6 +171,7 @@ class KeyTape extends Tape<String, JsonKeyException> {
                 } catch (StringIndexOutOfBoundsException e) {
                     return '{' + requestRegion(startIndex, currentIndex);
                 }
+            }
         }
         final int SKIP_KEY_START = 1;
         if (currentIndex < fullInput.length() && consumeTrailingDotDelimiter()) {
@@ -219,7 +212,7 @@ class KeyTape extends Tape<String, JsonKeyException> {
                 consumeTrailingDotDelimiter();
                 break;
             case '[':
-                // Arrays following arrays are okay and we should leave for next parse.
+                // Arrays following arrays are okay, and we should leave for next parse.
                 break;
             default:
                 // If we haven't reached the end, and we are not followed by a . or [, then raise exception.
@@ -228,7 +221,7 @@ class KeyTape extends Tape<String, JsonKeyException> {
     }
 
     private boolean consumeTrailingDotDelimiter() {
-        // If we are followed by a object separator, then consume that too
+        // If we are followed by an object separator, then consume that too
         if (checkCurrentChar() == '.') {
             consumeOne();
             return true;

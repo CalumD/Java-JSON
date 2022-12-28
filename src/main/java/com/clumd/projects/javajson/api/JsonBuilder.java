@@ -83,14 +83,14 @@ public interface JsonBuilder extends JsonGenerator {
     JsonBuilder addBuilderBlock(String path, Json value) throws BuildException;
 
     /**
-     * Use an existing, compiled JSON OBJECT, attempt to retain all information from the current builder,
-     * and all new information from the object to merge.
-     * This method should treat the data to be merged with higher importance.
-     * (e.g. any data in the input Object which has a key already existing in the builder, should overwrite the builder.)
+     * Use an existing, compiled JSON OBJECT, attempt to retain all information from the current builder, and all new
+     * information from the object to merge. This method should treat the data to be merged with higher importance.
+     * (e.g. any data in the input Object which has a key already existing in the builder, should overwrite the
+     * builder.)
      * <p>
-     * The key difference between this and the {@link #addBuilderBlock} methods, is that those are designed to insert
-     * a full piece of data at a predefined path, where as this is designed to dynamically select properties from
-     * the input object to use in the output of the builder.
+     * The key difference between this and the {@link #addBuilderBlock} methods, is that those are designed to insert a
+     * full piece of data at a predefined path, whereas this is designed to dynamically select properties from the input
+     * object to use in the output of the builder.
      * <p>
      * N.B.  This method WILL NOT throw if you try to merge an object which contains properties of the same "key"
      * pathing, but different data-types, however the .build() method used elsewhere to transform this

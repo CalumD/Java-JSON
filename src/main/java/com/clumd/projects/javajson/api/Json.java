@@ -101,7 +101,7 @@ public interface Json extends JsonGenerator, Serializable {
      * Used to get the double value of this JSON object, if it was itself, a double.
      *
      * @return The double value of the current JSON object.
-     * @throws KeyDifferentTypeException Thrown if this JSON object represents something other than an double.
+     * @throws KeyDifferentTypeException Thrown if this JSON object represents something other than a double.
      */
     double getDouble() throws KeyDifferentTypeException;
 
@@ -109,7 +109,7 @@ public interface Json extends JsonGenerator, Serializable {
      * Used to get the long value of this JSON object, if it was itself, a long.
      *
      * @return The long value of the current JSON object.
-     * @throws KeyDifferentTypeException Thrown if this JSON object represents something other than an long.
+     * @throws KeyDifferentTypeException Thrown if this JSON object represents something other than a long.
      */
     long getLong() throws KeyDifferentTypeException;
 

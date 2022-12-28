@@ -13,10 +13,11 @@ import com.clumd.projects.javajson.exceptions.json.KeyNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
 
-    private class NewValueIdentifier {
+    private static class NewValueIdentifier {
         final JsonKey keyChain;
         final String finalKey;
         final Object value;
@@ -60,6 +61,7 @@ public class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
     private final HashMap<String, Long> longs = new HashMap<>();
     private final HashMap<String, BasicJsonBuilder> objects = new HashMap<>();
     private final ArrayList<Object> array = new ArrayList<>();
+    private static final String VALUE = "value";
 
     private JSType type = JSType.OBJECT;
 
@@ -177,29 +179,21 @@ public class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
 
     private void overridePrimitives(String path, Json data) throws BuildException {
         switch (data.getDataType()) {
-            case BOOLEAN:
-                this.addBoolean(path, data.getBoolean());
-                break;
-            case DOUBLE:
-                this.addDouble(path, data.getDouble());
-                break;
-            case LONG:
-                this.addLong(path, data.getLong());
-                break;
-            case STRING:
-                this.addString(path, data.getString());
-                break;
-            case ARRAY:
+            case BOOLEAN -> this.addBoolean(path, data.getBoolean());
+            case DOUBLE -> this.addDouble(path, data.getDouble());
+            case LONG -> this.addLong(path, data.getLong());
+            case STRING -> this.addString(path, data.getString());
+            case ARRAY -> {
                 truncateArray(path);
                 for (String index : data.getKeys()) {
                     overridePrimitives(path + '[' + ']', data.getAnyAt('[' + index + ']'));
                 }
-                break;
-            case OBJECT:
+            }
+            case OBJECT -> {
                 for (String index : data.getKeys()) {
                     overridePrimitives(path + "[`" + index + "`]", data.getAnyAt(index));
                 }
-                break;
+            }
         }
     }
 
@@ -219,7 +213,7 @@ public class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
         BasicJsonBuilder objectStepInKey = this;
         List<String> allKeys = valueIdentifier.keyChain.getAllKeys();
 
-        // Loop through the whole key chain, getting, or creating new objects as required
+        // Loop through the whole chain of keys, getting, or creating new objects as required
         try {
             for (int index = 0; index < allKeys.size(); index++) {
                 if (allKeys.get(index).equals(valueIdentifier.finalKey)) {
@@ -273,8 +267,8 @@ public class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
                     throw new KeyNotFoundException("");
                 }
                 Object arrayElement = currentObject.array.get(index);
-                if (arrayElement instanceof BasicJsonBuilder) {
-                    currentObject = (BasicJsonBuilder) arrayElement;
+                if (arrayElement instanceof BasicJsonBuilder jsonBuilder) {
+                    currentObject = jsonBuilder;
                 } else {
                     throw new KeyDifferentTypeException("");
                 }
@@ -299,17 +293,22 @@ public class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
     @Override
     public JsonBuilder convertFromJSON(Json json) {
         switch (json.getDataType()) {
-            case BOOLEAN:
-                return new BasicJsonBuilder().addBoolean("value", json.getBoolean());
-            case DOUBLE:
-                return new BasicJsonBuilder().addDouble("value", json.getDouble());
-            case LONG:
-                return new BasicJsonBuilder().addLong("value", json.getLong());
-            case STRING:
-                return new BasicJsonBuilder().addString("value", json.getString());
-            case ARRAY:
-                return BasicJsonBuilder.getBuilder().addBuilderBlock("value", (BasicJsonBuilder) convertNonPrimitive(json));
-            default:
+            case BOOLEAN -> {
+                return new BasicJsonBuilder().addBoolean(VALUE, json.getBoolean());
+            }
+            case DOUBLE -> {
+                return new BasicJsonBuilder().addDouble(VALUE, json.getDouble());
+            }
+            case LONG -> {
+                return new BasicJsonBuilder().addLong(VALUE, json.getLong());
+            }
+            case STRING -> {
+                return new BasicJsonBuilder().addString(VALUE, json.getString());
+            }
+            case ARRAY -> {
+                return BasicJsonBuilder.getBuilder().addBuilderBlock(VALUE, (BasicJsonBuilder) convertNonPrimitive(json));
+            }
+            default -> {
                 BasicJsonBuilder returnObject = new BasicJsonBuilder(JSType.OBJECT);
                 for (String key : json.getKeys()) {
                     Object child = convertNonPrimitive(json.getAnyAt(key));
@@ -319,34 +318,41 @@ public class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
                         returnObject.addDouble(key, (double) child);
                     } else if (child instanceof Long) {
                         returnObject.addLong(key, (long) child);
-                    } else if (child instanceof String) {
-                        returnObject.addString(key, (String) child);
-                    } else if (child instanceof BasicJsonBuilder) {
-                        returnObject.objects.put(key, (BasicJsonBuilder) child);
+                    } else if (child instanceof String childString) {
+                        returnObject.addString(key, childString);
+                    } else if (child instanceof BasicJsonBuilder childJsonBuilder) {
+                        returnObject.objects.put(key, childJsonBuilder);
                     }
                 }
                 return returnObject;
+            }
         }
     }
 
     private Object convertNonPrimitive(Json json) {
         switch (json.getDataType()) {
-            case BOOLEAN:
+            case BOOLEAN -> {
                 return json.getBoolean();
-            case DOUBLE:
+            }
+            case DOUBLE -> {
                 return json.getDouble();
-            case LONG:
+            }
+            case LONG -> {
                 return json.getLong();
-            case STRING:
+            }
+            case STRING -> {
                 return json.getString();
-            case ARRAY:
+            }
+            case ARRAY -> {
                 BasicJsonBuilder values = new BasicJsonBuilder(JSType.ARRAY);
                 for (Json element : json.getValues()) {
                     values.array.add(convertNonPrimitive(element));
                 }
                 return values;
-            default:
+            }
+            default -> {
                 return convertFromJSON(json);
+            }
         }
     }
 
@@ -362,8 +368,8 @@ public class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
             for (Object value : array) {
 
                 //if it is a string, be sure to bookend with quotes else call the default toString
-                if (value instanceof String) {
-                    o.append('"').append(escapeString((String) value)).append('"');
+                if (value instanceof String s) {
+                    o.append('"').append(escapeString(s)).append('"');
                 } else {
                     o.append(value.toString());
                 }
@@ -383,26 +389,26 @@ public class BasicJsonBuilder implements JsonBuilder, JsonGenerator {
             o.append("{");
 
             //print all of our booleans with keys
-            for (String key : booleans.keySet()) {
-                o.append('"').append(escapeString(key)).append("\":").append(booleans.get(key)).append(',');
+            for (Map.Entry<String, Boolean> entry : booleans.entrySet()) {
+                o.append('"').append(escapeString(entry.getKey())).append("\":").append(entry.getValue()).append(',');
             }
             //print all of our doubles with keys
-            for (String key : doubles.keySet()) {
-                o.append('"').append(escapeString(key)).append("\":").append(doubles.get(key)).append(',');
+            for (Map.Entry<String, Double> entry : doubles.entrySet()) {
+                o.append('"').append(escapeString(entry.getKey())).append("\":").append(entry.getValue()).append(',');
             }
             //print all of our longs with keys
-            for (String key : longs.keySet()) {
-                o.append('"').append(escapeString(key)).append("\":").append(longs.get(key)).append(',');
+            for (Map.Entry<String, Long> entry : longs.entrySet()) {
+                o.append('"').append(escapeString(entry.getKey())).append("\":").append(entry.getValue()).append(',');
             }
             //print all of our strings with keys
-            for (String key : strings.keySet()) {
-                o.append('"').append(escapeString(key)).append("\":\"").append(escapeString(strings.get(key))).append("\",");
+            for (Map.Entry<String, String> entry : strings.entrySet()) {
+                o.append('"').append(escapeString(entry.getKey())).append("\":\"").append(escapeString(entry.getValue())).append("\",");
             }
 
             //print all of our sub objects too (again, with keys)
-            for (String key : objects.keySet()) {
-                o.append('"').append(escapeString(key)).append("\":");
-                o.append(objects.get(key).toString());
+            for (Map.Entry<String, BasicJsonBuilder> entry : objects.entrySet()) {
+                o.append('"').append(escapeString(entry.getKey())).append("\":");
+                o.append(objects.get(entry.getKey()).toString());
                 o.append(',');
             }
 

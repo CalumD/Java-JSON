@@ -76,8 +76,8 @@ public final class JsonParser {
     }
 
     /**
-     * Parse a collection of strings into a multiple JSON objects.
-     * Each string in the collection will be treated as it's own JSON object.
+     * Parse a collection of strings into a multiple JSON objects. Each string in the collection will be treated as its
+     * own JSON object.
      *
      * @param multipleJsonAsStrings A collection of JSON objects in string form.
      * @return The JSON objects in Java-JSON form.

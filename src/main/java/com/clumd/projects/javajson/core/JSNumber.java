@@ -18,22 +18,10 @@ final class JSNumber extends Json {
         while (!foundEnd) {
             try {
                 switch (parsingTape.checkCurrentChar()) {
-                    case '.':
-                    case 'e':
-                    case 'E':
+                    case '.', 'e', 'E':
                         isFloating = true;
-                    case '-':
-                    case '+':
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
+                        // Fallthrough to still consume the char we just checked.
+                    case '-', '+', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
                         parsingTape.consumeOne();
                         break;
                     default:
@@ -102,15 +90,15 @@ final class JSNumber extends Json {
         }
 
         if (myLongValue != null) {
-            if (other instanceof JSNumber) {
-                return myLongValue.equals(((JSNumber) other).myLongValue);
+            if (other instanceof JSNumber jsNum) {
+                return myLongValue.equals(jsNum.myLongValue);
             } else if (other instanceof Long) {
                 return myLongValue.equals(other);
             }
         }
         if (myDoubleValue != null) {
-            if (other instanceof JSNumber) {
-                return myDoubleValue.equals(((JSNumber) other).myDoubleValue);
+            if (other instanceof JSNumber jsNum) {
+                return myDoubleValue.equals(jsNum.myDoubleValue);
             } else if (other instanceof Double) {
                 return myDoubleValue.equals(other);
             }

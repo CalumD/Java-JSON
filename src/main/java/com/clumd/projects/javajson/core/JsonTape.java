@@ -18,39 +18,12 @@ public final class JsonTape extends Tape<Json, JsonParseException> {
         // Figure out the next JSON type
         Json nextElement = null;
         switch (checkCurrentChar()) {
-            case 't':
-            case 'T':
-            case 'f':
-            case 'F':
-                nextElement = new JSBoolean(this);
-                break;
-            case '{':
-                nextElement = new JSObject(this);
-                break;
-            case '[':
-                nextElement = new JSArray(this);
-                break;
-            case '"':
-            case '\'':
-            case '`':
-                nextElement = new JSString(this);
-                break;
-            case '-':
-            case '+':
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                nextElement = new JSNumber(this);
-                break;
-            default:
-                createParseError(VALID_JSON);
+            case 't', 'T', 'f', 'F' -> nextElement = new JSBoolean(this);
+            case '{' -> nextElement = new JSObject(this);
+            case '[' -> nextElement = new JSArray(this);
+            case '"', '\'', '`' -> nextElement = new JSString(this);
+            case '-', '+', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> nextElement = new JSNumber(this);
+            default -> createParseError(VALID_JSON);
         }
         return nextElement;
     }
@@ -65,18 +38,11 @@ public final class JsonTape extends Tape<Json, JsonParseException> {
         try {
             while (true) {
                 switch (checkCurrentChar()) {
-                    case ' ':
-                    case '\n':
-                    case '\r':
-                    case '\t':
-                        currentIndex++;
-                        break;
-                    case '/':
-                    case '#':
-                        consumeComment();
-                        break;
-                    default:
+                    case ' ', '\n', '\r', '\t' -> currentIndex++;
+                    case '/', '#' -> consumeComment();
+                    default -> {
                         return;
+                    }
                 }
             }
         } catch (IndexOutOfBoundsException e) {
@@ -88,25 +54,22 @@ public final class JsonTape extends Tape<Json, JsonParseException> {
 
     private void consumeComment() {
         switch (checkCurrentChar()) {
-            case '#':
-                consumeUntilNewLine();
-                break;
-            case '/':
+            case '#' -> consumeUntilNewLine();
+            case '/' -> {
                 switch (checkNextChar()) {
                     //   <-- this Comment
-                    case '/':
-                        consumeUntilNewLine();
-                        break;
+                    case '/' -> consumeUntilNewLine();
 
                     /*    This comment    */
-                    case '*':
-                        consumeUntilEndOfMultilineString();
-                        break;
+                    case '*' -> consumeUntilEndOfMultilineString();
 
                     // Invalid Comment Type
-                    default:
-                        createParseError("/ or *");
+                    default -> createParseError("/ or *");
                 }
+            }
+            default -> {
+                // do nothing, was not actually a comment
+            }
         }
     }
 

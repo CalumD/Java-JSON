@@ -7,6 +7,7 @@ import com.clumd.projects.javajson.exceptions.json.KeyNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 final class JSObject extends com.clumd.projects.javajson.core.Json {
 
@@ -60,23 +61,20 @@ final class JSObject extends com.clumd.projects.javajson.core.Json {
             parsingTape.consumeWhiteSpace();
             checkingChar = parsingTape.consumeOne();
             switch (checkingChar) {
-                case '}':
-                    moreChildren = false;
-                    break;
-                case ',':
+                case '}' -> moreChildren = false;
+                case ',' -> {
                     // Validate if we see a comma, there are more children to come
                     parsingTape.consumeWhiteSpace();
                     if (parsingTape.checkCurrentChar() == '}') {
                         throw parsingTape.createParseError(JsonTape.VALID_JSON,
                                 "Comma suggests more object elements, but object terminates.");
                     }
-                    break;
-                default:
-                    throw parsingTape.createParseErrorFromOffset(
-                            -1,
-                            ", / }",
-                            "Invalid object child delimiter."
-                    );
+                }
+                default -> throw parsingTape.createParseErrorFromOffset(
+                        -1,
+                        ", / }",
+                        "Invalid object child delimiter."
+                );
             }
         }
     }
@@ -139,19 +137,19 @@ final class JSObject extends com.clumd.projects.javajson.core.Json {
         if (json.size() == 0) {
             return ret.append('}').toString();
         }
-        //just print the boiler plate object stuff
+        // just print the boilerplate object stuff
         else if (depth == 0) {
             getKeysAsCompressedForString(ret);
             return ret.append('}').toString();
         }
 
         //print the full internals based on the next depth though
-        for (String key : json.keySet()) {
+        for (Map.Entry<String, Json> entry : json.entrySet()) {
             ret
                     .append("\"")
-                    .append(key.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\""))
+                    .append(entry.getKey().replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\""))
                     .append("\"").append(":")
-                    .append(json.get(key).asString(depth - 1)).append(",");
+                    .append(entry.getValue().asString(depth - 1)).append(",");
         }
 
         if (ret.charAt(ret.length() - 1) == ',') {
