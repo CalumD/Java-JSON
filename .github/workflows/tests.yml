@@ -1,7 +1,14 @@
 name: JUnit Tests
-on: push
+
+on:
+  workflow_dispatch:
+    branches: [ main, master ]
+  push:
+    branches:
+      - '*'
+
 jobs:
-  run_tests:
+  test:
     strategy:
       matrix:
         os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
@@ -9,10 +16,20 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
-      - name: Set up JDK 19
-        uses: actions/setup-java@v2
+
+      - uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
-          java-version: '19'
-      - name: Run tests with Maven
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: "~/.m2/repository"
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Run Maven Action
         run: mvn -B test --file pom.xml
