@@ -1,5 +1,6 @@
 # Java-Json
-[![Build](https://github.com/CalumD/Java-JSON/workflows/tests/badge.svg)](https://github.com/CalumD/Java-JSON)
+
+[![Build](https://github.com/CalumD/Java-JSON/actions/workflows/tests.yml/badge.svg)](https://github.com/CalumD/Java-JSON/actions/workflows/tests.yml)
 [![Dependencies](https://img.shields.io/badge/Dependencies-None-brightgreen)](https://github.com/CalumD/Java-JSON)
 [![JDK used](https://img.shields.io/badge/JDK--Used-21.28+85-green)](https://www.azul.com/downloads/?version=java-21-sts&package=jdk)
 [![Junit](https://img.shields.io/badge/JUnit-v5-green)](https://junit.org/junit5/docs/current/user-guide/)
